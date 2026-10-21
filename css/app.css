@@ -662,6 +662,23 @@ p { margin: 0 0 var(--sp-2); }
 #roomCode { text-transform: uppercase; letter-spacing: 0.2em; font-family: var(--font-display); }
 
 /* The clock has to read at arm's length on a tablet on a classroom table. */
+/* Team build presence: how many devices are on this hotel, and who sequences. */
+.team-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--ink-14);
+  background: var(--paper);
+  border-radius: var(--r-sm);
+  padding: 3px 8px;
+  margin-bottom: var(--sp-2);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-70);
+}
+.team-chip[data-role="lead"] { border-color: var(--gold); color: var(--ink); }
+
 .clock {
   display: inline-flex;
   align-items: center;

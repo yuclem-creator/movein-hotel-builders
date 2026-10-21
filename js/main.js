@@ -11,6 +11,9 @@ import {
 } from './sim/catalogue.js';
 import { createView } from './render/view.js';
 import { createClock, formatClock } from './classroom/timer.js';
+import { createTeam } from './net/team.js';
+import { localBus, supabaseBus } from './net/bus.js';
+import { applyIntent, INTENT } from './sim/intents.js';
 import {
   parseJoin, normaliseRoom, writeSave, readSave, clearSave, saveProblem, restore,
   scoreCode, layoutHash,
@@ -20,6 +23,22 @@ import {
 
 let session = null;
 let view = null;
+// Team build: null in every non-collaborative session, which is why every mutation site
+// below reads `commit(...)` rather than the engine directly.
+let team = null;
+const selfId = (() => {
+  const key = 'hb.v2.member';
+  try {
+    const saved = sessionStorage.getItem(key);
+    if (saved) return saved;
+    const made = Math.random().toString(36).slice(2, 8);
+    sessionStorage.setItem(key, made);
+    return made;
+  } catch {
+    return Math.random().toString(36).slice(2, 8);
+  }
+})();
+
 let tool = null;          // function id awaiting placement
 let placing = null;       // { uid } when moving an existing placement
 let lastResult = null;
@@ -402,10 +421,11 @@ function handleTap(ndc) {
     const cell = view.groundCell(ndc.x, ndc.y);
     if (!cell) { toast('Drop it inside the site boundary'); return; }
     const p = session.placements.find((x) => x.uid === placing.uid);
-    const res = SIM.movePlacement(session, placing.uid, cell.col, cell.row);
+    const res = commit({ op: INTENT.MOVE, uid: placing.uid, col: cell.col, row: cell.row });
     if (!res.ok) { toast(res.reason); return; }
     placing = null;
     view.hideGhost();
+    if (res.pending) { sentToTeam(); return; }
     refresh();
     toast(`${FUNCTION_BY_ID[p.fnId].label} moved`);
     return;
@@ -415,18 +435,20 @@ function handleTap(ndc) {
   if (tool) {
     const cell = view.groundCell(ndc.x, ndc.y);
     if (!cell) { toast('Place it inside the site boundary'); return; }
-    const res = SIM.place(session, tool, cell.col, cell.row, 0);
+    const fnId = tool;
+    const res = commit({ op: INTENT.PLACE, fnId, col: cell.col, row: cell.row, rot: 0 });
     if (!res.ok) { toast(res.reason); return; }
-    const placed = FUNCTION_BY_ID[tool].label;
-    if (FUNCTION_BY_ID[tool].cost > SIM.availableBudget(session)) selectTool(null);
-    else view.setGhost(tool, session);
+    if (res.pending) { sentToTeam(); return; }   // the lead applies it and echoes the uid
+    const placed = FUNCTION_BY_ID[fnId].label;
+    if (FUNCTION_BY_ID[fnId].cost > SIM.availableBudget(session)) selectTool(null);
+    else view.setGhost(fnId, session);
     refresh();
     toast(`${placed} placed`);
     // Select what was just built: the Customise panel is the only place size, storeys
     // and add-ons live, and with a tool still armed a tap on the building places
     // another one instead of selecting it — so without this the feature is hidden.
     // selectPlacement also disarms the tool; re-arm from the tray to place another.
-    selectPlacement(res.placement.uid);
+    selectPlacement(res.uid);
     return;
   }
 
@@ -501,8 +523,9 @@ function renderCustomise(p) {
   };
 
   const apply = (changes) => {
-    const res = SIM.customise(session, p.uid, changes);
+    const res = commit({ op: INTENT.CUSTOMISE, uid: p.uid, changes });
     if (!res.ok) { toast(res.reason); return; }
+    if (res.pending) { sentToTeam(); return; }
     refresh();
     selectPlacement(p.uid);
   };
@@ -669,8 +692,9 @@ function closePlotPanel() {
 
 function buyPendingPlot() {
   if (!pendingPlot) return;
-  const res = SIM.buyPlot(session, pendingPlot.id);
+  const res = commit({ op: INTENT.PLOT, plotId: pendingPlot.id });
   if (!res.ok) { toast(res.reason); return; }
+  if (res.pending) { sentToTeam(); return; }
   const { label, cost } = res.plot;
   exitExpand();
   refresh();
@@ -861,6 +885,82 @@ function applyPreset(id) {
   toast(`${SIM.PRESETS[id].label}: ${res.placed} functions built, ${res.available} credits left`);
 }
 
+/* ---------------------------------------------------------------- team build */
+
+/**
+ * One hotel, several devices. Every mutation below reads `commit(...)` instead of the engine:
+ * without a team that is the old local call, with a team it is an intent that the sequencer
+ * orders and every device replays. The engine still validates, so a refusal is identical
+ * everywhere and nothing can silently diverge.
+ */
+function commit(intent) {
+  if (team) return team.commit(intent);
+  const res = applyIntent(session, intent);
+  if (!res.ok) toast(res.reason);
+  return res;
+}
+
+const sentToTeam = () => toast('Sent to the team — the lead device applies it');
+
+function renderTeamChip() {
+  const el = $('#teamChip');
+  if (!el) return;
+  if (!team) { el.hidden = true; return; }
+  el.hidden = false;
+  el.dataset.role = team.leader ? 'lead' : 'follow';
+  el.textContent = `${team.size} in this hotel · ${team.leader ? 'you are the lead' : 'lead elsewhere'}`;
+}
+
+/** Reactions that belong to the team rather than to this device. */
+function onTeamChange(event) {
+  if (!event) return;
+  if (event.rejected) { toast(event.rejected.reason || 'The team build refused that change'); return; }
+  renderTeamChip();
+
+  if (event.res?.result) {              // a round was run, by anyone
+    lastResult = event.res.result;
+    if (clock) clock.pause();
+    autosave(true);
+    renderResult(lastResult);
+    show('result');
+    return;
+  }
+  if (event.snapshot) {
+    view.rebuild(session);
+    // A snapshot must not undo a screen the team is already looking at: adopting state while
+    // the result card is up would hide the round everyone just scored.
+    const resultVisible = !document.querySelector('[data-screen="result"]').hidden;
+    if (!resultVisible) show('build');
+    refresh();
+    return;
+  }
+  if (event.intent?.op === INTENT.ADVANCE) {
+    show('build');
+    refresh();
+    armClock({ reset: true });
+    toast(ROUNDS[session.round - 1].brief);
+    return;
+  }
+  if (event.res && event.res.ok === false) { toast(event.res.reason); return; }
+  if (event.res) refresh();
+}
+
+/**
+ * A team is only created once the build starts, so the design screen stays personal and the
+ * newest device adopts the lead's design with its first snapshot.
+ */
+function startTeam() {
+  if (!join.collab || !join.classroom || team) return;
+  let net = null;
+  try { net = JSON.parse(localStorage.getItem('hb.v2.net') || 'null'); } catch { net = null; }
+  const bus = net?.url && net?.anonKey
+    ? supabaseBus({ url: net.url, key: net.anonKey, room: join.room, team: session.teamName })
+    : localBus(`hb-team-${join.room}-${slug(session.teamName)}`);
+  team = createTeam({ bus, self: selfId, name: session.teamName, session, onChange: onTeamChange });
+  renderTeamChip();
+  toast(bus.kind === 'supabase' ? 'Team build connected — one hotel for everyone' : 'Team build: tabs on this device share one hotel');
+}
+
 function enterBuild() {
   show('build');
   tool = null;
@@ -871,6 +971,7 @@ function enterBuild() {
   view.hideGhost();
   refresh();
   armClock();
+  startTeam();
   $('#trayHint').textContent = 'Choose a function, then tap the site to place it. Tap a building to move, rotate or remove it.';
 }
 /* ---------------------------------------------------------------- run round */
@@ -881,7 +982,10 @@ const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => (
 
 function runRound() {
   if (!session.placements.length) { toast('Place at least one function before running the round'); return; }
-  lastResult = SIM.runRound(session);
+  const res = commit({ op: INTENT.RUN });
+  if (!res.ok) return;
+  if (res.pending) { toast('Round sent to the team — the lead device scores it'); return; }
+  lastResult = res.result;
   if (clock) clock.pause();
   autosave(true);
   renderResult(lastResult);
@@ -946,11 +1050,14 @@ function renderResult(res) {
 
   $('#resNext').addEventListener('click', () => {
     if (isLast) { finalResult = res; startShowcase(); return; }
-    SIM.advanceRound(session);
-    show('build');
-    refresh();
-    armClock({ reset: true });   // a new round starts with a full build block
-    toast(ROUNDS[session.round - 1].brief);
+    // Everyone advances together: a follower's click is an intent like any other.
+    commit({ op: INTENT.ADVANCE });
+    if (!team) {
+      show('build');
+      refresh();
+      armClock({ reset: true });   // a new round starts with a full build block
+      toast(ROUNDS[session.round - 1].brief);
+    }
   });
 }
 /* --------------------------------------------------------------- showcase */
@@ -1150,8 +1257,9 @@ function bindBuild() {
     const need = SIM.manpowerRequirement(session, session.round)[id] || 0;
     const current = session.staffing[id] === undefined ? need : session.staffing[id];
     const next = Math.max(0, Math.min(need * MANPOWER.maxMul, current + step));
-    if (next === need) delete session.staffing[id];
-    else session.staffing[id] = next;
+    // The intent carries the absolute headcount, so two devices cannot race a delta.
+    const res = commit({ op: INTENT.STAFFING, cluster: id, heads: next });
+    if (res.pending) { sentToTeam(); return; }
     refresh();
   });
 
@@ -1160,10 +1268,10 @@ function bindBuild() {
     if (!b) return;
     const tier = Number(b.dataset.tier);
     if (tier === (session.training || 0)) return;
-    session.training = tier;
     // When the tier was chosen matters as much as the tier itself: training bought in
     // pre-opening is absorbed before opening day, training bought later is rushed.
-    session.trainingSetRound = session.round;
+    const res = commit({ op: INTENT.TRAINING, tier, round: session.round });
+    if (res.pending) { sentToTeam(); return; }
     refresh();
   });
 
@@ -1188,15 +1296,18 @@ function bindBuild() {
   $('#plotCancel').addEventListener('click', closePlotPanel);
 
   $('#selRotate').addEventListener('click', () => {
-    const res = SIM.rotatePlacement(session, session.selectedUid);
+    const res = commit({ op: INTENT.ROTATE, uid: session.selectedUid });
     if (!res.ok) { toast(res.reason); return; }
+    if (res.pending) { sentToTeam(); return; }
     refresh();
     selectPlacement(session.selectedUid);
   });
   $('#selMove').addEventListener('click', startMove);
   $('#selRemove').addEventListener('click', () => {
-    const res = SIM.removePlacement(session, session.selectedUid);
+    const uid = session.selectedUid;
+    const res = commit({ op: INTENT.REMOVE, uid });
     if (!res.ok) { toast(res.reason); return; }
+    if (res.pending) { sentToTeam(); return; }
     $('#selectedPanel').hidden = true;
     refresh();
     toast(`${FUNCTION_BY_ID[res.placement.fnId].label} removed · ${res.refund} credits refunded`);
@@ -1242,6 +1353,13 @@ function boot() {
     get join() { return join; },
     get clock() { return clock; },
     get saveScope() { return saveScope; },
+    get team() { return team; },
+    // The actions a gate needs to drive without guessing at canvas coordinates. Each one goes
+    // through `commit`, the same intent path a tap takes, so a test cannot take a shortcut the
+    // UI lacks: a follower device still has to send the intent and wait for the sequencer.
+    select: (uid) => { selectPlacement(uid); },
+    placeAt: (fnId, col, row) => commit({ op: INTENT.PLACE, fnId, col, row, rot: 0 }),
+    remove: (uid) => commit({ op: INTENT.REMOVE, uid }),
     scoreCode,
     layoutHash,
     SIM,

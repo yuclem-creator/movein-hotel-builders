@@ -505,5 +505,68 @@ console.log('\n== manpower: training, chronic shortfall and the event deck ==');
   check('the same roster and seed produce the same round', once('hb-mp-a') === once('hb-mp-a'));
 }
 
+/* ------------------------------------------------------- shared build (team) */
+console.log('\n== shared build: one hotel, several people ==');
+{
+  const { applyIntent, snapshotOf, adoptSnapshot } = await import('../js/sim/intents.js');
+  const open = (team) => createSession({ seed: 'hb-room-SYNC', teamName: team, hotelName: 'H' });
+  const a = open('A');
+  const b = open('B');
+
+  // The leader assigns uids; both devices replay the same ordered intents.
+  const stream = [
+    { op: 'place', fnId: 'rooms', col: 3, row: 3, uid: 'p900' },
+    { op: 'place', fnId: 'front', col: 7, row: 3, uid: 'p901' },
+    { op: 'customise', uid: 'p901', changes: { size: 'S' } },
+    { op: 'rotate', uid: 'p900' },
+    { op: 'place', fnId: 'rooms', col: 5, row: 8, uid: 'p902' },
+    { op: 'remove', uid: 'p902' },
+    { op: 'staffing', cluster: 'rooms', heads: 3 },
+    { op: 'training', tier: 1, round: 1 },
+  ];
+  for (const intent of stream) {
+    applyIntent(a, intent);
+    applyIntent(b, intent);
+  }
+  check('two devices replaying the same intents hold the same hotel',
+    JSON.stringify(a.placements) === JSON.stringify(b.placements), `${a.placements.length} vs ${b.placements.length}`);
+  check('the same budget, roster and training tier travel with them',
+    a.spent === b.spent && JSON.stringify(a.staffing) === JSON.stringify(b.staffing)
+    && a.training === b.training && a.trainingSetRound === b.trainingSetRound);
+  const ra = runRound(a);
+  const rb = runRound(b);
+  check('and the same round scores the same on both',
+    ra.composite === rb.composite && JSON.stringify(ra.metrics) === JSON.stringify(rb.metrics),
+    `${ra.composite} vs ${rb.composite}`);
+  check('a stale intent is refused rather than applied differently',
+    applyIntent(b, { op: 'remove', uid: 'p999' }).ok === false
+    && applyIntent(a, { op: 'remove', uid: 'p999' }).ok === false);
+
+  // Two people pressing + at the same time must land on a headcount, not a race: the
+  // staffing intent is absolute, so replaying it is idempotent.
+  const before = JSON.stringify(a.staffing);
+  applyIntent(a, { op: 'staffing', cluster: 'rooms', heads: 3 });
+  applyIntent(b, { op: 'staffing', cluster: 'rooms', heads: 3 });
+  check('a replayed staffing intent is idempotent',
+    JSON.stringify(a.staffing) === before && JSON.stringify(b.staffing) === before);
+  check('stepping back to the requirement clears the cluster on every device',
+    (() => {
+      const need = manpowerRequirement(a, a.round).rooms;
+      applyIntent(a, { op: 'staffing', cluster: 'rooms', heads: need });
+      applyIntent(b, { op: 'staffing', cluster: 'rooms', heads: need });
+      return a.staffing.rooms === undefined && b.staffing.rooms === undefined;
+    })());
+
+  // A late joiner gets one snapshot, not a replay of the whole session.
+  const c = open('C');
+  adoptSnapshot(c, snapshotOf(a));
+  check('a late joiner adopts the leader snapshot exactly',
+    JSON.stringify(c.placements) === JSON.stringify(a.placements) && c.spent === a.spent
+    && c.round === a.round && c.training === a.training);
+  check('and previews the same score as the leader',
+    preview(c).composite === preview(a).composite,
+    `${preview(c).composite} vs ${preview(a).composite}`);
+}
+
 console.log(fails ? `\n${fails} CHECK(S) FAILED` : '\nALL SIM CHECKS PASSED');
 process.exit(fails ? 1 : 0);

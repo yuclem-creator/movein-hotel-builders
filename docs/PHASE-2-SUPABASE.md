@@ -99,7 +99,44 @@ network.
 
 ---
 
-## Not built, deliberately
+## Team build: several devices, one hotel
+
+`collab=1` on the join link puts every device in the same room *and team* on one shared build.
+The design is a **leader-relay**, not shared state:
+
+- the earliest device is the **sequencer**; a heartbeat every 2 s keeps presence, and a silent
+  device drops out after 7 s, at which point the next earliest member takes over;
+- everyone else sends **intents** (`place`, `move`, `rotate`, `customise`, `remove`, `plot`,
+  `staffing`, `training`, `run`, `advance`). The sequencer validates each through the engine,
+  republishes it with a sequence number, and every device applies it in that order;
+- the sequencer assigns placement **uids**, so later intents address the same building on every
+  device; a late joiner gets one snapshot and then follows the stream;
+- nothing merges. `intents.js` is pure and `sim-check` proves two sessions replaying one intent
+  stream end up identical, then score identically.
+
+Transport is a bus with two adapters (`js/net/bus.js`):
+
+| bus | reaches | needs |
+|---|---|---|
+| `BroadcastChannel` | tabs and windows on **one device** | nothing — this is what `npm run team` exercises |
+| Supabase `team_events` | **phones on any network** | a project + the table below |
+
+Apply the `team_events` block from `supabase/schema.sql`, then set the project on the
+facilitator's device (the board and the game share the key):
+
+```js
+localStorage.setItem('hb.v2.net', JSON.stringify({ url: 'https://<ref>.supabase.co', anonKey: '<anon>' }));
+```
+
+With that set, *Make join cards* adds `collab=1` to every card; without it, cards are left
+alone rather than promising a sync that cannot happen.
+
+**Limits, stated plainly.** The bus polls (800 ms default), so a change lands in about a
+second — fine for a build, not a twitch game. Room codes are not a security boundary: anyone
+holding one can post intents, exactly as anyone holding a score code can top the board; closing
+the room is what ends it. If the sequencer's tab closes mid-round, the next device continues
+from the intents it has applied — a teammate may lose the last un-broadcast action, never the
+hotel.
 
 - **Edge Functions, auth, realtime channels.** None of them earn their keep for a
   4-round, one-laptop session.

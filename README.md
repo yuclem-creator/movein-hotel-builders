@@ -153,11 +153,22 @@ Key decision: **the simulation never touches the renderer.** `js/sim/` is import
 Node with no browser, which is what lets the determinism gate compare the browser's
 answer against Node's answer bit for bit.
 
-**There is no real-time multiplayer, by design.** A team builds locally and submits a
-finished score, because the simulation is deterministic and single-client: there is no
-state to reconcile and no way for a dropped connection to corrupt a hotel. The classroom
-layer coordinates a room without syncing build state at all, and Phase 2 adds Supabase
-only as a score transport (`js/net/room.js`).
+**Several people, one hotel (opt-in).** A card built with `collab=1` puts every device that
+joins the same room *and team* on one shared build. It is not a multiplayer server: the
+earliest device is the **sequencer**, everyone else sends intents, the sequencer validates
+them against the engine and republishes them with a sequence number, and every device replays
+the same intents in the same order. There is no state to merge, so two devices cannot drift —
+which is the whole point. The engine stays deterministic and single-client; the order is the
+only shared artefact.
+
+- Transport: `BroadcastChannel` across tabs on one device, or Supabase (`team_events`, polled)
+  across phones once a project is configured — see `docs/PHASE-2-SUPABASE.md`.
+- Tests: `npm run team` drives two browser contexts and a late joiner through place, roster,
+  remove and a full round, asserting every device holds the same hotel. `sim-check` proves the
+  same convergence in Node, with no browser at all.
+
+**Solo play never touches any of it.** Without `collab`, the simulation is one client that
+stores nothing outside the device and cannot be corrupted by a dropped connection.
 
 ### How the architecture is drawn
 
@@ -248,14 +259,15 @@ frames or handing a tablet to a colleague.
 
 | gate | proves |
 |---|---|
-| `check-syntax.mjs` | every JS file parses (28 files) |
-| `sim-check.mjs` | determinism, **regression lock against `tools/baseline.json`**, balance assertions, ledger reconciliation, placement rules, journey resolution, journey legs, owned land, manpower requirements and deviations (136 checks) |
+| `check-syntax.mjs` | every JS file parses (33 files) |
+| `sim-check.mjs` | determinism, **regression lock against `tools/baseline.json`**, balance assertions, ledger reconciliation, placement rules, journey resolution, journey legs, owned land, manpower requirements and deviations, and **shared-build convergence** — two sessions replaying one intent stream, a refused stale intent, and a late joiner (144 checks) |
 | `brand-gate.mjs` | no off-canon colour anywhere in shipped CSS/HTML/JS, `board.html` included; headings use MO Exceptional at Regular only, never synthesised weight |
-| `bytes.mjs` | first-load budget: **1133.2 KB raw / 298.8 KB gzip** (budgets 1180 / 310), now walking all of `js/` |
+| `bytes.mjs` | first-load budget: **1155.9 KB raw / 307.5 KB gzip** (budgets 1180 / 310), now walking all of `js/` |
 | `qr-check.mjs` | the join-card QR is scannable: finders, timing, both format copies, capacity boundaries, quiet zone — and, when the dev decoder is installed, an independent **decode** of five real join URLs |
 | `smoke.mjs` | browser E2E on desktop **and** phone: boot, WebGL, fonts, full demo flow, result card, showcase, reveal, **browser engine === Node engine**, a *comparative* frame-rate check, zero console errors (39 checks) |
 | `visual-check.mjs` | composition (sky/middle/ground), three styles produce genuinely different silhouettes, each palette's accent is wired to real geometry, four signature elements are distinguishable, add-ons change the building without breaking the frame, and the manpower roster sits clear of the HUD and the tray with its own steps reflected on screen (39 checks) |
 | `input-check.mjs` | a real pointer reaches the scene at 1280/1440/1920: start, pick a function, orbit, zoom, tap the site, press Reset view, buy a plot, then hand the right-hand column from Customise to the roster and back — plus phone 390×844 and tablet 1024×768, where the roster must open from the tool button, stay hittable, always leave a way out, and write the session; the canvas stays topmost throughout (133 checks) |
+| `team-check.mjs` | two devices and a late joiner on one hotel: both see each other, a placement on one appears on the other under the same uid, a roster change and a removal cross over, the late joiner adopts the hotel instead of starting empty, and a round run on one device lands every device on the result screen with the same composite (12 checks) |
 | `class-check.mjs` | the classroom path at 390×844, 844×390 and 1024×768: join from the URL, classroom rules, clock start and countdown, nothing off screen; then place, autosave, reload, resume, four rounds, score code, the reveal card's scroll cue, and the board ranking it — plus the join cards' QR pointing at an address a phone can actually open (56 checks) |
 
 The reveal card is the one screen that scrolls internally at tablet size, and a tablet draws
@@ -354,7 +366,7 @@ only prove the image is not empty and that the differences are real.
 1. **Run the pilot** — `docs/PILOT-RUNSHEET.md`. Six teams, 70 minutes, one tablet per
    table. Bring back the score codes, the spread, the real timings and the device list.
 2. **Manpower, remaining build** — the engine and its scoring are in and gated
-   (`sim-check`, 136 checks). Still to build: the build-screen panel (per-cluster
+   (`sim-check`, 144 checks). Still to build: the build-screen panel (per-cluster
    steppers, required-versus-planned bar, illustrative payroll, training tier), the reveal
    lines, and the run-sheet briefing and debrief questions. `docs/MANPOWER-BRIEF.md` is
    the design lock; do not re-derive the numbers from this README.

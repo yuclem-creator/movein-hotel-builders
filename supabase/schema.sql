@@ -76,3 +76,35 @@ create or replace function public.close_room(room_code text)
 returns void language sql security definer as $$
   update public.rooms set closed_at = now() where code = room_code;
 $$;
+
+-- ---------------------------------------------------------------------------
+-- Team build: the message log that lets several devices drive one hotel.
+--
+-- One append-only log per (room, team). Clients POST intents and poll for what they have
+-- not seen; the lead device validates each intent against the engine and republishes it with
+-- a sequence number, so every device replays the same order. Nothing here holds hotel state:
+-- the log is the order, and the deterministic engine is the state.
+--
+-- Rows are disposable once a room closes; `delete from public.team_events;` is a safe reset.
+create table if not exists public.team_events (
+  id         bigserial primary key,
+  room       text not null references public.rooms(code) on delete cascade,
+  team       text not null,
+  body       jsonb not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists team_events_room_team_id
+  on public.team_events (room, team, id);
+
+alter table public.team_events enable row level security;
+
+drop policy if exists team_events_read  on public.team_events;
+drop policy if exists team_events_write on public.team_events;
+-- A class is not a security boundary: anyone with the room code can read and post, exactly as
+-- they can paste a score code into the board. Room closure is what ends it.
+create policy team_events_read  on public.team_events for select using (true);
+create policy team_events_write on public.team_events for insert with check (
+  exists (select 1 from public.rooms r where r.code = team_events.room and r.closed_at is null)
+);
+

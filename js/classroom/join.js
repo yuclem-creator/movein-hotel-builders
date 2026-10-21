@@ -32,6 +32,9 @@ export function parseJoin(search = '') {
     hotel: (params.get('hotel') || '').trim().slice(0, 28),
     minutes: Number.isFinite(minutes) && minutes > 0 ? Math.min(60, Math.round(minutes)) : 8,
     facilitator: params.get('facilitator') === '1',
+    // Team build: several devices on one hotel, one of them sequencing. Off unless the card
+    // asks for it, because a solo session must keep behaving exactly as it did.
+    collab: params.get('collab') === '1',
   };
 }
 

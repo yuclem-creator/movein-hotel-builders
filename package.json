@@ -12,7 +12,8 @@
     "input": "node tools/input-check.mjs",
     "qr": "node tools/qr-check.mjs",
     "class": "node tools/class-check.mjs",
+    "team": "node tools/team-check.mjs",
     "share": "node tools/share.mjs",
-    "verify": "node tools/check-syntax.mjs && node tools/sim-check.mjs && node tools/brand-gate.mjs && node tools/bytes.mjs && node tools/qr-check.mjs && node tools/smoke.mjs && node tools/visual-check.mjs && node tools/input-check.mjs && node tools/class-check.mjs"
+    "verify": "node tools/check-syntax.mjs && node tools/sim-check.mjs && node tools/brand-gate.mjs && node tools/bytes.mjs && node tools/qr-check.mjs && node tools/smoke.mjs && node tools/visual-check.mjs && node tools/input-check.mjs && node tools/team-check.mjs && node tools/class-check.mjs"
   }
 }

@@ -98,12 +98,27 @@ async function adoptLanSite() {
 
 const randomRoom = () => Array.from({ length: 4 }, () => ALPHABET[Math.floor(Math.random() * ALPHABET.length)]).join('');
 
+/**
+ * Team build needs a shared transport. With a Supabase project configured the cards carry
+ * `collab=1` and every phone joins one hotel; without one the bus is a browser tab channel,
+ * so the card is left alone rather than promising a sync that cannot happen.
+ */
+function collabReady() {
+  try {
+    const net = JSON.parse(localStorage.getItem('hb.v2.net') || 'null');
+    return Boolean(net && net.url && net.anonKey);
+  } catch {
+    return false;
+  }
+}
+
 function makeCards() {
   const room = normaliseRoom($('#room').value) || randomRoom();
   const count = Math.max(1, Math.min(12, Number($('#teams').value) || 1));
   const mins = Math.max(3, Math.min(30, Number($('#mins').value) || 8));
   const names = $('#names').value.split('\n').map((s) => s.trim()).filter(Boolean);
   const base = siteBase();
+  const collab = collabReady();
 
   const teams = Array.from({ length: count }, (_, i) => names[i] || `Team ${i + 1}`)
     .map((name) => {
@@ -111,6 +126,7 @@ function makeCards() {
       url.searchParams.set('room', room);
       url.searchParams.set('team', name);
       url.searchParams.set('mins', String(mins));
+      if (collab) url.searchParams.set('collab', '1');
       return { name, url: url.toString() };
     });
 
