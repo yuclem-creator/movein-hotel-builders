@@ -54,6 +54,13 @@ let mpOpen = true;
 // Classroom state. `join` is read once at boot from the URL; a room code typed in the
 // lobby updates it in place, so the rest of the app only ever asks `join.classroom`.
 let join = parseJoin(window.location.search);
+
+// A join card can carry the relay configuration. Storing it here is what lets a phone take
+// part in a shared hotel without anyone opening a console on it.
+if (join.net) {
+  try { localStorage.setItem('hb.v2.net', JSON.stringify(join.net)); } catch { /* private mode */ }
+}
+
 let clock = null;         // build clock; null in solo mode
 let saveScope = 'solo';   // localStorage slot: "<room>.<team>" in class, "solo" solo
 let saveTimer = 0;

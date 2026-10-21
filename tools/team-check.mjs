@@ -143,6 +143,25 @@ try {
     [...a.errors, ...b.errors, ...c.errors].length === 0,
     [...a.errors, ...b.errors, ...c.errors].slice(0, 3).join(' | '));
 
+  // A card can carry the relay pair, so a phone needs nothing typed into a console. The
+  // decode is pure, and the effect is observable: the device stores the config it was given.
+  const { parseNet, encodeNet } = await import('../js/classroom/join.js');
+  const payload = encodeNet('https://example.supabase.co', 'anon-key-test');
+  const parsed = parseNet(payload);
+  check('a card can carry the relay configuration and it decodes',
+    parsed && parsed.url === 'https://example.supabase.co' && parsed.anonKey === 'anon-key-test',
+    JSON.stringify(parsed));
+  check('a malformed relay payload is ignored rather than trusted', parseNet('not-base64!!') === null);
+
+  const cfg = await ctx.newPage();
+  await cfg.goto(`${BASE}/index.html?room=HB24&team=Cfg&mins=8&collab=1&net=${payload}`,
+    { waitUntil: 'load', timeout: 40000 });
+  await cfg.waitForFunction(() => window.__hb && window.__hb.view, null, { timeout: 30000 });
+  const stored = await cfg.evaluate(() => localStorage.getItem('hb.v2.net'));
+  check('the device stores the relay it was handed', Boolean(stored && stored.includes('example.supabase.co')),
+    String(stored).slice(0, 40));
+  await cfg.close();
+
   await ctx.close();
 } catch (err) {
   fails++;

@@ -8,3 +8,6 @@ tools/.qrdeps/
 # committing it would ship a dead URL to a Pages deploy.
 share-url.txt
 tools/bin/
+# A facilitator's local Supabase pair for team build. Public client key by design, but it
+# belongs to a project, not to a repository — cards carry it to the phones that need it.
+net.json

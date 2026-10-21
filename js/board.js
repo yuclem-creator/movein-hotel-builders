@@ -5,7 +5,7 @@
 // pasted from a chat) and the board is the only place it lands. Phase 2 replaces the
 // paste box with Supabase, which this file already knows how to read when configured.
 import { qrSvg } from './qr/qr.js';
-import { normaliseRoom, readScoreBlock, rankRows } from './classroom/join.js';
+import { normaliseRoom, readScoreBlock, rankRows, encodeNet } from './classroom/join.js';
 
 const $ = (sel) => document.querySelector(sel);
 const STORE = 'hb.v2.board';
@@ -98,18 +98,17 @@ async function adoptLanSite() {
 
 const randomRoom = () => Array.from({ length: 4 }, () => ALPHABET[Math.floor(Math.random() * ALPHABET.length)]).join('');
 
-/**
- * Team build needs a shared transport. With a Supabase project configured the cards carry
- * `collab=1` and every phone joins one hotel; without one the bus is a browser tab channel,
- * so the card is left alone rather than promising a sync that cannot happen.
- */
-function collabReady() {
+// The relay pair, if this laptop has one. Two sources, in order: the browser (set once, or
+// carried by a card), then `net.json` beside this page — a facilitator's local file, which is
+// git-ignored so a project key never reaches the deployed site.
+let relayFromFile = null;
+
+function relayConfig() {
   try {
     const net = JSON.parse(localStorage.getItem('hb.v2.net') || 'null');
-    return Boolean(net && net.url && net.anonKey);
-  } catch {
-    return false;
-  }
+    if (net && net.url && net.anonKey) return { url: net.url, anonKey: net.anonKey };
+  } catch { /* private mode */ }
+  return relayFromFile;
 }
 
 function makeCards() {
@@ -118,7 +117,7 @@ function makeCards() {
   const mins = Math.max(3, Math.min(30, Number($('#mins').value) || 8));
   const names = $('#names').value.split('\n').map((s) => s.trim()).filter(Boolean);
   const base = siteBase();
-  const collab = collabReady();
+  const relay = relayConfig();
 
   const teams = Array.from({ length: count }, (_, i) => names[i] || `Team ${i + 1}`)
     .map((name) => {
@@ -126,7 +125,10 @@ function makeCards() {
       url.searchParams.set('room', room);
       url.searchParams.set('team', name);
       url.searchParams.set('mins', String(mins));
-      if (collab) url.searchParams.set('collab', '1');
+      if (relay) {
+        url.searchParams.set('collab', '1');
+        url.searchParams.set('net', encodeNet(relay.url, relay.anonKey));
+      }
       return { name, url: url.toString() };
     });
 
@@ -255,6 +257,17 @@ function init() {
   // The cards rendered above may be built from 127.0.0.1, which no phone can open. Ask the
   // dev server for a reachable address and rebuild if it has one.
   adoptLanSite();
+  // Then pick up a local relay file, if this laptop has one, and rebuild the cards so they
+  // carry `collab=1` and the project pair.
+  fetch('net.json', { cache: 'no-store' })
+    .then((res) => (res.ok ? res.json() : null))
+    .then((net) => {
+      if (net && net.url && net.anonKey) {
+        relayFromFile = { url: net.url, anonKey: net.anonKey };
+        makeCards();
+      }
+    })
+    .catch(() => { /* no relay file: cards stay single-device */ });
 }
 
 init();
