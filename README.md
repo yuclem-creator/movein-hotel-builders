@@ -13,6 +13,11 @@ but is dormant until a project is configured.
 Run the pilot from `docs/PILOT-RUNSHEET.md`; wire the optional backend from
 `docs/PHASE-2-SUPABASE.md`.
 
+**Deployed pilot:** <https://yuclem-creator.github.io/movein-hotel-builders/> — GitHub Pages
+serves the repo root on `main`, so a push is a deploy. The board at
+`…/movein-hotel-builders/board.html` prints join cards carrying that HTTPS address, which is
+why phones can scan them from any network: no laptop, no tunnel, no client isolation.
+
 ---
 
 ## Run it
@@ -85,6 +90,10 @@ that query string, and all of them work offline.
 Solo play, the presets and the sandbox are unchanged when there is no `room` in the URL.
 
 ### When the room's Wi-Fi will not let a phone reach the laptop
+
+**The deployed Pages site removes this problem entirely** — point the cards at
+`https://yuclem-creator.github.io/movein-hotel-builders/` and stop running a local server.
+What follows is only for a laptop-hosted session.
 
 Guest and corporate networks routinely isolate clients. A card can carry a correct address,
 scan perfectly, and still open nothing, because the access point drops phone-to-laptop
