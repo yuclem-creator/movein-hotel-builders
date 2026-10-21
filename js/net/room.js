@@ -26,7 +26,8 @@ export const configured = () => Boolean(config());
 
 const headers = (extra = {}) => ({
   apikey: config().anonKey,
-  Authorization: `Bearer ${config().anonKey}`,
+  // A publishable key (`sb_publishable_…`) is not a JWT; only JWT keys travel as a Bearer.
+  ...(String(config().anonKey).startsWith('eyJ') ? { Authorization: `Bearer ${config().anonKey}` } : {}),
   'Content-Type': 'application/json',
   ...extra,
 });

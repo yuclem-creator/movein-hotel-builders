@@ -40,9 +40,17 @@ export function localBus(name) {
  * The table is `team_events(id bigserial, room text, team text, body jsonb)`; the schema and
  * its row-level policy live in `supabase/schema.sql`.
  */
+// Supabase now issues two key formats: legacy anon JWTs (`eyJ…`) and publishable keys
+// (`sb_publishable_…`). A publishable key is not a JWT, and sending it as a Bearer token is
+// rejected — so the Authorization header is only sent when the key actually is one.
+const isJwt = (key) => String(key || '').startsWith('eyJ');
+const authHeaders = (key) => (isJwt(key)
+  ? { apikey: key, Authorization: `Bearer ${key}` }
+  : { apikey: key });
+
 export function supabaseBus({ url, key, room, team, pollMs = 800 }) {
   const base = url.replace(/\/$/, '');
-  const headers = { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' };
+  const headers = { ...authHeaders(key), 'Content-Type': 'application/json' };
   const handlers = new Set();
   const scope = `room=eq.${encodeURIComponent(room)}&team=eq.${encodeURIComponent(team)}`;
   let lastId = 0;
