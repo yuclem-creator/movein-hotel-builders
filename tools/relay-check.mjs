@@ -1,14 +1,29 @@
 // relay-check.mjs — proves the team-build relay is actually usable before a session does.
 //
-//   node tools/relay-check.mjs <project-url> <publishable-or-anon-key> [room]
+//   node tools/relay-check.mjs [project-url] [publishable-or-anon-key] [room]
 //
-// or set HB_SB_URL / HB_SB_ANON. It answers four questions in order, because each one is a
-// different failure with a different fix: is the project reachable, has the schema been run,
-// can a device write, and how long a round trip takes — that last number is the poll latency a
-// team actually feels. Nothing here is part of `npm run verify`: it needs credentials.
+// With no arguments it reads net.json (the facilitator's local pair). It also accepts
+// HB_SB_URL / HB_SB_ANON. It answers four questions in order, because each one is a different
+// failure with a different fix: is the project reachable, has the schema been run, can a
+// device write, and how long a round trip takes — that last number is the poll latency a team
+// actually feels. Nothing here is part of `npm run verify`: it needs credentials.
+import { readFile } from 'node:fs/promises';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const [, , urlArg, keyArg, roomArg] = process.argv;
-const url = (urlArg || process.env.HB_SB_URL || '').replace(/\/$/, '');
-const key = keyArg || process.env.HB_SB_ANON || '';
+let url = urlArg || process.env.HB_SB_URL || '';
+let key = keyArg || process.env.HB_SB_ANON || '';
+if (!url || !key) {
+  const file = await readFile(join(ROOT, 'net.json'), 'utf8').catch(() => null);
+  if (file) {
+    const net = JSON.parse(file);
+    url = url || net.url || '';
+    key = key || net.anonKey || '';
+  }
+}
+url = String(url).replace(/\/$/, '');
 const room = (roomArg || 'HB24').toUpperCase();
 
 let fails = 0;

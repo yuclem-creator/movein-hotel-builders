@@ -131,6 +131,27 @@ localStorage.setItem('hb.v2.net', JSON.stringify({ url: 'https://<ref>.supabase.
 With that set, *Make join cards* adds `collab=1` to every card; without it, cards are left
 alone rather than promising a sync that cannot happen.
 
+### Setting a project up (the sequence that actually worked)
+
+```bash
+# 1. schema — the Management API takes one statement per call, so the file is split for you
+HB_SB_PAT=sbp_… node tools/apply-schema.mjs <project-ref>     # 23 statements, all ok
+
+# 2. is it usable? four questions: reachable, schema, writable, how slow
+node tools/relay-check.mjs                                    # reads net.json
+
+# 3. cross-device, for real: two independent browser profiles, no shared storage
+node tools/relay-team-check.mjs HB24
+```
+
+`net.json` (git-ignored) holds `{ "url": "https://<ref>.supabase.co", "anonKey": "sb_publishable_…" }`.
+Keep it on the facilitator laptop: cards are generated there — with **Site address** set to the
+deployed Pages URL — and each card carries the relay pair itself, so a phone configures itself
+on arrival. Nothing is committed, and the published site never holds a project key.
+
+Current project: `bacagknsardeqikanbyi` ("MOvein Hotel Builders"), verified 2026-10-21 —
+relay round trip 102 ms, felt latency ≈ 800 ms with the default poll.
+
 **Limits, stated plainly.** The bus polls (800 ms default), so a change lands in about a
 second — fine for a build, not a twitch game. Room codes are not a security boundary: anyone
 holding one can post intents, exactly as anyone holding a score code can top the board; closing

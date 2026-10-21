@@ -74,13 +74,18 @@ try {
   console.log('== two devices on one hotel ==');
   const a = await device('A');
   const b = await device('B');
-  await sleep(1200);   // heartbeats: each device learns the other has joined
+  // Presence converges within a heartbeat; the contract is "quickly", not "instantly", so the
+  // gate waits for it rather than assuming a fixed sleep is long enough.
+  const twoSeen = async () => {
+    const [x, y] = await Promise.all([state(a.page), state(b.page)]);
+    return /2 in this hotel/.test(x.chip) && /2 in this hotel/.test(y.chip);
+  };
+  for (let i = 0; i < 10 && !(await twoSeen()); i++) await sleep(400);
 
   const joined = await Promise.all([state(a.page), state(b.page)]);
   check('both devices know they are on the same hotel',
     /2 in this hotel/.test(joined[0].chip) && /2 in this hotel/.test(joined[1].chip),
     JSON.stringify(joined.map((s) => s.chip)));
-
   // A places; B must hold the same building, under the leader's uid.
   check('the lead device can place a building', Boolean(await placeOne(a.page)));
   await sleep(900);

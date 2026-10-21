@@ -956,10 +956,21 @@ function onTeamChange(event) {
  * A team is only created once the build starts, so the design screen stays personal and the
  * newest device adopts the lead's design with its first snapshot.
  */
-function startTeam() {
+async function startTeam() {
   if (!join.collab || !join.classroom || team) return;
   let net = null;
   try { net = JSON.parse(localStorage.getItem('hb.v2.net') || 'null'); } catch { net = null; }
+
+  if (net?.url && net?.anonKey) {
+    // The relay only accepts messages for a room that exists and is open, so whoever arrives
+    // first creates the row. Without this a fresh room code silently drops every intent — the
+    // exact failure a pilot would hit on its first new session.
+    try {
+      const { openRoom } = await import('./net/room.js');
+      await openRoom({ code: join.room, rounds: ROUNDS.length, minutes: join.minutes, label: session.hotelName });
+    } catch { /* the bus keeps retrying; a missing room is reported by relay-check */ }
+  }
+
   const bus = net?.url && net?.anonKey
     ? supabaseBus({ url: net.url, key: net.anonKey, room: join.room, team: session.teamName })
     : localBus(`hb-team-${join.room}-${slug(session.teamName)}`);

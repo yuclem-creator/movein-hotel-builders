@@ -34,6 +34,9 @@ function persist() {
     room: normaliseRoom($('#room').value),
     teams: Number($('#teams').value) || 1,
     mins: Number($('#mins').value) || 8,
+    // Where the cards point is a facilitator decision, not something to retype every reload.
+    // With the relay kept local, cards are generated here and open the deployed Pages site.
+    site: $('#site').value.trim(),
     // The names are the facilitator's own work: without them a reload silently went back
     // to "Team 1..6" while the room, the team count and the clock survived.
     names: $('#names').value,
@@ -228,9 +231,10 @@ function init() {
     $('#teams').value = save.teams || $('#teams').value;
     $('#mins').value = save.mins || $('#mins').value;
     if (typeof save.names === 'string') $('#names').value = save.names;
+    if (typeof save.site === 'string' && save.site) $('#site').value = save.site;
     rows = save.rows || [];
   }
-  $('#site').value = siteBase();
+  if (!$('#site').value.trim()) $('#site').value = siteBase();
 
   $('#tabJoin').addEventListener('click', () => setPanel('join'));
   $('#tabBoard').addEventListener('click', () => setPanel('board'));
@@ -248,6 +252,9 @@ function init() {
   for (const id of ['room', 'teams', 'mins']) {
     $(`#${id}`).addEventListener('change', makeCards);
   }
+  // The site address decides where every card sends a phone; retyping it and pressing Print
+  // used to print the old target.
+  $('#site').addEventListener('change', makeCards);
   // Typing the names then going straight to Print used to print the old set: rebuild on
   // blur, which is when 'change' fires for a textarea.
   $('#names').addEventListener('change', makeCards);

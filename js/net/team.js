@@ -64,6 +64,10 @@ export function createTeam({ bus, self, name, session, onChange = () => {} }) {
         touch({ id: msg.from, name: msg.name || 'Teammate', at: msg.at || Date.now() });
         if (isLeader() && (isNew || msg.resync)) {
           send({ k: 'snapshot', to: msg.from, seq: appliedUpTo, leader: self, state: snapshotOf(session) });
+          // A newcomer would otherwise not learn the lead exists until the next heartbeat and
+          // would briefly call itself the lead. Answer the introduction immediately; only a
+          // lead answers, so two devices cannot ping-pong introductions.
+          if (isNew) send({ k: 'hello', name, at: joinedAt });
         }
         onChange({ presence: true });
         break;
