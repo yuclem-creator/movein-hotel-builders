@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#232323">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>MOVEin — Hotel Builders</title>
+<!-- Inline favicon: a missing favicon.ico is a 404 in the console on every load. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23232323'/%3E%3Cpath d='M8 22 L16 9 L24 22 Z' fill='none' stroke='%23B59060' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/app.css">
+<!-- Every module imports the vendored Three.js by path. A bare "three" specifier needs an
+     import map, which Safari below 16.4 and most in-app browsers do not implement — the whole
+     module graph then failed silently, leaving a lobby whose buttons did nothing. -->
+<script>
+  (() => {
+    let reported = false;
+    const report = () => {
+      if (reported || window.__hb) return;
+      reported = true;
+      const note = document.getElementById('lobbyNote');
+      if (!note) return;
+      note.textContent = 'This browser could not start the app, so the buttons will not '
+        + 'respond. Open the link in Chrome or Safari rather than an in-app browser, and '
+        + 'update the browser if it is old.';
+      note.style.color = 'var(--alert)';
+    };
+    window.addEventListener('error', report, true);
+    // A slow phone can take a while to boot the 3D layer; a false alarm is worse than a late
+    // one, so the timer is generous and retires the moment the app has booted.
+    window.addEventListener('load', () => setTimeout(report, 8000));
+  })();
+</script>
+</head>
+<body>
+<canvas id="scene" aria-label="Hotel site, three dimensional"></canvas>
+
+<div id="ui">
+
+  <!-- ============================================================ lobby -->
+  <section class="screen screen--lobby" data-screen="lobby">
+    <div class="lobby-card">
+      <p class="eyebrow">MOVEin</p>
+      <h1>Hotel Builders</h1>
+      <p class="lede">Build a hotel on a constrained site. Every decision about rooms,
+        back of house and colleagues shows up in the scorecard — and in the building.</p>
+
+      <div class="room-chip" id="classChip" hidden>
+        <span>Session</span><b id="classRoom">—</b>
+      </div>
+
+      <label class="field"><span>Team name</span>
+        <input id="teamName" type="text" value="Team One" maxlength="24" autocomplete="off"></label>
+      <label class="field"><span>Hotel name</span>
+        <input id="hotelName" type="text" value="The Riverside" maxlength="28" autocomplete="off"></label>
+      <button class="btn btn--primary" id="startDemo">Start build</button>
+      <p class="note" id="lobbyNote">Solo mode runs the full simulation on this device:
+        no other players, no accounts, no network.</p>
+
+      <div class="resume" id="resumeCard" hidden>
+        <p class="eyebrow">Saved on this device</p>
+        <p class="note" id="resumeLine">—</p>
+        <div class="row">
+          <button class="btn btn--small btn--primary" id="resumeGo">Resume</button>
+          <button class="btn btn--small" id="resumeDrop">Start fresh</button>
+        </div>
+      </div>
+
+      <details class="join-details" id="joinDetails">
+        <summary>Joining a classroom session?</summary>
+        <p class="note">Scan the team card from the facilitator, or type the room code
+          you were given. A room code switches starting hotels off and starts the round
+          clock.</p>
+        <div class="join-row">
+          <label class="field"><span>Room code</span>
+            <input id="roomCode" type="text" inputmode="text" autocapitalize="characters"
+              maxlength="6" placeholder="HB24" autocomplete="off"></label>
+          <button class="btn btn--primary" id="joinRoom">Join</button>
+        </div>
+        <p class="note" id="joinHint" hidden></p>
+      </details>
+    </div>
+  </section>
+
+  <!-- =========================================================== design -->
+  <section class="screen screen--panel" data-screen="design" hidden>
+    <div class="panel">
+      <p class="eyebrow">Step 1</p>
+      <h2>Customise your hotel</h2>
+      <div class="choice-group" data-group="style"><h3>Architecture style</h3><div class="choices" id="choicesStyle"></div></div>
+      <div class="choice-group" data-group="palette"><h3>Accent palette</h3><div class="swatches" id="choicesPalette"></div></div>
+      <div class="choice-group" data-group="signature"><h3>Signature element</h3><div class="choices" id="choicesSignature"></div></div>
+      <div class="choice-group" data-group="landscape"><h3>Landscape</h3><div class="choices" id="choicesLandscape"></div></div>
+      <div id="presetBlock">
+        <h3>Or start from a finished hotel</h3>
+        <p class="note">These are starting points a team might adopt — not strategies being
+          scored against. The score is computed the same way whatever you build.</p>
+        <div class="choices" id="choicesPreset"></div>
+        <p class="note" style="margin-top: var(--sp-4)">Or open a <b>Sandbox</b>: full 640 credits
+          upfront, all four outcomes scored against one layout. Use it to compare
+          radically different hotels in a single session.</p>
+        <div class="row" style="margin-top: var(--sp-2)">
+          <button class="btn" id="designSandbox">Open the sandbox</button>
+        </div>
+      </div>
+      <p class="note" id="classroomNote" hidden>Starting hotels and the sandbox are off in a
+        classroom session: every team builds its own hotel from the same 640 credits and
+        the same events.</p>
+      <div class="row">
+        <button class="btn" id="designBack">Back</button>
+        <button class="btn btn--primary" id="designContinue">Build the hotel</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ build -->
+  <section class="screen screen--build" data-screen="build" hidden>
+    <header class="hud">
+      <div class="hud-left">
+        <p class="eyebrow" id="hudRoundEyebrow">Round 1</p>
+        <h2 id="hudRoundName">Foundations</h2>
+        <p class="hud-hotel" id="hudHotel">The Riverside</p>
+      </div>
+      <div class="hud-right">
+        <div class="clock" id="clock" hidden>
+          <span class="clock-label">Build time</span>
+          <b id="clockValue">8:00</b>
+          <span class="clock-share" id="clockShare"></span>
+          <div class="clock-bar"><span id="clockFill"></span></div>
+        </div>
+        <div class="metrics" id="hudMetrics"></div>
+        <div class="budget">
+          <div class="budget-bar"><span id="budgetFill"></span></div>
+          <p class="budget-text"><b id="budgetLeft">300</b> credits left of <span id="budgetTotal">640</span></p>
+        </div>
+      </div>
+    </header>
+
+    <div class="tools">
+      <button class="tool" id="btnOverlays" aria-pressed="false">Journeys</button>
+      <button class="tool" id="btnManpower" aria-pressed="true">Manpower plan</button>
+      <button class="tool" id="btnDusk" aria-pressed="false">Dusk</button>
+      <button class="tool" id="btnFit">Reset view</button>
+      <button class="tool" id="btnGrid" aria-pressed="true">Grid</button>
+      <button class="tool" id="btnExpand" aria-pressed="false">Expand site</button>
+    </div>
+
+    <aside class="mp-panel" id="mpPanel" hidden>
+      <div class="mp-head">
+        <h3 id="mpTitle"></h3>
+        <span class="mp-tag" id="mpTag"></span>
+        <!-- Below 700px the panel spans the screen and covers the tool column, including the
+             Manpower plan button that opened it. Without this the roster could be opened and
+             not closed on a phone. The glyph is the whole label; aria-label carries the words. -->
+        <button class="mp-close" id="mpClose" type="button" aria-label="Close the manpower plan">×</button>
+      </div>
+      <div class="mp-list" id="mpList"></div>
+      <div class="mp-train">
+        <p class="mp-label" id="mpTrainLabel"></p>
+        <div class="chips" id="mpTraining"></div>
+      </div>
+      <p class="mp-total"><span><b id="mpTotalLabel"></b> <small id="mpSeason"></small></span>
+        <b id="mpTotal">—</b></p>
+    </aside>
+
+
+    <div class="selected-panel" id="selectedPanel" hidden>
+      <h3 id="selLabel">—</h3>
+      <p class="note" id="selHint"></p>
+      <div class="customise" id="customise"></div>
+      <div class="row">
+        <button class="btn btn--small" id="selRotate">Rotate</button>
+        <button class="btn btn--small" id="selMove">Move</button>
+        <button class="btn btn--small btn--danger" id="selRemove">Remove</button>
+        <button class="btn btn--small" id="selClose">Done</button>
+      </div>
+    </div>
+
+    <div class="plot-panel" id="plotPanel" hidden>
+      <h3 id="plotLabel">—</h3>
+      <p class="note" id="plotNote"></p>
+      <div class="row">
+        <button class="btn btn--small btn--primary" id="plotBuy">Buy</button>
+        <button class="btn btn--small" id="plotCancel">Cancel</button>
+      </div>
+    </div>
+
+    <footer class="tray-wrap">
+      <p class="tray-hint" id="trayHint">Choose a function, then tap the site to place it. Tap a building to customise it.</p>
+      <nav class="tray" id="tray"></nav>
+      <button class="btn btn--primary btn--run" id="btnRun">Run this round</button>
+    </footer>
+  </section>
+
+  <!-- =========================================================== result -->
+  <section class="screen screen--modal" data-screen="result" hidden>
+    <div class="card" id="resultCard"></div>
+  </section>
+
+  <!-- ========================================================= showcase -->
+  <section class="screen screen--showcase" data-screen="showcase" hidden>
+    <div class="plate">
+      <p class="eyebrow" id="showcaseTeam">Team One</p>
+      <h2 id="showcaseHotel">The Riverside</h2>
+      <p class="caption" id="showcaseCaption"></p>
+    </div>
+    <button class="btn btn--ghost" id="btnSkipShowcase">Skip to results</button>
+  </section>
+
+  <!-- =========================================================== reveal -->
+  <section class="screen screen--modal" data-screen="reveal" hidden>
+    <div class="card" id="revealCard"></div>
+  </section>
+
+  <div class="toast" id="toast" hidden></div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

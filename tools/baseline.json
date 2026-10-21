@@ -1,0 +1,4707 @@
+{
+  "note": "Regression baseline for MOVEin Hotel Builders. Generated once from the shipped engine; do not regenerate without approval.",
+  "seed": "hb-baseline",
+  "presets": {
+    "core": {
+      "rounds": [
+        {
+          "round": 1,
+          "metrics": {
+            "fan": 85,
+            "profit": 44,
+            "colleague": 0,
+            "brand": 34
+          },
+          "composite": 43,
+          "events": [
+            "group"
+          ],
+          "ledger": [
+            {
+              "metric": "fan",
+              "code": "base:opening",
+              "delta": 52,
+              "note": "Opening position before design decisions are counted"
+            },
+            {
+              "metric": "fan",
+              "code": "adj:kitchen:fnb",
+              "delta": 9,
+              "note": "Kitchen serves the restaurant directly"
+            },
+            {
+              "metric": "fan",
+              "code": "adj:house:rooms",
+              "delta": 8,
+              "note": "Housekeeping is close to the rooms it turns over"
+            },
+            {
+              "metric": "fan",
+              "code": "walk:arrival",
+              "delta": 8,
+              "note": "Front Office is close to the arrival court"
+            },
+            {
+              "metric": "fan",
+              "code": "walk:rooms",
+              "delta": 4,
+              "note": "Rooms are a short walk from check-in"
+            },
+            {
+              "metric": "fan",
+              "code": "edge:view",
+              "delta": 8,
+              "note": "Guest-facing spaces look out over the river frontage"
+            },
+            {
+              "metric": "profit",
+              "code": "rev:rooms",
+              "delta": 46,
+              "note": "Room capacity met the demand this round"
+            },
+            {
+              "metric": "profit",
+              "code": "rev:fnb",
+              "delta": 20,
+              "note": "Outlets covered the covers demanded"
+            },
+            {
+              "metric": "profit",
+              "code": "missing:recv",
+              "delta": -12,
+              "note": "Deliveries are handled by hand at the entrance"
+            },
+            {
+              "metric": "profit",
+              "code": "cost:operating",
+              "delta": -10,
+              "note": "Running 32 cells of building and a 14-step goods route"
+            },
+            {
+              "metric": "colleague",
+              "code": "base:opening",
+              "delta": 46,
+              "note": "Colleagues start neutral; the building shapes the shift"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:canteen",
+              "delta": -18,
+              "note": "Colleagues have nowhere to eat or rest"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:train",
+              "delta": -14,
+              "note": "No training space: capability never grows"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:pc",
+              "delta": -10,
+              "note": "No People & Culture presence on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "walk:colleague",
+              "delta": 5,
+              "note": "The colleague route is short: change, eat, then on shift"
+            },
+            {
+              "metric": "colleague",
+              "code": "staff:short",
+              "delta": -9,
+              "note": "People & Culture provision is below the size of the workforce"
+            },
+            {
+              "metric": "brand",
+              "code": "base:opening",
+              "delta": 50,
+              "note": "Standards start at the house baseline"
+            },
+            {
+              "metric": "brand",
+              "code": "missing:laundry",
+              "delta": -14,
+              "note": "Linen is sent off-site: slow and costly"
+            },
+            {
+              "metric": "brand",
+              "code": "missing:eng",
+              "delta": -16,
+              "note": "No plant team: breakdowns stay broken"
+            },
+            {
+              "metric": "brand",
+              "code": "signature:water",
+              "delta": 4,
+              "note": "Water Feature gives the hotel a signature guests remember"
+            },
+            {
+              "metric": "brand",
+              "code": "landscape:medium",
+              "delta": 3,
+              "note": "Balanced landscaping around the building"
+            },
+            {
+              "metric": "brand",
+              "code": "heritage:kept",
+              "delta": 5,
+              "note": "The heritage pavilion was preserved"
+            },
+            {
+              "metric": "brand",
+              "code": "edge:service",
+              "delta": 2,
+              "note": "Back of house is tucked against the service yard, out of guest sight"
+            },
+            {
+              "metric": "fan",
+              "code": "event:group",
+              "delta": -4,
+              "note": "Group booking — Turned away: no event space"
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "metrics": {
+            "fan": 88,
+            "profit": 22,
+            "colleague": 0,
+            "brand": 34
+          },
+          "composite": 39,
+          "events": [
+            "festival"
+          ],
+          "ledger": [
+            {
+              "metric": "fan",
+              "code": "base:opening",
+              "delta": 52,
+              "note": "Opening position before design decisions are counted"
+            },
+            {
+              "metric": "fan",
+              "code": "adj:kitchen:fnb",
+              "delta": 9,
+              "note": "Kitchen serves the restaurant directly"
+            },
+            {
+              "metric": "fan",
+              "code": "adj:house:rooms",
+              "delta": 8,
+              "note": "Housekeeping is close to the rooms it turns over"
+            },
+            {
+              "metric": "fan",
+              "code": "walk:arrival",
+              "delta": 8,
+              "note": "Front Office is close to the arrival court"
+            },
+            {
+              "metric": "fan",
+              "code": "walk:rooms",
+              "delta": 4,
+              "note": "Rooms are a short walk from check-in"
+            },
+            {
+              "metric": "fan",
+              "code": "cap:rooms",
+              "delta": -6,
+              "note": "Not enough rooms: guests queue or are turned away"
+            },
+            {
+              "metric": "fan",
+              "code": "cap:fnb",
+              "delta": -3,
+              "note": "Not enough covers: the restaurant turns guests away"
+            },
+            {
+              "metric": "fan",
+              "code": "edge:view",
+              "delta": 8,
+              "note": "Guest-facing spaces look out over the river frontage"
+            },
+            {
+              "metric": "profit",
+              "code": "rev:rooms",
+              "delta": 35,
+              "note": "Only 77% of the rooms demanded could be sold"
+            },
+            {
+              "metric": "profit",
+              "code": "rev:fnb",
+              "delta": 15,
+              "note": "Only 76% of the covers demanded could be served"
+            },
+            {
+              "metric": "profit",
+              "code": "missing:recv",
+              "delta": -12,
+              "note": "Deliveries are handled by hand at the entrance"
+            },
+            {
+              "metric": "profit",
+              "code": "cost:operating",
+              "delta": -10,
+              "note": "Running 32 cells of building and a 14-step goods route"
+            },
+            {
+              "metric": "colleague",
+              "code": "base:opening",
+              "delta": 46,
+              "note": "Colleagues start neutral; the building shapes the shift"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:canteen",
+              "delta": -18,
+              "note": "Colleagues have nowhere to eat or rest"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:train",
+              "delta": -14,
+              "note": "No training space: capability never grows"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:pc",
+              "delta": -10,
+              "note": "No People & Culture presence on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "walk:colleague",
+              "delta": 5,
+              "note": "The colleague route is short: change, eat, then on shift"
+            },
+            {
+              "metric": "colleague",
+              "code": "staff:short",
+              "delta": -14,
+              "note": "People & Culture provision is below the size of the workforce"
+            },
+            {
+              "metric": "brand",
+              "code": "base:opening",
+              "delta": 50,
+              "note": "Standards start at the house baseline"
+            },
+            {
+              "metric": "brand",
+              "code": "missing:laundry",
+              "delta": -14,
+              "note": "Linen is sent off-site: slow and costly"
+            },
+            {
+              "metric": "brand",
+              "code": "missing:eng",
+              "delta": -16,
+              "note": "No plant team: breakdowns stay broken"
+            },
+            {
+              "metric": "brand",
+              "code": "signature:water",
+              "delta": 4,
+              "note": "Water Feature gives the hotel a signature guests remember"
+            },
+            {
+              "metric": "brand",
+              "code": "landscape:medium",
+              "delta": 3,
+              "note": "Balanced landscaping around the building"
+            },
+            {
+              "metric": "brand",
+              "code": "heritage:kept",
+              "delta": 5,
+              "note": "The heritage pavilion was preserved"
+            },
+            {
+              "metric": "brand",
+              "code": "edge:service",
+              "delta": 2,
+              "note": "Back of house is tucked against the service yard, out of guest sight"
+            },
+            {
+              "metric": "fan",
+              "code": "journey:arrival",
+              "delta": 8,
+              "note": "Guest Arrival: 2 steps of walking end to end"
+            },
+            {
+              "metric": "colleague",
+              "code": "clamp",
+              "delta": 5,
+              "note": "colleague was held inside the 0-100 range"
+            },
+            {
+              "metric": "profit",
+              "code": "event:festival",
+              "delta": -6,
+              "note": "Local festival — Only absorbed 0% of the 21 extra arrivals"
+            }
+          ]
+        },
+        {
+          "round": 3,
+          "metrics": {
+            "fan": 74,
+            "profit": 0,
+            "colleague": 0,
+            "brand": 38
+          },
+          "composite": 30,
+          "events": [
+            "absence",
+            "supply"
+          ],
+          "ledger": [
+            {
+              "metric": "fan",
+              "code": "base:opening",
+              "delta": 52,
+              "note": "Opening position before design decisions are counted"
+            },
+            {
+              "metric": "fan",
+              "code": "adj:kitchen:fnb",
+              "delta": 9,
+              "note": "Kitchen serves the restaurant directly"
+            },
+            {
+              "metric": "fan",
+              "code": "adj:house:rooms",
+              "delta": 8,
+              "note": "Housekeeping is close to the rooms it turns over"
+            },
+            {
+              "metric": "fan",
+              "code": "walk:arrival",
+              "delta": 8,
+              "note": "Front Office is close to the arrival court"
+            },
+            {
+              "metric": "fan",
+              "code": "walk:rooms",
+              "delta": 4,
+              "note": "Rooms are a short walk from check-in"
+            },
+            {
+              "metric": "fan",
+              "code": "cap:rooms",
+              "delta": -13,
+              "note": "Not enough rooms: guests queue or are turned away"
+            },
+            {
+              "metric": "fan",
+              "code": "cap:fnb",
+              "delta": -7,
+              "note": "Not enough covers: the restaurant turns guests away"
+            },
+            {
+              "metric": "fan",
+              "code": "edge:view",
+              "delta": 8,
+              "note": "Guest-facing spaces look out over the river frontage"
+            },
+            {
+              "metric": "profit",
+              "code": "rev:rooms",
+              "delta": 24,
+              "note": "Only 51% of the rooms demanded could be sold"
+            },
+            {
+              "metric": "profit",
+              "code": "rev:fnb",
+              "delta": 10,
+              "note": "Only 51% of the covers demanded could be served"
+            },
+            {
+              "metric": "profit",
+              "code": "missing:recv",
+              "delta": -12,
+              "note": "Deliveries are handled by hand at the entrance"
+            },
+            {
+              "metric": "profit",
+              "code": "cost:operating",
+              "delta": -10,
+              "note": "Running 32 cells of building and a 14-step goods route"
+            },
+            {
+              "metric": "colleague",
+              "code": "base:opening",
+              "delta": 46,
+              "note": "Colleagues start neutral; the building shapes the shift"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:canteen",
+              "delta": -18,
+              "note": "Colleagues have nowhere to eat or rest"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:train",
+              "delta": -14,
+              "note": "No training space: capability never grows"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:pc",
+              "delta": -10,
+              "note": "No People & Culture presence on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "walk:colleague",
+              "delta": 5,
+              "note": "The colleague route is short: change, eat, then on shift"
+            },
+            {
+              "metric": "colleague",
+              "code": "staff:short",
+              "delta": -20,
+              "note": "People & Culture provision is below the size of the workforce"
+            },
+            {
+              "metric": "brand",
+              "code": "base:opening",
+              "delta": 50,
+              "note": "Standards start at the house baseline"
+            },
+            {
+              "metric": "brand",
+              "code": "missing:laundry",
+              "delta": -14,
+              "note": "Linen is sent off-site: slow and costly"
+            },
+            {
+              "metric": "brand",
+              "code": "missing:eng",
+              "delta": -16,
+              "note": "No plant team: breakdowns stay broken"
+            },
+            {
+              "metric": "brand",
+              "code": "signature:water",
+              "delta": 4,
+              "note": "Water Feature gives the hotel a signature guests remember"
+            },
+            {
+              "metric": "brand",
+              "code": "landscape:medium",
+              "delta": 3,
+              "note": "Balanced landscaping around the building"
+            },
+            {
+              "metric": "brand",
+              "code": "heritage:kept",
+              "delta": 5,
+              "note": "The heritage pavilion was preserved"
+            },
+            {
+              "metric": "brand",
+              "code": "edge:service",
+              "delta": 2,
+              "note": "Back of house is tucked against the service yard, out of guest sight"
+            },
+            {
+              "metric": "fan",
+              "code": "journey:arrival",
+              "delta": 8,
+              "note": "Guest Arrival: 2 steps of walking end to end"
+            },
+            {
+              "metric": "fan",
+              "code": "journey:recovery",
+              "delta": 4,
+              "note": "Service Recovery: 1 step with no home on site"
+            },
+            {
+              "metric": "brand",
+              "code": "journey:linen",
+              "delta": 4,
+              "note": "Linen Cycle: 1 step with no home on site"
+            },
+            {
+              "metric": "profit",
+              "code": "journey:goods",
+              "delta": 4,
+              "note": "Goods-In: 1 step with no home on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "clamp",
+              "delta": 11,
+              "note": "colleague was held inside the 0-100 range"
+            },
+            {
+              "metric": "fan",
+              "code": "event:absence",
+              "delta": -7,
+              "note": "Colleague absence spike — Thin Colleague Engagement turned absence into a service failure"
+            },
+            {
+              "metric": "profit",
+              "code": "event:absence",
+              "delta": -9,
+              "note": "Colleague absence spike — Thin Colleague Engagement turned absence into a service failure"
+            },
+            {
+              "metric": "profit",
+              "code": "event:supply",
+              "delta": -10,
+              "note": "Supply delivery delay — Not handled: Receiving & Stores were not on site"
+            }
+          ]
+        },
+        {
+          "round": 4,
+          "metrics": {
+            "fan": 77,
+            "profit": 22,
+            "colleague": 0,
+            "brand": 19
+          },
+          "composite": 32,
+          "events": [
+            "escalation",
+            "breakdown",
+            "hsinspect"
+          ],
+          "ledger": [
+            {
+              "metric": "fan",
+              "code": "base:opening",
+              "delta": 52,
+              "note": "Opening position before design decisions are counted"
+            },
+            {
+              "metric": "fan",
+              "code": "adj:kitchen:fnb",
+              "delta": 9,
+              "note": "Kitchen serves the restaurant directly"
+            },
+            {
+              "metric": "fan",
+              "code": "adj:house:rooms",
+              "delta": 8,
+              "note": "Housekeeping is close to the rooms it turns over"
+            },
+            {
+              "metric": "fan",
+              "code": "walk:arrival",
+              "delta": 8,
+              "note": "Front Office is close to the arrival court"
+            },
+            {
+              "metric": "fan",
+              "code": "walk:rooms",
+              "delta": 4,
+              "note": "Rooms are a short walk from check-in"
+            },
+            {
+              "metric": "fan",
+              "code": "cap:rooms",
+              "delta": -10,
+              "note": "Not enough rooms: guests queue or are turned away"
+            },
+            {
+              "metric": "fan",
+              "code": "cap:fnb",
+              "delta": -6,
+              "note": "Not enough covers: the restaurant turns guests away"
+            },
+            {
+              "metric": "fan",
+              "code": "edge:view",
+              "delta": 8,
+              "note": "Guest-facing spaces look out over the river frontage"
+            },
+            {
+              "metric": "profit",
+              "code": "rev:rooms",
+              "delta": 28,
+              "note": "Only 60% of the rooms demanded could be sold"
+            },
+            {
+              "metric": "profit",
+              "code": "rev:fnb",
+              "delta": 12,
+              "note": "Only 59% of the covers demanded could be served"
+            },
+            {
+              "metric": "profit",
+              "code": "missing:recv",
+              "delta": -12,
+              "note": "Deliveries are handled by hand at the entrance"
+            },
+            {
+              "metric": "profit",
+              "code": "cost:operating",
+              "delta": -10,
+              "note": "Running 32 cells of building and a 14-step goods route"
+            },
+            {
+              "metric": "colleague",
+              "code": "base:opening",
+              "delta": 46,
+              "note": "Colleagues start neutral; the building shapes the shift"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:canteen",
+              "delta": -18,
+              "note": "Colleagues have nowhere to eat or rest"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:train",
+              "delta": -14,
+              "note": "No training space: capability never grows"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:pc",
+              "delta": -10,
+              "note": "No People & Culture presence on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "walk:colleague",
+              "delta": 5,
+              "note": "The colleague route is short: change, eat, then on shift"
+            },
+            {
+              "metric": "colleague",
+              "code": "staff:short",
+              "delta": -18,
+              "note": "People & Culture provision is below the size of the workforce"
+            },
+            {
+              "metric": "brand",
+              "code": "base:opening",
+              "delta": 50,
+              "note": "Standards start at the house baseline"
+            },
+            {
+              "metric": "brand",
+              "code": "missing:laundry",
+              "delta": -14,
+              "note": "Linen is sent off-site: slow and costly"
+            },
+            {
+              "metric": "brand",
+              "code": "missing:eng",
+              "delta": -16,
+              "note": "No plant team: breakdowns stay broken"
+            },
+            {
+              "metric": "brand",
+              "code": "signature:water",
+              "delta": 4,
+              "note": "Water Feature gives the hotel a signature guests remember"
+            },
+            {
+              "metric": "brand",
+              "code": "landscape:medium",
+              "delta": 3,
+              "note": "Balanced landscaping around the building"
+            },
+            {
+              "metric": "brand",
+              "code": "heritage:kept",
+              "delta": 5,
+              "note": "The heritage pavilion was preserved"
+            },
+            {
+              "metric": "brand",
+              "code": "edge:service",
+              "delta": 2,
+              "note": "Back of house is tucked against the service yard, out of guest sight"
+            },
+            {
+              "metric": "fan",
+              "code": "journey:arrival",
+              "delta": 8,
+              "note": "Guest Arrival: 2 steps of walking end to end"
+            },
+            {
+              "metric": "fan",
+              "code": "journey:recovery",
+              "delta": 4,
+              "note": "Service Recovery: 1 step with no home on site"
+            },
+            {
+              "metric": "brand",
+              "code": "journey:linen",
+              "delta": 4,
+              "note": "Linen Cycle: 1 step with no home on site"
+            },
+            {
+              "metric": "profit",
+              "code": "journey:goods",
+              "delta": 4,
+              "note": "Goods-In: 1 step with no home on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "clamp",
+              "delta": 9,
+              "note": "colleague was held inside the 0-100 range"
+            },
+            {
+              "metric": "fan",
+              "code": "event:escalation",
+              "delta": 3,
+              "note": "Complaint escalation — Guest Arrival absorbed the complaint on the night"
+            },
+            {
+              "metric": "fan",
+              "code": "event:breakdown",
+              "delta": -11,
+              "note": "Plant failure — No plant team on site: the fault stayed open all night"
+            },
+            {
+              "metric": "brand",
+              "code": "event:breakdown",
+              "delta": -9,
+              "note": "Plant failure — No plant team on site: the fault stayed open all night"
+            },
+            {
+              "metric": "brand",
+              "code": "event:hsinspect",
+              "delta": -10,
+              "note": "Health & safety inspection — Not handled: Main Kitchen and Stewarding were not on site"
+            }
+          ]
+        }
+      ],
+      "layout": {
+        "metrics": {
+          "fan": 85,
+          "profit": 22,
+          "colleague": 0,
+          "brand": 38
+        },
+        "causes": [
+          {
+            "metric": "fan",
+            "code": "base:opening",
+            "delta": 52,
+            "note": "Opening position before design decisions are counted"
+          },
+          {
+            "metric": "fan",
+            "code": "adj:kitchen:fnb",
+            "delta": 9,
+            "note": "Kitchen serves the restaurant directly"
+          },
+          {
+            "metric": "fan",
+            "code": "adj:house:rooms",
+            "delta": 8,
+            "note": "Housekeeping is close to the rooms it turns over"
+          },
+          {
+            "metric": "fan",
+            "code": "walk:arrival",
+            "delta": 8,
+            "note": "Front Office is close to the arrival court"
+          },
+          {
+            "metric": "fan",
+            "code": "walk:rooms",
+            "delta": 4,
+            "note": "Rooms are a short walk from check-in"
+          },
+          {
+            "metric": "fan",
+            "code": "cap:rooms",
+            "delta": -10,
+            "note": "Not enough rooms: guests queue or are turned away"
+          },
+          {
+            "metric": "fan",
+            "code": "cap:fnb",
+            "delta": -6,
+            "note": "Not enough covers: the restaurant turns guests away"
+          },
+          {
+            "metric": "fan",
+            "code": "edge:view",
+            "delta": 8,
+            "note": "Guest-facing spaces look out over the river frontage"
+          },
+          {
+            "metric": "profit",
+            "code": "rev:rooms",
+            "delta": 28,
+            "note": "Only 60% of the rooms demanded could be sold"
+          },
+          {
+            "metric": "profit",
+            "code": "rev:fnb",
+            "delta": 12,
+            "note": "Only 59% of the covers demanded could be served"
+          },
+          {
+            "metric": "profit",
+            "code": "missing:recv",
+            "delta": -12,
+            "note": "Deliveries are handled by hand at the entrance"
+          },
+          {
+            "metric": "profit",
+            "code": "cost:operating",
+            "delta": -10,
+            "note": "Running 32 cells of building and a 14-step goods route"
+          },
+          {
+            "metric": "colleague",
+            "code": "base:opening",
+            "delta": 46,
+            "note": "Colleagues start neutral; the building shapes the shift"
+          },
+          {
+            "metric": "colleague",
+            "code": "missing:canteen",
+            "delta": -18,
+            "note": "Colleagues have nowhere to eat or rest"
+          },
+          {
+            "metric": "colleague",
+            "code": "missing:train",
+            "delta": -14,
+            "note": "No training space: capability never grows"
+          },
+          {
+            "metric": "colleague",
+            "code": "missing:pc",
+            "delta": -10,
+            "note": "No People & Culture presence on site"
+          },
+          {
+            "metric": "colleague",
+            "code": "walk:colleague",
+            "delta": 5,
+            "note": "The colleague route is short: change, eat, then on shift"
+          },
+          {
+            "metric": "colleague",
+            "code": "staff:short",
+            "delta": -18,
+            "note": "People & Culture provision is below the size of the workforce"
+          },
+          {
+            "metric": "brand",
+            "code": "base:opening",
+            "delta": 50,
+            "note": "Standards start at the house baseline"
+          },
+          {
+            "metric": "brand",
+            "code": "missing:laundry",
+            "delta": -14,
+            "note": "Linen is sent off-site: slow and costly"
+          },
+          {
+            "metric": "brand",
+            "code": "missing:eng",
+            "delta": -16,
+            "note": "No plant team: breakdowns stay broken"
+          },
+          {
+            "metric": "brand",
+            "code": "signature:water",
+            "delta": 4,
+            "note": "Water Feature gives the hotel a signature guests remember"
+          },
+          {
+            "metric": "brand",
+            "code": "landscape:medium",
+            "delta": 3,
+            "note": "Balanced landscaping around the building"
+          },
+          {
+            "metric": "brand",
+            "code": "heritage:kept",
+            "delta": 5,
+            "note": "The heritage pavilion was preserved"
+          },
+          {
+            "metric": "brand",
+            "code": "edge:service",
+            "delta": 2,
+            "note": "Back of house is tucked against the service yard, out of guest sight"
+          },
+          {
+            "metric": "fan",
+            "code": "journey:arrival",
+            "delta": 8,
+            "note": "Guest Arrival: 2 steps of walking end to end"
+          },
+          {
+            "metric": "fan",
+            "code": "journey:recovery",
+            "delta": 4,
+            "note": "Service Recovery: 1 step with no home on site"
+          },
+          {
+            "metric": "brand",
+            "code": "journey:linen",
+            "delta": 4,
+            "note": "Linen Cycle: 1 step with no home on site"
+          },
+          {
+            "metric": "profit",
+            "code": "journey:goods",
+            "delta": 4,
+            "note": "Goods-In: 1 step with no home on site"
+          },
+          {
+            "metric": "colleague",
+            "code": "clamp",
+            "delta": 9,
+            "note": "colleague was held inside the 0-100 range"
+          }
+        ],
+        "journeys": [
+          {
+            "id": "arrival",
+            "label": "Guest Arrival",
+            "friction": 2,
+            "gaps": 0,
+            "quality": 100,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "arrival",
+                "owner": null,
+                "resolved": true,
+                "uid": null
+              },
+              {
+                "tag": "front",
+                "owner": "Front Office",
+                "resolved": true,
+                "uid": "p2"
+              },
+              {
+                "tag": "concierge",
+                "owner": "Concierge",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "rooms",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p1"
+              }
+            ]
+          },
+          {
+            "id": "recovery",
+            "label": "Service Recovery",
+            "friction": 14,
+            "gaps": 1,
+            "quality": 80,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "front",
+                "owner": "Front Office",
+                "resolved": true,
+                "uid": "p2"
+              },
+              {
+                "tag": "pc",
+                "owner": "People & Culture",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "eng",
+                "owner": "Engineering",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "fnb",
+                "owner": "Food & Beverage",
+                "resolved": true,
+                "uid": "p3"
+              },
+              {
+                "tag": "front",
+                "owner": "Front Office",
+                "resolved": true,
+                "uid": "p2"
+              }
+            ]
+          },
+          {
+            "id": "linen",
+            "label": "Linen Cycle",
+            "friction": 0,
+            "gaps": 1,
+            "quality": 80,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "rooms",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p1"
+              },
+              {
+                "tag": "laundry",
+                "owner": "Laundry",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "house",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p5"
+              },
+              {
+                "tag": "rooms",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p1"
+              }
+            ]
+          },
+          {
+            "id": "goods",
+            "label": "Goods-In",
+            "friction": 1,
+            "gaps": 1,
+            "quality": 80,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "service",
+                "owner": null,
+                "resolved": true,
+                "uid": null
+              },
+              {
+                "tag": "recv",
+                "owner": "Receiving",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "steward",
+                "owner": "Stewarding",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "kitchen",
+                "owner": "Kitchen",
+                "resolved": true,
+                "uid": "p4"
+              },
+              {
+                "tag": "fnb",
+                "owner": "Food & Beverage",
+                "resolved": true,
+                "uid": "p3"
+              }
+            ]
+          },
+          {
+            "id": "colleague",
+            "label": "Colleague Day",
+            "friction": 2,
+            "gaps": 2,
+            "quality": 60,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "service",
+                "owner": null,
+                "resolved": true,
+                "uid": null
+              },
+              {
+                "tag": "locker",
+                "owner": "People & Culture",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "canteen",
+                "owner": "People & Culture",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "train",
+                "owner": "Learning & Development",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "house",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p5"
+              }
+            ]
+          }
+        ],
+        "placements": [
+          {
+            "fnId": "rooms",
+            "col": 8,
+            "row": 3,
+            "w": 4,
+            "h": 3,
+            "rot": 0,
+            "round": 1
+          },
+          {
+            "fnId": "front",
+            "col": 4,
+            "row": 6,
+            "w": 3,
+            "h": 2,
+            "rot": 0,
+            "round": 1
+          },
+          {
+            "fnId": "fnb",
+            "col": 9,
+            "row": 1,
+            "w": 3,
+            "h": 2,
+            "rot": 0,
+            "round": 1
+          },
+          {
+            "fnId": "kitchen",
+            "col": 6,
+            "row": 0,
+            "w": 3,
+            "h": 2,
+            "rot": 0,
+            "round": 1
+          },
+          {
+            "fnId": "house",
+            "col": 6,
+            "row": 3,
+            "w": 2,
+            "h": 1,
+            "rot": 0,
+            "round": 1
+          }
+        ]
+      }
+    },
+    "balanced": {
+      "rounds": [
+        {
+          "round": 4,
+          "metrics": {
+            "fan": 98,
+            "profit": 48,
+            "colleague": 71,
+            "brand": 68
+          },
+          "composite": 73,
+          "events": [
+            "festival",
+            "escalation",
+            "group"
+          ],
+          "ledger": [
+            {
+              "metric": "fan",
+              "code": "base:opening",
+              "delta": 52,
+              "note": "Opening position before design decisions are counted"
+            },
+            {
+              "metric": "fan",
+              "code": "adj:kitchen:fnb",
+              "delta": 9,
+              "note": "Kitchen serves the restaurant directly"
+            },
+            {
+              "metric": "fan",
+              "code": "adj:house:rooms",
+              "delta": 8,
+              "note": "Housekeeping is close to the rooms it turns over"
+            },
+            {
+              "metric": "fan",
+              "code": "adj:front:concierge",
+              "delta": 5,
+              "note": "Concierge works beside the Front Office"
+            },
+            {
+              "metric": "fan",
+              "code": "adj:laundry:rooms",
+              "delta": -7,
+              "note": "Laundry noise and vibration beside guest rooms"
+            },
+            {
+              "metric": "fan",
+              "code": "walk:arrival",
+              "delta": 8,
+              "note": "Front Office is close to the arrival court"
+            },
+            {
+              "metric": "fan",
+              "code": "walk:rooms",
+              "delta": 4,
+              "note": "Rooms are a short walk from check-in"
+            },
+            {
+              "metric": "fan",
+              "code": "cap:fnb",
+              "delta": -6,
+              "note": "Not enough covers: the restaurant turns guests away"
+            },
+            {
+              "metric": "fan",
+              "code": "edge:view",
+              "delta": 10,
+              "note": "Guest-facing spaces look out over the river frontage"
+            },
+            {
+              "metric": "profit",
+              "code": "rev:rooms",
+              "delta": 46,
+              "note": "Room capacity met the demand this round"
+            },
+            {
+              "metric": "profit",
+              "code": "rev:fnb",
+              "delta": 12,
+              "note": "Only 59% of the covers demanded could be served"
+            },
+            {
+              "metric": "profit",
+              "code": "adj:recv:kitchen",
+              "delta": 5.3,
+              "note": "Deliveries reach the kitchen without crossing the hotel"
+            },
+            {
+              "metric": "profit",
+              "code": "cost:operating",
+              "delta": -23,
+              "note": "Running 72 cells of building and a 28-step goods route"
+            },
+            {
+              "metric": "profit",
+              "code": "cost:colleague-walk",
+              "delta": -10,
+              "note": "Long colleague routes add paid hours that produce nothing"
+            },
+            {
+              "metric": "colleague",
+              "code": "base:opening",
+              "delta": 46,
+              "note": "Colleagues start neutral; the building shapes the shift"
+            },
+            {
+              "metric": "colleague",
+              "code": "have:canteen",
+              "delta": 9,
+              "note": "Colleague Canteen is on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "have:train",
+              "delta": 8,
+              "note": "Training Room is on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "have:pc",
+              "delta": 5,
+              "note": "People & Culture Office is on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "have:locker",
+              "delta": 4,
+              "note": "Colleague Lockers is on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "adj:canteen:locker",
+              "delta": 5,
+              "note": "Colleagues change and eat in one place"
+            },
+            {
+              "metric": "colleague",
+              "code": "adj:train:pc",
+              "delta": 4.3,
+              "note": "Training sits with People & Culture"
+            },
+            {
+              "metric": "colleague",
+              "code": "walk:colleague",
+              "delta": -18,
+              "note": "Colleagues cross the site to change, eat and start shift"
+            },
+            {
+              "metric": "brand",
+              "code": "base:opening",
+              "delta": 50,
+              "note": "Standards start at the house baseline"
+            },
+            {
+              "metric": "brand",
+              "code": "adj:sec:recv",
+              "delta": 4,
+              "note": "Security watches the goods entrance"
+            },
+            {
+              "metric": "brand",
+              "code": "adj:laundry:heritage",
+              "delta": -8,
+              "note": "Plant tucked against the heritage pavilion"
+            },
+            {
+              "metric": "brand",
+              "code": "adj:eng:heritage",
+              "delta": -4.2,
+              "note": "Plant vibration against the heritage pavilion"
+            },
+            {
+              "metric": "brand",
+              "code": "signature:water",
+              "delta": 4,
+              "note": "Water Feature gives the hotel a signature guests remember"
+            },
+            {
+              "metric": "brand",
+              "code": "landscape:medium",
+              "delta": 3,
+              "note": "Balanced landscaping around the building"
+            },
+            {
+              "metric": "brand",
+              "code": "heritage:kept",
+              "delta": 5,
+              "note": "The heritage pavilion was preserved"
+            },
+            {
+              "metric": "brand",
+              "code": "edge:service",
+              "delta": 6,
+              "note": "Back of house is tucked against the service yard, out of guest sight"
+            },
+            {
+              "metric": "fan",
+              "code": "journey:arrival",
+              "delta": 8,
+              "note": "Guest Arrival: 3 steps of walking end to end"
+            },
+            {
+              "metric": "fan",
+              "code": "journey:recovery",
+              "delta": 8,
+              "note": "Service Recovery: 0 steps of walking end to end"
+            },
+            {
+              "metric": "brand",
+              "code": "journey:linen",
+              "delta": 8,
+              "note": "Linen Cycle: 1 steps of walking end to end"
+            },
+            {
+              "metric": "profit",
+              "code": "journey:goods",
+              "delta": 8,
+              "note": "Goods-In: 0 steps of walking end to end"
+            },
+            {
+              "metric": "colleague",
+              "code": "journey:colleague",
+              "delta": 8,
+              "note": "Colleague Day: 1 steps of walking end to end"
+            },
+            {
+              "metric": "profit",
+              "code": "event:festival",
+              "delta": 10,
+              "note": "Local festival — Absorbed all 27 extra arrivals"
+            },
+            {
+              "metric": "fan",
+              "code": "event:escalation",
+              "delta": 3,
+              "note": "Complaint escalation — Guest Arrival absorbed the complaint on the night"
+            },
+            {
+              "metric": "fan",
+              "code": "event:group",
+              "delta": -4,
+              "note": "Group booking — Turned away: no event space"
+            }
+          ]
+        }
+      ],
+      "layout": {
+        "metrics": {
+          "fan": 99,
+          "profit": 38,
+          "colleague": 71,
+          "brand": 68
+        },
+        "causes": [
+          {
+            "metric": "fan",
+            "code": "base:opening",
+            "delta": 52,
+            "note": "Opening position before design decisions are counted"
+          },
+          {
+            "metric": "fan",
+            "code": "adj:kitchen:fnb",
+            "delta": 9,
+            "note": "Kitchen serves the restaurant directly"
+          },
+          {
+            "metric": "fan",
+            "code": "adj:house:rooms",
+            "delta": 8,
+            "note": "Housekeeping is close to the rooms it turns over"
+          },
+          {
+            "metric": "fan",
+            "code": "adj:front:concierge",
+            "delta": 5,
+            "note": "Concierge works beside the Front Office"
+          },
+          {
+            "metric": "fan",
+            "code": "adj:laundry:rooms",
+            "delta": -7,
+            "note": "Laundry noise and vibration beside guest rooms"
+          },
+          {
+            "metric": "fan",
+            "code": "walk:arrival",
+            "delta": 8,
+            "note": "Front Office is close to the arrival court"
+          },
+          {
+            "metric": "fan",
+            "code": "walk:rooms",
+            "delta": 4,
+            "note": "Rooms are a short walk from check-in"
+          },
+          {
+            "metric": "fan",
+            "code": "cap:fnb",
+            "delta": -6,
+            "note": "Not enough covers: the restaurant turns guests away"
+          },
+          {
+            "metric": "fan",
+            "code": "edge:view",
+            "delta": 10,
+            "note": "Guest-facing spaces look out over the river frontage"
+          },
+          {
+            "metric": "profit",
+            "code": "rev:rooms",
+            "delta": 46,
+            "note": "Room capacity met the demand this round"
+          },
+          {
+            "metric": "profit",
+            "code": "rev:fnb",
+            "delta": 12,
+            "note": "Only 59% of the covers demanded could be served"
+          },
+          {
+            "metric": "profit",
+            "code": "adj:recv:kitchen",
+            "delta": 5.3,
+            "note": "Deliveries reach the kitchen without crossing the hotel"
+          },
+          {
+            "metric": "profit",
+            "code": "cost:operating",
+            "delta": -23,
+            "note": "Running 72 cells of building and a 28-step goods route"
+          },
+          {
+            "metric": "profit",
+            "code": "cost:colleague-walk",
+            "delta": -10,
+            "note": "Long colleague routes add paid hours that produce nothing"
+          },
+          {
+            "metric": "colleague",
+            "code": "base:opening",
+            "delta": 46,
+            "note": "Colleagues start neutral; the building shapes the shift"
+          },
+          {
+            "metric": "colleague",
+            "code": "have:canteen",
+            "delta": 9,
+            "note": "Colleague Canteen is on site"
+          },
+          {
+            "metric": "colleague",
+            "code": "have:train",
+            "delta": 8,
+            "note": "Training Room is on site"
+          },
+          {
+            "metric": "colleague",
+            "code": "have:pc",
+            "delta": 5,
+            "note": "People & Culture Office is on site"
+          },
+          {
+            "metric": "colleague",
+            "code": "have:locker",
+            "delta": 4,
+            "note": "Colleague Lockers is on site"
+          },
+          {
+            "metric": "colleague",
+            "code": "adj:canteen:locker",
+            "delta": 5,
+            "note": "Colleagues change and eat in one place"
+          },
+          {
+            "metric": "colleague",
+            "code": "adj:train:pc",
+            "delta": 4.3,
+            "note": "Training sits with People & Culture"
+          },
+          {
+            "metric": "colleague",
+            "code": "walk:colleague",
+            "delta": -18,
+            "note": "Colleagues cross the site to change, eat and start shift"
+          },
+          {
+            "metric": "brand",
+            "code": "base:opening",
+            "delta": 50,
+            "note": "Standards start at the house baseline"
+          },
+          {
+            "metric": "brand",
+            "code": "adj:sec:recv",
+            "delta": 4,
+            "note": "Security watches the goods entrance"
+          },
+          {
+            "metric": "brand",
+            "code": "adj:laundry:heritage",
+            "delta": -8,
+            "note": "Plant tucked against the heritage pavilion"
+          },
+          {
+            "metric": "brand",
+            "code": "adj:eng:heritage",
+            "delta": -4.2,
+            "note": "Plant vibration against the heritage pavilion"
+          },
+          {
+            "metric": "brand",
+            "code": "signature:water",
+            "delta": 4,
+            "note": "Water Feature gives the hotel a signature guests remember"
+          },
+          {
+            "metric": "brand",
+            "code": "landscape:medium",
+            "delta": 3,
+            "note": "Balanced landscaping around the building"
+          },
+          {
+            "metric": "brand",
+            "code": "heritage:kept",
+            "delta": 5,
+            "note": "The heritage pavilion was preserved"
+          },
+          {
+            "metric": "brand",
+            "code": "edge:service",
+            "delta": 6,
+            "note": "Back of house is tucked against the service yard, out of guest sight"
+          },
+          {
+            "metric": "fan",
+            "code": "journey:arrival",
+            "delta": 8,
+            "note": "Guest Arrival: 3 steps of walking end to end"
+          },
+          {
+            "metric": "fan",
+            "code": "journey:recovery",
+            "delta": 8,
+            "note": "Service Recovery: 0 steps of walking end to end"
+          },
+          {
+            "metric": "brand",
+            "code": "journey:linen",
+            "delta": 8,
+            "note": "Linen Cycle: 1 steps of walking end to end"
+          },
+          {
+            "metric": "profit",
+            "code": "journey:goods",
+            "delta": 8,
+            "note": "Goods-In: 0 steps of walking end to end"
+          },
+          {
+            "metric": "colleague",
+            "code": "journey:colleague",
+            "delta": 8,
+            "note": "Colleague Day: 1 steps of walking end to end"
+          }
+        ],
+        "journeys": [
+          {
+            "id": "arrival",
+            "label": "Guest Arrival",
+            "friction": 3,
+            "gaps": 0,
+            "quality": 100,
+            "optionalHits": 1,
+            "stops": [
+              {
+                "tag": "arrival",
+                "owner": null,
+                "resolved": true,
+                "uid": null
+              },
+              {
+                "tag": "front",
+                "owner": "Front Office",
+                "resolved": true,
+                "uid": "p2"
+              },
+              {
+                "tag": "concierge",
+                "owner": "Concierge",
+                "resolved": true,
+                "uid": "p3"
+              },
+              {
+                "tag": "rooms",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p8"
+              }
+            ]
+          },
+          {
+            "id": "recovery",
+            "label": "Service Recovery",
+            "friction": 0,
+            "gaps": 0,
+            "quality": 100,
+            "optionalHits": 1,
+            "stops": [
+              {
+                "tag": "front",
+                "owner": "Front Office",
+                "resolved": true,
+                "uid": "p2"
+              },
+              {
+                "tag": "pc",
+                "owner": "People & Culture",
+                "resolved": true,
+                "uid": "p14"
+              },
+              {
+                "tag": "eng",
+                "owner": "Engineering",
+                "resolved": true,
+                "uid": "p10"
+              },
+              {
+                "tag": "fnb",
+                "owner": "Food & Beverage",
+                "resolved": true,
+                "uid": "p4"
+              },
+              {
+                "tag": "front",
+                "owner": "Front Office",
+                "resolved": true,
+                "uid": "p2"
+              }
+            ]
+          },
+          {
+            "id": "linen",
+            "label": "Linen Cycle",
+            "friction": 1,
+            "gaps": 0,
+            "quality": 100,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "rooms",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p1"
+              },
+              {
+                "tag": "laundry",
+                "owner": "Laundry",
+                "resolved": true,
+                "uid": "p9"
+              },
+              {
+                "tag": "house",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p7"
+              },
+              {
+                "tag": "rooms",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p1"
+              }
+            ]
+          },
+          {
+            "id": "goods",
+            "label": "Goods-In",
+            "friction": 0,
+            "gaps": 0,
+            "quality": 100,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "service",
+                "owner": null,
+                "resolved": true,
+                "uid": null
+              },
+              {
+                "tag": "recv",
+                "owner": "Receiving",
+                "resolved": true,
+                "uid": "p6"
+              },
+              {
+                "tag": "steward",
+                "owner": "Stewarding",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "kitchen",
+                "owner": "Kitchen",
+                "resolved": true,
+                "uid": "p5"
+              },
+              {
+                "tag": "fnb",
+                "owner": "Food & Beverage",
+                "resolved": true,
+                "uid": "p4"
+              }
+            ]
+          },
+          {
+            "id": "colleague",
+            "label": "Colleague Day",
+            "friction": 1,
+            "gaps": 0,
+            "quality": 100,
+            "optionalHits": 1,
+            "stops": [
+              {
+                "tag": "service",
+                "owner": null,
+                "resolved": true,
+                "uid": null
+              },
+              {
+                "tag": "locker",
+                "owner": "People & Culture",
+                "resolved": true,
+                "uid": "p15"
+              },
+              {
+                "tag": "canteen",
+                "owner": "People & Culture",
+                "resolved": true,
+                "uid": "p12"
+              },
+              {
+                "tag": "train",
+                "owner": "Learning & Development",
+                "resolved": true,
+                "uid": "p13"
+              },
+              {
+                "tag": "house",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p7"
+              }
+            ]
+          }
+        ],
+        "placements": [
+          {
+            "fnId": "rooms",
+            "col": 8,
+            "row": 3,
+            "w": 4,
+            "h": 3,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "front",
+            "col": 4,
+            "row": 6,
+            "w": 3,
+            "h": 2,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "concierge",
+            "col": 4,
+            "row": 8,
+            "w": 1,
+            "h": 1,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "fnb",
+            "col": 9,
+            "row": 1,
+            "w": 3,
+            "h": 2,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "kitchen",
+            "col": 6,
+            "row": 0,
+            "w": 3,
+            "h": 2,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "recv",
+            "col": 3,
+            "row": 0,
+            "w": 2,
+            "h": 2,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "house",
+            "col": 6,
+            "row": 3,
+            "w": 2,
+            "h": 1,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "rooms",
+            "col": 8,
+            "row": 6,
+            "w": 4,
+            "h": 3,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "laundry",
+            "col": 3,
+            "row": 2,
+            "w": 3,
+            "h": 2,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "eng",
+            "col": 0,
+            "row": 0,
+            "w": 3,
+            "h": 2,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "sec",
+            "col": 5,
+            "row": 1,
+            "w": 1,
+            "h": 1,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "canteen",
+            "col": 1,
+            "row": 2,
+            "w": 2,
+            "h": 2,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "train",
+            "col": 4,
+            "row": 4,
+            "w": 2,
+            "h": 1,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "pc",
+            "col": 6,
+            "row": 2,
+            "w": 2,
+            "h": 1,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "locker",
+            "col": 0,
+            "row": 2,
+            "w": 1,
+            "h": 2,
+            "rot": 1,
+            "round": 4
+          }
+        ]
+      }
+    },
+    "revenue": {
+      "rounds": [
+        {
+          "round": 4,
+          "metrics": {
+            "fan": 75,
+            "profit": 88,
+            "colleague": 0,
+            "brand": 36
+          },
+          "composite": 52,
+          "events": [
+            "festival",
+            "escalation",
+            "group"
+          ],
+          "ledger": [
+            {
+              "metric": "fan",
+              "code": "base:opening",
+              "delta": 52,
+              "note": "Opening position before design decisions are counted"
+            },
+            {
+              "metric": "fan",
+              "code": "adj:kitchen:fnb",
+              "delta": 9,
+              "note": "Kitchen serves the restaurant directly"
+            },
+            {
+              "metric": "fan",
+              "code": "adj:kitchen:fnb2",
+              "delta": 7,
+              "note": "Kitchen serves the speciality restaurant"
+            },
+            {
+              "metric": "fan",
+              "code": "missing:house",
+              "delta": -14,
+              "note": "Rooms cannot be turned over on time"
+            },
+            {
+              "metric": "fan",
+              "code": "walk:arrival",
+              "delta": 8,
+              "note": "Front Office is close to the arrival court"
+            },
+            {
+              "metric": "fan",
+              "code": "walk:rooms",
+              "delta": -10,
+              "note": "Guests are walked a long way to their rooms"
+            },
+            {
+              "metric": "fan",
+              "code": "cap:fnb",
+              "delta": -2,
+              "note": "Not enough covers: the restaurant turns guests away"
+            },
+            {
+              "metric": "fan",
+              "code": "edge:view",
+              "delta": 10,
+              "note": "Guest-facing spaces look out over the river frontage"
+            },
+            {
+              "metric": "profit",
+              "code": "rev:rooms",
+              "delta": 46,
+              "note": "Room capacity met the demand this round"
+            },
+            {
+              "metric": "profit",
+              "code": "rev:fnb",
+              "delta": 18,
+              "note": "Only 89% of the covers demanded could be served"
+            },
+            {
+              "metric": "profit",
+              "code": "rev:events",
+              "delta": 10,
+              "note": "Event space captured the enquiries"
+            },
+            {
+              "metric": "profit",
+              "code": "missing:recv",
+              "delta": -12,
+              "note": "Deliveries are handled by hand at the entrance"
+            },
+            {
+              "metric": "profit",
+              "code": "cost:operating",
+              "delta": -14,
+              "note": "Running 67 cells of building and a 1-step goods route"
+            },
+            {
+              "metric": "colleague",
+              "code": "base:opening",
+              "delta": 46,
+              "note": "Colleagues start neutral; the building shapes the shift"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:canteen",
+              "delta": -18,
+              "note": "Colleagues have nowhere to eat or rest"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:train",
+              "delta": -14,
+              "note": "No training space: capability never grows"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:pc",
+              "delta": -10,
+              "note": "No People & Culture presence on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "walk:colleague",
+              "delta": 5,
+              "note": "The colleague route is short: change, eat, then on shift"
+            },
+            {
+              "metric": "colleague",
+              "code": "staff:short",
+              "delta": -18,
+              "note": "People & Culture provision is below the size of the workforce"
+            },
+            {
+              "metric": "brand",
+              "code": "base:opening",
+              "delta": 50,
+              "note": "Standards start at the house baseline"
+            },
+            {
+              "metric": "brand",
+              "code": "adj:fnb:heritage",
+              "delta": 4.2,
+              "note": "Dining beside the heritage pavilion gives a sense of place"
+            },
+            {
+              "metric": "brand",
+              "code": "missing:laundry",
+              "delta": -14,
+              "note": "Linen is sent off-site: slow and costly"
+            },
+            {
+              "metric": "brand",
+              "code": "missing:eng",
+              "delta": -16,
+              "note": "No plant team: breakdowns stay broken"
+            },
+            {
+              "metric": "brand",
+              "code": "signature:water",
+              "delta": 4,
+              "note": "Water Feature gives the hotel a signature guests remember"
+            },
+            {
+              "metric": "brand",
+              "code": "landscape:medium",
+              "delta": 3,
+              "note": "Balanced landscaping around the building"
+            },
+            {
+              "metric": "brand",
+              "code": "heritage:kept",
+              "delta": 5,
+              "note": "The heritage pavilion was preserved"
+            },
+            {
+              "metric": "fan",
+              "code": "journey:arrival",
+              "delta": 8,
+              "note": "Guest Arrival: 2 steps of walking end to end"
+            },
+            {
+              "metric": "fan",
+              "code": "journey:recovery",
+              "delta": 4,
+              "note": "Service Recovery: 1 step with no home on site"
+            },
+            {
+              "metric": "profit",
+              "code": "journey:goods",
+              "delta": 4,
+              "note": "Goods-In: 1 step with no home on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "journey:colleague",
+              "delta": -5,
+              "note": "Colleague Day: 3 steps with no home on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "clamp",
+              "delta": 14,
+              "note": "colleague was held inside the 0-100 range"
+            },
+            {
+              "metric": "profit",
+              "code": "event:festival",
+              "delta": 10,
+              "note": "Local festival — Absorbed all 27 extra arrivals"
+            },
+            {
+              "metric": "fan",
+              "code": "event:escalation",
+              "delta": 3,
+              "note": "Complaint escalation — Guest Arrival absorbed the complaint on the night"
+            },
+            {
+              "metric": "profit",
+              "code": "event:group",
+              "delta": 26,
+              "note": "Group booking — Handled: Ballroom & Events were in place and in reach"
+            }
+          ]
+        }
+      ],
+      "layout": {
+        "metrics": {
+          "fan": 72,
+          "profit": 52,
+          "colleague": 0,
+          "brand": 36
+        },
+        "causes": [
+          {
+            "metric": "fan",
+            "code": "base:opening",
+            "delta": 52,
+            "note": "Opening position before design decisions are counted"
+          },
+          {
+            "metric": "fan",
+            "code": "adj:kitchen:fnb",
+            "delta": 9,
+            "note": "Kitchen serves the restaurant directly"
+          },
+          {
+            "metric": "fan",
+            "code": "adj:kitchen:fnb2",
+            "delta": 7,
+            "note": "Kitchen serves the speciality restaurant"
+          },
+          {
+            "metric": "fan",
+            "code": "missing:house",
+            "delta": -14,
+            "note": "Rooms cannot be turned over on time"
+          },
+          {
+            "metric": "fan",
+            "code": "walk:arrival",
+            "delta": 8,
+            "note": "Front Office is close to the arrival court"
+          },
+          {
+            "metric": "fan",
+            "code": "walk:rooms",
+            "delta": -10,
+            "note": "Guests are walked a long way to their rooms"
+          },
+          {
+            "metric": "fan",
+            "code": "cap:fnb",
+            "delta": -2,
+            "note": "Not enough covers: the restaurant turns guests away"
+          },
+          {
+            "metric": "fan",
+            "code": "edge:view",
+            "delta": 10,
+            "note": "Guest-facing spaces look out over the river frontage"
+          },
+          {
+            "metric": "profit",
+            "code": "rev:rooms",
+            "delta": 46,
+            "note": "Room capacity met the demand this round"
+          },
+          {
+            "metric": "profit",
+            "code": "rev:fnb",
+            "delta": 18,
+            "note": "Only 89% of the covers demanded could be served"
+          },
+          {
+            "metric": "profit",
+            "code": "rev:events",
+            "delta": 10,
+            "note": "Event space captured the enquiries"
+          },
+          {
+            "metric": "profit",
+            "code": "missing:recv",
+            "delta": -12,
+            "note": "Deliveries are handled by hand at the entrance"
+          },
+          {
+            "metric": "profit",
+            "code": "cost:operating",
+            "delta": -14,
+            "note": "Running 67 cells of building and a 1-step goods route"
+          },
+          {
+            "metric": "colleague",
+            "code": "base:opening",
+            "delta": 46,
+            "note": "Colleagues start neutral; the building shapes the shift"
+          },
+          {
+            "metric": "colleague",
+            "code": "missing:canteen",
+            "delta": -18,
+            "note": "Colleagues have nowhere to eat or rest"
+          },
+          {
+            "metric": "colleague",
+            "code": "missing:train",
+            "delta": -14,
+            "note": "No training space: capability never grows"
+          },
+          {
+            "metric": "colleague",
+            "code": "missing:pc",
+            "delta": -10,
+            "note": "No People & Culture presence on site"
+          },
+          {
+            "metric": "colleague",
+            "code": "walk:colleague",
+            "delta": 5,
+            "note": "The colleague route is short: change, eat, then on shift"
+          },
+          {
+            "metric": "colleague",
+            "code": "staff:short",
+            "delta": -18,
+            "note": "People & Culture provision is below the size of the workforce"
+          },
+          {
+            "metric": "brand",
+            "code": "base:opening",
+            "delta": 50,
+            "note": "Standards start at the house baseline"
+          },
+          {
+            "metric": "brand",
+            "code": "adj:fnb:heritage",
+            "delta": 4.2,
+            "note": "Dining beside the heritage pavilion gives a sense of place"
+          },
+          {
+            "metric": "brand",
+            "code": "missing:laundry",
+            "delta": -14,
+            "note": "Linen is sent off-site: slow and costly"
+          },
+          {
+            "metric": "brand",
+            "code": "missing:eng",
+            "delta": -16,
+            "note": "No plant team: breakdowns stay broken"
+          },
+          {
+            "metric": "brand",
+            "code": "signature:water",
+            "delta": 4,
+            "note": "Water Feature gives the hotel a signature guests remember"
+          },
+          {
+            "metric": "brand",
+            "code": "landscape:medium",
+            "delta": 3,
+            "note": "Balanced landscaping around the building"
+          },
+          {
+            "metric": "brand",
+            "code": "heritage:kept",
+            "delta": 5,
+            "note": "The heritage pavilion was preserved"
+          },
+          {
+            "metric": "fan",
+            "code": "journey:arrival",
+            "delta": 8,
+            "note": "Guest Arrival: 2 steps of walking end to end"
+          },
+          {
+            "metric": "fan",
+            "code": "journey:recovery",
+            "delta": 4,
+            "note": "Service Recovery: 1 step with no home on site"
+          },
+          {
+            "metric": "profit",
+            "code": "journey:goods",
+            "delta": 4,
+            "note": "Goods-In: 1 step with no home on site"
+          },
+          {
+            "metric": "colleague",
+            "code": "journey:colleague",
+            "delta": -5,
+            "note": "Colleague Day: 3 steps with no home on site"
+          },
+          {
+            "metric": "colleague",
+            "code": "clamp",
+            "delta": 14,
+            "note": "colleague was held inside the 0-100 range"
+          }
+        ],
+        "journeys": [
+          {
+            "id": "arrival",
+            "label": "Guest Arrival",
+            "friction": 2,
+            "gaps": 0,
+            "quality": 100,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "arrival",
+                "owner": null,
+                "resolved": true,
+                "uid": null
+              },
+              {
+                "tag": "front",
+                "owner": "Front Office",
+                "resolved": true,
+                "uid": "p4"
+              },
+              {
+                "tag": "concierge",
+                "owner": "Concierge",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "rooms",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p3"
+              }
+            ]
+          },
+          {
+            "id": "recovery",
+            "label": "Service Recovery",
+            "friction": 0,
+            "gaps": 1,
+            "quality": 80,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "front",
+                "owner": "Front Office",
+                "resolved": true,
+                "uid": "p4"
+              },
+              {
+                "tag": "pc",
+                "owner": "People & Culture",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "eng",
+                "owner": "Engineering",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "fnb",
+                "owner": "Food & Beverage",
+                "resolved": true,
+                "uid": "p5"
+              },
+              {
+                "tag": "front",
+                "owner": "Front Office",
+                "resolved": true,
+                "uid": "p4"
+              }
+            ]
+          },
+          {
+            "id": "linen",
+            "label": "Linen Cycle",
+            "friction": 0,
+            "gaps": 2,
+            "quality": 60,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "rooms",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p1"
+              },
+              {
+                "tag": "laundry",
+                "owner": "Laundry",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "house",
+                "owner": "Housekeeping",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "rooms",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p1"
+              }
+            ]
+          },
+          {
+            "id": "goods",
+            "label": "Goods-In",
+            "friction": 2,
+            "gaps": 1,
+            "quality": 80,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "service",
+                "owner": null,
+                "resolved": true,
+                "uid": null
+              },
+              {
+                "tag": "recv",
+                "owner": "Receiving",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "steward",
+                "owner": "Stewarding",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "kitchen",
+                "owner": "Kitchen",
+                "resolved": true,
+                "uid": "p7"
+              },
+              {
+                "tag": "fnb",
+                "owner": "Food & Beverage",
+                "resolved": true,
+                "uid": "p5"
+              }
+            ]
+          },
+          {
+            "id": "colleague",
+            "label": "Colleague Day",
+            "friction": 0,
+            "gaps": 3,
+            "quality": 40,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "service",
+                "owner": null,
+                "resolved": true,
+                "uid": null
+              },
+              {
+                "tag": "locker",
+                "owner": "People & Culture",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "canteen",
+                "owner": "People & Culture",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "train",
+                "owner": "Learning & Development",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "house",
+                "owner": "Housekeeping",
+                "resolved": false,
+                "uid": null
+              }
+            ]
+          }
+        ],
+        "placements": [
+          {
+            "fnId": "rooms",
+            "col": 8,
+            "row": 3,
+            "w": 4,
+            "h": 3,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "rooms",
+            "col": 8,
+            "row": 0,
+            "w": 4,
+            "h": 3,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "rooms",
+            "col": 8,
+            "row": 6,
+            "w": 4,
+            "h": 3,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "front",
+            "col": 4,
+            "row": 6,
+            "w": 3,
+            "h": 2,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "fnb",
+            "col": 6,
+            "row": 3,
+            "w": 2,
+            "h": 3,
+            "rot": 1,
+            "round": 4
+          },
+          {
+            "fnId": "fnb2",
+            "col": 4,
+            "row": 3,
+            "w": 2,
+            "h": 2,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "kitchen",
+            "col": 5,
+            "row": 1,
+            "w": 3,
+            "h": 2,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "ballroom",
+            "col": 1,
+            "row": 1,
+            "w": 3,
+            "h": 3,
+            "rot": 0,
+            "round": 4
+          }
+        ]
+      }
+    },
+    "people": {
+      "rounds": [
+        {
+          "round": 4,
+          "metrics": {
+            "fan": 93,
+            "profit": 40,
+            "colleague": 71,
+            "brand": 64
+          },
+          "composite": 68,
+          "events": [
+            "festival",
+            "escalation",
+            "group"
+          ],
+          "ledger": [
+            {
+              "metric": "fan",
+              "code": "base:opening",
+              "delta": 52,
+              "note": "Opening position before design decisions are counted"
+            },
+            {
+              "metric": "fan",
+              "code": "adj:kitchen:fnb",
+              "delta": 9,
+              "note": "Kitchen serves the restaurant directly"
+            },
+            {
+              "metric": "fan",
+              "code": "adj:house:rooms",
+              "delta": 8,
+              "note": "Housekeeping is close to the rooms it turns over"
+            },
+            {
+              "metric": "fan",
+              "code": "adj:eng:rooms",
+              "delta": -7,
+              "note": "Plant vibration beside guest rooms"
+            },
+            {
+              "metric": "fan",
+              "code": "walk:arrival",
+              "delta": 8,
+              "note": "Front Office is close to the arrival court"
+            },
+            {
+              "metric": "fan",
+              "code": "walk:rooms",
+              "delta": 4,
+              "note": "Rooms are a short walk from check-in"
+            },
+            {
+              "metric": "fan",
+              "code": "cap:fnb",
+              "delta": -6,
+              "note": "Not enough covers: the restaurant turns guests away"
+            },
+            {
+              "metric": "fan",
+              "code": "edge:view",
+              "delta": 10,
+              "note": "Guest-facing spaces look out over the river frontage"
+            },
+            {
+              "metric": "profit",
+              "code": "rev:rooms",
+              "delta": 46,
+              "note": "Room capacity met the demand this round"
+            },
+            {
+              "metric": "profit",
+              "code": "rev:fnb",
+              "delta": 12,
+              "note": "Only 59% of the covers demanded could be served"
+            },
+            {
+              "metric": "profit",
+              "code": "cost:operating",
+              "delta": -26,
+              "note": "Running 71 cells of building and a 42-step goods route"
+            },
+            {
+              "metric": "profit",
+              "code": "cost:colleague-walk",
+              "delta": -10,
+              "note": "Long colleague routes add paid hours that produce nothing"
+            },
+            {
+              "metric": "colleague",
+              "code": "base:opening",
+              "delta": 46,
+              "note": "Colleagues start neutral; the building shapes the shift"
+            },
+            {
+              "metric": "colleague",
+              "code": "have:canteen",
+              "delta": 9,
+              "note": "Colleague Canteen is on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "have:train",
+              "delta": 8,
+              "note": "Training Room is on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "have:pc",
+              "delta": 5,
+              "note": "People & Culture Office is on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "have:locker",
+              "delta": 4,
+              "note": "Colleague Lockers is on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "adj:canteen:locker",
+              "delta": 5,
+              "note": "Colleagues change and eat in one place"
+            },
+            {
+              "metric": "colleague",
+              "code": "adj:train:pc",
+              "delta": 4.3,
+              "note": "Training sits with People & Culture"
+            },
+            {
+              "metric": "colleague",
+              "code": "walk:colleague",
+              "delta": -18,
+              "note": "Colleagues cross the site to change, eat and start shift"
+            },
+            {
+              "metric": "brand",
+              "code": "base:opening",
+              "delta": 50,
+              "note": "Standards start at the house baseline"
+            },
+            {
+              "metric": "brand",
+              "code": "adj:laundry:heritage",
+              "delta": -5.6,
+              "note": "Plant tucked against the heritage pavilion"
+            },
+            {
+              "metric": "brand",
+              "code": "adj:eng:heritage",
+              "delta": -6,
+              "note": "Plant vibration against the heritage pavilion"
+            },
+            {
+              "metric": "brand",
+              "code": "signature:water",
+              "delta": 4,
+              "note": "Water Feature gives the hotel a signature guests remember"
+            },
+            {
+              "metric": "brand",
+              "code": "landscape:medium",
+              "delta": 3,
+              "note": "Balanced landscaping around the building"
+            },
+            {
+              "metric": "brand",
+              "code": "heritage:kept",
+              "delta": 5,
+              "note": "The heritage pavilion was preserved"
+            },
+            {
+              "metric": "brand",
+              "code": "edge:service",
+              "delta": 6,
+              "note": "Back of house is tucked against the service yard, out of guest sight"
+            },
+            {
+              "metric": "fan",
+              "code": "journey:arrival",
+              "delta": 8,
+              "note": "Guest Arrival: 2 steps of walking end to end"
+            },
+            {
+              "metric": "fan",
+              "code": "journey:recovery",
+              "delta": 8,
+              "note": "Service Recovery: 1 steps of walking end to end"
+            },
+            {
+              "metric": "brand",
+              "code": "journey:linen",
+              "delta": 8,
+              "note": "Linen Cycle: 0 steps of walking end to end"
+            },
+            {
+              "metric": "profit",
+              "code": "journey:goods",
+              "delta": 8,
+              "note": "Goods-In: 0 steps of walking end to end"
+            },
+            {
+              "metric": "colleague",
+              "code": "journey:colleague",
+              "delta": 8,
+              "note": "Colleague Day: 1 steps of walking end to end"
+            },
+            {
+              "metric": "profit",
+              "code": "event:festival",
+              "delta": 10,
+              "note": "Local festival — Absorbed all 27 extra arrivals"
+            },
+            {
+              "metric": "fan",
+              "code": "event:escalation",
+              "delta": 3,
+              "note": "Complaint escalation — Guest Arrival absorbed the complaint on the night"
+            },
+            {
+              "metric": "fan",
+              "code": "event:group",
+              "delta": -4,
+              "note": "Group booking — Turned away: no event space"
+            }
+          ]
+        }
+      ],
+      "layout": {
+        "metrics": {
+          "fan": 94,
+          "profit": 30,
+          "colleague": 71,
+          "brand": 64
+        },
+        "causes": [
+          {
+            "metric": "fan",
+            "code": "base:opening",
+            "delta": 52,
+            "note": "Opening position before design decisions are counted"
+          },
+          {
+            "metric": "fan",
+            "code": "adj:kitchen:fnb",
+            "delta": 9,
+            "note": "Kitchen serves the restaurant directly"
+          },
+          {
+            "metric": "fan",
+            "code": "adj:house:rooms",
+            "delta": 8,
+            "note": "Housekeeping is close to the rooms it turns over"
+          },
+          {
+            "metric": "fan",
+            "code": "adj:eng:rooms",
+            "delta": -7,
+            "note": "Plant vibration beside guest rooms"
+          },
+          {
+            "metric": "fan",
+            "code": "walk:arrival",
+            "delta": 8,
+            "note": "Front Office is close to the arrival court"
+          },
+          {
+            "metric": "fan",
+            "code": "walk:rooms",
+            "delta": 4,
+            "note": "Rooms are a short walk from check-in"
+          },
+          {
+            "metric": "fan",
+            "code": "cap:fnb",
+            "delta": -6,
+            "note": "Not enough covers: the restaurant turns guests away"
+          },
+          {
+            "metric": "fan",
+            "code": "edge:view",
+            "delta": 10,
+            "note": "Guest-facing spaces look out over the river frontage"
+          },
+          {
+            "metric": "profit",
+            "code": "rev:rooms",
+            "delta": 46,
+            "note": "Room capacity met the demand this round"
+          },
+          {
+            "metric": "profit",
+            "code": "rev:fnb",
+            "delta": 12,
+            "note": "Only 59% of the covers demanded could be served"
+          },
+          {
+            "metric": "profit",
+            "code": "cost:operating",
+            "delta": -26,
+            "note": "Running 71 cells of building and a 42-step goods route"
+          },
+          {
+            "metric": "profit",
+            "code": "cost:colleague-walk",
+            "delta": -10,
+            "note": "Long colleague routes add paid hours that produce nothing"
+          },
+          {
+            "metric": "colleague",
+            "code": "base:opening",
+            "delta": 46,
+            "note": "Colleagues start neutral; the building shapes the shift"
+          },
+          {
+            "metric": "colleague",
+            "code": "have:canteen",
+            "delta": 9,
+            "note": "Colleague Canteen is on site"
+          },
+          {
+            "metric": "colleague",
+            "code": "have:train",
+            "delta": 8,
+            "note": "Training Room is on site"
+          },
+          {
+            "metric": "colleague",
+            "code": "have:pc",
+            "delta": 5,
+            "note": "People & Culture Office is on site"
+          },
+          {
+            "metric": "colleague",
+            "code": "have:locker",
+            "delta": 4,
+            "note": "Colleague Lockers is on site"
+          },
+          {
+            "metric": "colleague",
+            "code": "adj:canteen:locker",
+            "delta": 5,
+            "note": "Colleagues change and eat in one place"
+          },
+          {
+            "metric": "colleague",
+            "code": "adj:train:pc",
+            "delta": 4.3,
+            "note": "Training sits with People & Culture"
+          },
+          {
+            "metric": "colleague",
+            "code": "walk:colleague",
+            "delta": -18,
+            "note": "Colleagues cross the site to change, eat and start shift"
+          },
+          {
+            "metric": "brand",
+            "code": "base:opening",
+            "delta": 50,
+            "note": "Standards start at the house baseline"
+          },
+          {
+            "metric": "brand",
+            "code": "adj:laundry:heritage",
+            "delta": -5.6,
+            "note": "Plant tucked against the heritage pavilion"
+          },
+          {
+            "metric": "brand",
+            "code": "adj:eng:heritage",
+            "delta": -6,
+            "note": "Plant vibration against the heritage pavilion"
+          },
+          {
+            "metric": "brand",
+            "code": "signature:water",
+            "delta": 4,
+            "note": "Water Feature gives the hotel a signature guests remember"
+          },
+          {
+            "metric": "brand",
+            "code": "landscape:medium",
+            "delta": 3,
+            "note": "Balanced landscaping around the building"
+          },
+          {
+            "metric": "brand",
+            "code": "heritage:kept",
+            "delta": 5,
+            "note": "The heritage pavilion was preserved"
+          },
+          {
+            "metric": "brand",
+            "code": "edge:service",
+            "delta": 6,
+            "note": "Back of house is tucked against the service yard, out of guest sight"
+          },
+          {
+            "metric": "fan",
+            "code": "journey:arrival",
+            "delta": 8,
+            "note": "Guest Arrival: 2 steps of walking end to end"
+          },
+          {
+            "metric": "fan",
+            "code": "journey:recovery",
+            "delta": 8,
+            "note": "Service Recovery: 1 steps of walking end to end"
+          },
+          {
+            "metric": "brand",
+            "code": "journey:linen",
+            "delta": 8,
+            "note": "Linen Cycle: 0 steps of walking end to end"
+          },
+          {
+            "metric": "profit",
+            "code": "journey:goods",
+            "delta": 8,
+            "note": "Goods-In: 0 steps of walking end to end"
+          },
+          {
+            "metric": "colleague",
+            "code": "journey:colleague",
+            "delta": 8,
+            "note": "Colleague Day: 1 steps of walking end to end"
+          }
+        ],
+        "journeys": [
+          {
+            "id": "arrival",
+            "label": "Guest Arrival",
+            "friction": 2,
+            "gaps": 0,
+            "quality": 100,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "arrival",
+                "owner": null,
+                "resolved": true,
+                "uid": null
+              },
+              {
+                "tag": "front",
+                "owner": "Front Office",
+                "resolved": true,
+                "uid": "p2"
+              },
+              {
+                "tag": "concierge",
+                "owner": "Concierge",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "rooms",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p1"
+              }
+            ]
+          },
+          {
+            "id": "recovery",
+            "label": "Service Recovery",
+            "friction": 1,
+            "gaps": 0,
+            "quality": 100,
+            "optionalHits": 1,
+            "stops": [
+              {
+                "tag": "front",
+                "owner": "Front Office",
+                "resolved": true,
+                "uid": "p2"
+              },
+              {
+                "tag": "pc",
+                "owner": "People & Culture",
+                "resolved": true,
+                "uid": "p12"
+              },
+              {
+                "tag": "eng",
+                "owner": "Engineering",
+                "resolved": true,
+                "uid": "p7"
+              },
+              {
+                "tag": "fnb",
+                "owner": "Food & Beverage",
+                "resolved": true,
+                "uid": "p3"
+              },
+              {
+                "tag": "front",
+                "owner": "Front Office",
+                "resolved": true,
+                "uid": "p2"
+              }
+            ]
+          },
+          {
+            "id": "linen",
+            "label": "Linen Cycle",
+            "friction": 0,
+            "gaps": 0,
+            "quality": 100,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "rooms",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p1"
+              },
+              {
+                "tag": "laundry",
+                "owner": "Laundry",
+                "resolved": true,
+                "uid": "p6"
+              },
+              {
+                "tag": "house",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p5"
+              },
+              {
+                "tag": "rooms",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p1"
+              }
+            ]
+          },
+          {
+            "id": "goods",
+            "label": "Goods-In",
+            "friction": 0,
+            "gaps": 0,
+            "quality": 100,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "service",
+                "owner": null,
+                "resolved": true,
+                "uid": null
+              },
+              {
+                "tag": "recv",
+                "owner": "Receiving",
+                "resolved": true,
+                "uid": "p8"
+              },
+              {
+                "tag": "steward",
+                "owner": "Stewarding",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "kitchen",
+                "owner": "Kitchen",
+                "resolved": true,
+                "uid": "p4"
+              },
+              {
+                "tag": "fnb",
+                "owner": "Food & Beverage",
+                "resolved": true,
+                "uid": "p3"
+              }
+            ]
+          },
+          {
+            "id": "colleague",
+            "label": "Colleague Day",
+            "friction": 1,
+            "gaps": 0,
+            "quality": 100,
+            "optionalHits": 1,
+            "stops": [
+              {
+                "tag": "service",
+                "owner": null,
+                "resolved": true,
+                "uid": null
+              },
+              {
+                "tag": "locker",
+                "owner": "People & Culture",
+                "resolved": true,
+                "uid": "p13"
+              },
+              {
+                "tag": "canteen",
+                "owner": "People & Culture",
+                "resolved": true,
+                "uid": "p10"
+              },
+              {
+                "tag": "train",
+                "owner": "Learning & Development",
+                "resolved": true,
+                "uid": "p11"
+              },
+              {
+                "tag": "house",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p5"
+              }
+            ]
+          }
+        ],
+        "placements": [
+          {
+            "fnId": "rooms",
+            "col": 8,
+            "row": 3,
+            "w": 4,
+            "h": 3,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "front",
+            "col": 4,
+            "row": 6,
+            "w": 3,
+            "h": 2,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "fnb",
+            "col": 9,
+            "row": 1,
+            "w": 3,
+            "h": 2,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "kitchen",
+            "col": 6,
+            "row": 0,
+            "w": 3,
+            "h": 2,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "house",
+            "col": 6,
+            "row": 3,
+            "w": 2,
+            "h": 1,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "laundry",
+            "col": 2,
+            "row": 0,
+            "w": 3,
+            "h": 2,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "eng",
+            "col": 3,
+            "row": 2,
+            "w": 3,
+            "h": 2,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "recv",
+            "col": 0,
+            "row": 0,
+            "w": 2,
+            "h": 2,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "sec",
+            "col": 5,
+            "row": 1,
+            "w": 1,
+            "h": 1,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "canteen",
+            "col": 1,
+            "row": 2,
+            "w": 2,
+            "h": 2,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "train",
+            "col": 4,
+            "row": 4,
+            "w": 2,
+            "h": 1,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "pc",
+            "col": 6,
+            "row": 2,
+            "w": 2,
+            "h": 1,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "locker",
+            "col": 0,
+            "row": 2,
+            "w": 1,
+            "h": 2,
+            "rot": 1,
+            "round": 4
+          },
+          {
+            "fnId": "rooms",
+            "col": 8,
+            "row": 6,
+            "w": 4,
+            "h": 3,
+            "rot": 0,
+            "round": 4
+          }
+        ]
+      }
+    },
+    "neglect": {
+      "rounds": [
+        {
+          "round": 4,
+          "metrics": {
+            "fan": 62,
+            "profit": 46,
+            "colleague": 0,
+            "brand": 41
+          },
+          "composite": 38,
+          "events": [
+            "festival",
+            "escalation",
+            "group"
+          ],
+          "ledger": [
+            {
+              "metric": "fan",
+              "code": "base:opening",
+              "delta": 52,
+              "note": "Opening position before design decisions are counted"
+            },
+            {
+              "metric": "fan",
+              "code": "adj:kitchen:fnb",
+              "delta": 9,
+              "note": "Kitchen serves the restaurant directly"
+            },
+            {
+              "metric": "fan",
+              "code": "adj:spa:pool",
+              "delta": 6,
+              "note": "Spa and pool read as one wellness offer"
+            },
+            {
+              "metric": "fan",
+              "code": "adj:kitchen:spa",
+              "delta": -3.9,
+              "note": "Kitchen odour reaches the spa"
+            },
+            {
+              "metric": "fan",
+              "code": "missing:house",
+              "delta": -14,
+              "note": "Rooms cannot be turned over on time"
+            },
+            {
+              "metric": "fan",
+              "code": "walk:arrival",
+              "delta": 8,
+              "note": "Front Office is close to the arrival court"
+            },
+            {
+              "metric": "fan",
+              "code": "walk:rooms",
+              "delta": -10,
+              "note": "Guests are walked a long way to their rooms"
+            },
+            {
+              "metric": "fan",
+              "code": "cap:fnb",
+              "delta": -6,
+              "note": "Not enough covers: the restaurant turns guests away"
+            },
+            {
+              "metric": "fan",
+              "code": "edge:view",
+              "delta": 10,
+              "note": "Guest-facing spaces look out over the river frontage"
+            },
+            {
+              "metric": "profit",
+              "code": "rev:rooms",
+              "delta": 46,
+              "note": "Room capacity met the demand this round"
+            },
+            {
+              "metric": "profit",
+              "code": "rev:fnb",
+              "delta": 12,
+              "note": "Only 59% of the covers demanded could be served"
+            },
+            {
+              "metric": "profit",
+              "code": "missing:recv",
+              "delta": -12,
+              "note": "Deliveries are handled by hand at the entrance"
+            },
+            {
+              "metric": "profit",
+              "code": "cost:operating",
+              "delta": -14,
+              "note": "Running 66 cells of building and a 1-step goods route"
+            },
+            {
+              "metric": "colleague",
+              "code": "base:opening",
+              "delta": 46,
+              "note": "Colleagues start neutral; the building shapes the shift"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:canteen",
+              "delta": -18,
+              "note": "Colleagues have nowhere to eat or rest"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:train",
+              "delta": -14,
+              "note": "No training space: capability never grows"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:pc",
+              "delta": -10,
+              "note": "No People & Culture presence on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "walk:colleague",
+              "delta": 5,
+              "note": "The colleague route is short: change, eat, then on shift"
+            },
+            {
+              "metric": "colleague",
+              "code": "staff:short",
+              "delta": -18,
+              "note": "People & Culture provision is below the size of the workforce"
+            },
+            {
+              "metric": "brand",
+              "code": "base:opening",
+              "delta": 50,
+              "note": "Standards start at the house baseline"
+            },
+            {
+              "metric": "brand",
+              "code": "adj:fnb:heritage",
+              "delta": 4.2,
+              "note": "Dining beside the heritage pavilion gives a sense of place"
+            },
+            {
+              "metric": "brand",
+              "code": "adj:spa:heritage",
+              "delta": 5,
+              "note": "The heritage pavilion anchors the wellness offer"
+            },
+            {
+              "metric": "brand",
+              "code": "missing:laundry",
+              "delta": -14,
+              "note": "Linen is sent off-site: slow and costly"
+            },
+            {
+              "metric": "brand",
+              "code": "missing:eng",
+              "delta": -16,
+              "note": "No plant team: breakdowns stay broken"
+            },
+            {
+              "metric": "brand",
+              "code": "signature:water",
+              "delta": 4,
+              "note": "Water Feature gives the hotel a signature guests remember"
+            },
+            {
+              "metric": "brand",
+              "code": "landscape:medium",
+              "delta": 3,
+              "note": "Balanced landscaping around the building"
+            },
+            {
+              "metric": "brand",
+              "code": "heritage:kept",
+              "delta": 5,
+              "note": "The heritage pavilion was preserved"
+            },
+            {
+              "metric": "fan",
+              "code": "journey:arrival",
+              "delta": 8,
+              "note": "Guest Arrival: 2 steps of walking end to end"
+            },
+            {
+              "metric": "fan",
+              "code": "journey:recovery",
+              "delta": 4,
+              "note": "Service Recovery: 1 step with no home on site"
+            },
+            {
+              "metric": "profit",
+              "code": "journey:goods",
+              "delta": 4,
+              "note": "Goods-In: 1 step with no home on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "journey:colleague",
+              "delta": -5,
+              "note": "Colleague Day: 3 steps with no home on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "clamp",
+              "delta": 14,
+              "note": "colleague was held inside the 0-100 range"
+            },
+            {
+              "metric": "profit",
+              "code": "event:festival",
+              "delta": 10,
+              "note": "Local festival — Absorbed all 27 extra arrivals"
+            },
+            {
+              "metric": "fan",
+              "code": "event:escalation",
+              "delta": 3,
+              "note": "Complaint escalation — Guest Arrival absorbed the complaint on the night"
+            },
+            {
+              "metric": "fan",
+              "code": "event:group",
+              "delta": -4,
+              "note": "Group booking — Turned away: no event space"
+            }
+          ]
+        }
+      ],
+      "layout": {
+        "metrics": {
+          "fan": 63,
+          "profit": 36,
+          "colleague": 0,
+          "brand": 41
+        },
+        "causes": [
+          {
+            "metric": "fan",
+            "code": "base:opening",
+            "delta": 52,
+            "note": "Opening position before design decisions are counted"
+          },
+          {
+            "metric": "fan",
+            "code": "adj:kitchen:fnb",
+            "delta": 9,
+            "note": "Kitchen serves the restaurant directly"
+          },
+          {
+            "metric": "fan",
+            "code": "adj:spa:pool",
+            "delta": 6,
+            "note": "Spa and pool read as one wellness offer"
+          },
+          {
+            "metric": "fan",
+            "code": "adj:kitchen:spa",
+            "delta": -3.9,
+            "note": "Kitchen odour reaches the spa"
+          },
+          {
+            "metric": "fan",
+            "code": "missing:house",
+            "delta": -14,
+            "note": "Rooms cannot be turned over on time"
+          },
+          {
+            "metric": "fan",
+            "code": "walk:arrival",
+            "delta": 8,
+            "note": "Front Office is close to the arrival court"
+          },
+          {
+            "metric": "fan",
+            "code": "walk:rooms",
+            "delta": -10,
+            "note": "Guests are walked a long way to their rooms"
+          },
+          {
+            "metric": "fan",
+            "code": "cap:fnb",
+            "delta": -6,
+            "note": "Not enough covers: the restaurant turns guests away"
+          },
+          {
+            "metric": "fan",
+            "code": "edge:view",
+            "delta": 10,
+            "note": "Guest-facing spaces look out over the river frontage"
+          },
+          {
+            "metric": "profit",
+            "code": "rev:rooms",
+            "delta": 46,
+            "note": "Room capacity met the demand this round"
+          },
+          {
+            "metric": "profit",
+            "code": "rev:fnb",
+            "delta": 12,
+            "note": "Only 59% of the covers demanded could be served"
+          },
+          {
+            "metric": "profit",
+            "code": "missing:recv",
+            "delta": -12,
+            "note": "Deliveries are handled by hand at the entrance"
+          },
+          {
+            "metric": "profit",
+            "code": "cost:operating",
+            "delta": -14,
+            "note": "Running 66 cells of building and a 1-step goods route"
+          },
+          {
+            "metric": "colleague",
+            "code": "base:opening",
+            "delta": 46,
+            "note": "Colleagues start neutral; the building shapes the shift"
+          },
+          {
+            "metric": "colleague",
+            "code": "missing:canteen",
+            "delta": -18,
+            "note": "Colleagues have nowhere to eat or rest"
+          },
+          {
+            "metric": "colleague",
+            "code": "missing:train",
+            "delta": -14,
+            "note": "No training space: capability never grows"
+          },
+          {
+            "metric": "colleague",
+            "code": "missing:pc",
+            "delta": -10,
+            "note": "No People & Culture presence on site"
+          },
+          {
+            "metric": "colleague",
+            "code": "walk:colleague",
+            "delta": 5,
+            "note": "The colleague route is short: change, eat, then on shift"
+          },
+          {
+            "metric": "colleague",
+            "code": "staff:short",
+            "delta": -18,
+            "note": "People & Culture provision is below the size of the workforce"
+          },
+          {
+            "metric": "brand",
+            "code": "base:opening",
+            "delta": 50,
+            "note": "Standards start at the house baseline"
+          },
+          {
+            "metric": "brand",
+            "code": "adj:fnb:heritage",
+            "delta": 4.2,
+            "note": "Dining beside the heritage pavilion gives a sense of place"
+          },
+          {
+            "metric": "brand",
+            "code": "adj:spa:heritage",
+            "delta": 5,
+            "note": "The heritage pavilion anchors the wellness offer"
+          },
+          {
+            "metric": "brand",
+            "code": "missing:laundry",
+            "delta": -14,
+            "note": "Linen is sent off-site: slow and costly"
+          },
+          {
+            "metric": "brand",
+            "code": "missing:eng",
+            "delta": -16,
+            "note": "No plant team: breakdowns stay broken"
+          },
+          {
+            "metric": "brand",
+            "code": "signature:water",
+            "delta": 4,
+            "note": "Water Feature gives the hotel a signature guests remember"
+          },
+          {
+            "metric": "brand",
+            "code": "landscape:medium",
+            "delta": 3,
+            "note": "Balanced landscaping around the building"
+          },
+          {
+            "metric": "brand",
+            "code": "heritage:kept",
+            "delta": 5,
+            "note": "The heritage pavilion was preserved"
+          },
+          {
+            "metric": "fan",
+            "code": "journey:arrival",
+            "delta": 8,
+            "note": "Guest Arrival: 2 steps of walking end to end"
+          },
+          {
+            "metric": "fan",
+            "code": "journey:recovery",
+            "delta": 4,
+            "note": "Service Recovery: 1 step with no home on site"
+          },
+          {
+            "metric": "profit",
+            "code": "journey:goods",
+            "delta": 4,
+            "note": "Goods-In: 1 step with no home on site"
+          },
+          {
+            "metric": "colleague",
+            "code": "journey:colleague",
+            "delta": -5,
+            "note": "Colleague Day: 3 steps with no home on site"
+          },
+          {
+            "metric": "colleague",
+            "code": "clamp",
+            "delta": 14,
+            "note": "colleague was held inside the 0-100 range"
+          }
+        ],
+        "journeys": [
+          {
+            "id": "arrival",
+            "label": "Guest Arrival",
+            "friction": 2,
+            "gaps": 0,
+            "quality": 100,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "arrival",
+                "owner": null,
+                "resolved": true,
+                "uid": null
+              },
+              {
+                "tag": "front",
+                "owner": "Front Office",
+                "resolved": true,
+                "uid": "p4"
+              },
+              {
+                "tag": "concierge",
+                "owner": "Concierge",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "rooms",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p3"
+              }
+            ]
+          },
+          {
+            "id": "recovery",
+            "label": "Service Recovery",
+            "friction": 2,
+            "gaps": 1,
+            "quality": 80,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "front",
+                "owner": "Front Office",
+                "resolved": true,
+                "uid": "p4"
+              },
+              {
+                "tag": "pc",
+                "owner": "People & Culture",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "eng",
+                "owner": "Engineering",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "fnb",
+                "owner": "Food & Beverage",
+                "resolved": true,
+                "uid": "p5"
+              },
+              {
+                "tag": "front",
+                "owner": "Front Office",
+                "resolved": true,
+                "uid": "p4"
+              }
+            ]
+          },
+          {
+            "id": "linen",
+            "label": "Linen Cycle",
+            "friction": 0,
+            "gaps": 2,
+            "quality": 60,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "rooms",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p1"
+              },
+              {
+                "tag": "laundry",
+                "owner": "Laundry",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "house",
+                "owner": "Housekeeping",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "rooms",
+                "owner": "Housekeeping",
+                "resolved": true,
+                "uid": "p1"
+              }
+            ]
+          },
+          {
+            "id": "goods",
+            "label": "Goods-In",
+            "friction": 2,
+            "gaps": 1,
+            "quality": 80,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "service",
+                "owner": null,
+                "resolved": true,
+                "uid": null
+              },
+              {
+                "tag": "recv",
+                "owner": "Receiving",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "steward",
+                "owner": "Stewarding",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "kitchen",
+                "owner": "Kitchen",
+                "resolved": true,
+                "uid": "p6"
+              },
+              {
+                "tag": "fnb",
+                "owner": "Food & Beverage",
+                "resolved": true,
+                "uid": "p5"
+              }
+            ]
+          },
+          {
+            "id": "colleague",
+            "label": "Colleague Day",
+            "friction": 0,
+            "gaps": 3,
+            "quality": 40,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "service",
+                "owner": null,
+                "resolved": true,
+                "uid": null
+              },
+              {
+                "tag": "locker",
+                "owner": "People & Culture",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "canteen",
+                "owner": "People & Culture",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "train",
+                "owner": "Learning & Development",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "house",
+                "owner": "Housekeeping",
+                "resolved": false,
+                "uid": null
+              }
+            ]
+          }
+        ],
+        "placements": [
+          {
+            "fnId": "rooms",
+            "col": 8,
+            "row": 3,
+            "w": 4,
+            "h": 3,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "rooms",
+            "col": 8,
+            "row": 0,
+            "w": 4,
+            "h": 3,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "rooms",
+            "col": 8,
+            "row": 6,
+            "w": 4,
+            "h": 3,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "front",
+            "col": 4,
+            "row": 6,
+            "w": 3,
+            "h": 2,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "fnb",
+            "col": 6,
+            "row": 3,
+            "w": 2,
+            "h": 3,
+            "rot": 1,
+            "round": 4
+          },
+          {
+            "fnId": "kitchen",
+            "col": 5,
+            "row": 1,
+            "w": 3,
+            "h": 2,
+            "rot": 0,
+            "round": 4
+          },
+          {
+            "fnId": "pool",
+            "col": 4,
+            "row": 3,
+            "w": 2,
+            "h": 3,
+            "rot": 1,
+            "round": 4
+          },
+          {
+            "fnId": "spa",
+            "col": 1,
+            "row": 2,
+            "w": 3,
+            "h": 2,
+            "rot": 0,
+            "round": 4
+          }
+        ]
+      }
+    },
+    "sandbox": {
+      "rounds": [
+        {
+          "round": 4,
+          "metrics": {
+            "fan": 0,
+            "profit": 0,
+            "colleague": 0,
+            "brand": 23
+          },
+          "composite": 5,
+          "events": [
+            "festival",
+            "escalation",
+            "group"
+          ],
+          "ledger": [
+            {
+              "metric": "fan",
+              "code": "base:opening",
+              "delta": 52,
+              "note": "Opening position before design decisions are counted"
+            },
+            {
+              "metric": "fan",
+              "code": "missing:front",
+              "delta": -30,
+              "note": "No check-in: guests queue outside"
+            },
+            {
+              "metric": "fan",
+              "code": "missing:house",
+              "delta": -14,
+              "note": "Rooms cannot be turned over on time"
+            },
+            {
+              "metric": "fan",
+              "code": "cap:rooms",
+              "delta": -26,
+              "note": "Not enough rooms: guests queue or are turned away"
+            },
+            {
+              "metric": "fan",
+              "code": "cap:fnb",
+              "delta": -14,
+              "note": "Not enough covers: the restaurant turns guests away"
+            },
+            {
+              "metric": "profit",
+              "code": "missing:rooms",
+              "delta": -34,
+              "note": "No rooms to sell"
+            },
+            {
+              "metric": "profit",
+              "code": "missing:recv",
+              "delta": -12,
+              "note": "Deliveries are handled by hand at the entrance"
+            },
+            {
+              "metric": "colleague",
+              "code": "base:opening",
+              "delta": 46,
+              "note": "Colleagues start neutral; the building shapes the shift"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:canteen",
+              "delta": -18,
+              "note": "Colleagues have nowhere to eat or rest"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:train",
+              "delta": -14,
+              "note": "No training space: capability never grows"
+            },
+            {
+              "metric": "colleague",
+              "code": "missing:pc",
+              "delta": -10,
+              "note": "No People & Culture presence on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "walk:colleague",
+              "delta": 5,
+              "note": "The colleague route is short: change, eat, then on shift"
+            },
+            {
+              "metric": "colleague",
+              "code": "staff:short",
+              "delta": -18,
+              "note": "People & Culture provision is below the size of the workforce"
+            },
+            {
+              "metric": "brand",
+              "code": "base:opening",
+              "delta": 50,
+              "note": "Standards start at the house baseline"
+            },
+            {
+              "metric": "brand",
+              "code": "missing:laundry",
+              "delta": -14,
+              "note": "Linen is sent off-site: slow and costly"
+            },
+            {
+              "metric": "brand",
+              "code": "missing:eng",
+              "delta": -16,
+              "note": "No plant team: breakdowns stay broken"
+            },
+            {
+              "metric": "brand",
+              "code": "signature:water",
+              "delta": 4,
+              "note": "Water Feature gives the hotel a signature guests remember"
+            },
+            {
+              "metric": "brand",
+              "code": "landscape:medium",
+              "delta": 3,
+              "note": "Balanced landscaping around the building"
+            },
+            {
+              "metric": "brand",
+              "code": "heritage:kept",
+              "delta": 5,
+              "note": "The heritage pavilion was preserved"
+            },
+            {
+              "metric": "fan",
+              "code": "journey:arrival",
+              "delta": -3,
+              "note": "Guest Arrival: 2 steps with no home on site"
+            },
+            {
+              "metric": "fan",
+              "code": "journey:recovery",
+              "delta": -9,
+              "note": "Service Recovery: 4 steps with no home on site"
+            },
+            {
+              "metric": "brand",
+              "code": "journey:linen",
+              "delta": -9,
+              "note": "Linen Cycle: 4 steps with no home on site"
+            },
+            {
+              "metric": "profit",
+              "code": "journey:goods",
+              "delta": -5,
+              "note": "Goods-In: 3 steps with no home on site"
+            },
+            {
+              "metric": "colleague",
+              "code": "journey:colleague",
+              "delta": -5,
+              "note": "Colleague Day: 3 steps with no home on site"
+            },
+            {
+              "metric": "fan",
+              "code": "clamp",
+              "delta": 44,
+              "note": "fan was held inside the 0-100 range"
+            },
+            {
+              "metric": "profit",
+              "code": "clamp",
+              "delta": 51,
+              "note": "profit was held inside the 0-100 range"
+            },
+            {
+              "metric": "colleague",
+              "code": "clamp",
+              "delta": 14,
+              "note": "colleague was held inside the 0-100 range"
+            },
+            {
+              "metric": "profit",
+              "code": "event:festival",
+              "delta": -6,
+              "note": "Local festival — Only absorbed 0% of the 27 extra arrivals"
+            },
+            {
+              "metric": "fan",
+              "code": "event:escalation",
+              "delta": -8,
+              "note": "Complaint escalation — Guest Arrival could not absorb the complaint (2 gaps, 0 steps)"
+            },
+            {
+              "metric": "fan",
+              "code": "event:group",
+              "delta": -4,
+              "note": "Group booking — Turned away: no event space"
+            }
+          ]
+        }
+      ],
+      "layout": {
+        "metrics": {
+          "fan": 0,
+          "profit": 0,
+          "colleague": 0,
+          "brand": 23
+        },
+        "causes": [
+          {
+            "metric": "fan",
+            "code": "base:opening",
+            "delta": 52,
+            "note": "Opening position before design decisions are counted"
+          },
+          {
+            "metric": "fan",
+            "code": "missing:front",
+            "delta": -30,
+            "note": "No check-in: guests queue outside"
+          },
+          {
+            "metric": "fan",
+            "code": "missing:house",
+            "delta": -14,
+            "note": "Rooms cannot be turned over on time"
+          },
+          {
+            "metric": "fan",
+            "code": "cap:rooms",
+            "delta": -26,
+            "note": "Not enough rooms: guests queue or are turned away"
+          },
+          {
+            "metric": "fan",
+            "code": "cap:fnb",
+            "delta": -14,
+            "note": "Not enough covers: the restaurant turns guests away"
+          },
+          {
+            "metric": "profit",
+            "code": "missing:rooms",
+            "delta": -34,
+            "note": "No rooms to sell"
+          },
+          {
+            "metric": "profit",
+            "code": "missing:recv",
+            "delta": -12,
+            "note": "Deliveries are handled by hand at the entrance"
+          },
+          {
+            "metric": "colleague",
+            "code": "base:opening",
+            "delta": 46,
+            "note": "Colleagues start neutral; the building shapes the shift"
+          },
+          {
+            "metric": "colleague",
+            "code": "missing:canteen",
+            "delta": -18,
+            "note": "Colleagues have nowhere to eat or rest"
+          },
+          {
+            "metric": "colleague",
+            "code": "missing:train",
+            "delta": -14,
+            "note": "No training space: capability never grows"
+          },
+          {
+            "metric": "colleague",
+            "code": "missing:pc",
+            "delta": -10,
+            "note": "No People & Culture presence on site"
+          },
+          {
+            "metric": "colleague",
+            "code": "walk:colleague",
+            "delta": 5,
+            "note": "The colleague route is short: change, eat, then on shift"
+          },
+          {
+            "metric": "colleague",
+            "code": "staff:short",
+            "delta": -18,
+            "note": "People & Culture provision is below the size of the workforce"
+          },
+          {
+            "metric": "brand",
+            "code": "base:opening",
+            "delta": 50,
+            "note": "Standards start at the house baseline"
+          },
+          {
+            "metric": "brand",
+            "code": "missing:laundry",
+            "delta": -14,
+            "note": "Linen is sent off-site: slow and costly"
+          },
+          {
+            "metric": "brand",
+            "code": "missing:eng",
+            "delta": -16,
+            "note": "No plant team: breakdowns stay broken"
+          },
+          {
+            "metric": "brand",
+            "code": "signature:water",
+            "delta": 4,
+            "note": "Water Feature gives the hotel a signature guests remember"
+          },
+          {
+            "metric": "brand",
+            "code": "landscape:medium",
+            "delta": 3,
+            "note": "Balanced landscaping around the building"
+          },
+          {
+            "metric": "brand",
+            "code": "heritage:kept",
+            "delta": 5,
+            "note": "The heritage pavilion was preserved"
+          },
+          {
+            "metric": "fan",
+            "code": "journey:arrival",
+            "delta": -3,
+            "note": "Guest Arrival: 2 steps with no home on site"
+          },
+          {
+            "metric": "fan",
+            "code": "journey:recovery",
+            "delta": -9,
+            "note": "Service Recovery: 4 steps with no home on site"
+          },
+          {
+            "metric": "brand",
+            "code": "journey:linen",
+            "delta": -9,
+            "note": "Linen Cycle: 4 steps with no home on site"
+          },
+          {
+            "metric": "profit",
+            "code": "journey:goods",
+            "delta": -5,
+            "note": "Goods-In: 3 steps with no home on site"
+          },
+          {
+            "metric": "colleague",
+            "code": "journey:colleague",
+            "delta": -5,
+            "note": "Colleague Day: 3 steps with no home on site"
+          },
+          {
+            "metric": "fan",
+            "code": "clamp",
+            "delta": 44,
+            "note": "fan was held inside the 0-100 range"
+          },
+          {
+            "metric": "profit",
+            "code": "clamp",
+            "delta": 51,
+            "note": "profit was held inside the 0-100 range"
+          },
+          {
+            "metric": "colleague",
+            "code": "clamp",
+            "delta": 14,
+            "note": "colleague was held inside the 0-100 range"
+          }
+        ],
+        "journeys": [
+          {
+            "id": "arrival",
+            "label": "Guest Arrival",
+            "friction": 0,
+            "gaps": 2,
+            "quality": 48,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "arrival",
+                "owner": null,
+                "resolved": true,
+                "uid": null
+              },
+              {
+                "tag": "front",
+                "owner": "Front Office",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "concierge",
+                "owner": "Concierge",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "rooms",
+                "owner": "Housekeeping",
+                "resolved": false,
+                "uid": null
+              }
+            ]
+          },
+          {
+            "id": "recovery",
+            "label": "Service Recovery",
+            "friction": 0,
+            "gaps": 4,
+            "quality": 20,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "front",
+                "owner": "Front Office",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "pc",
+                "owner": "People & Culture",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "eng",
+                "owner": "Engineering",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "fnb",
+                "owner": "Food & Beverage",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "front",
+                "owner": "Front Office",
+                "resolved": false,
+                "uid": null
+              }
+            ]
+          },
+          {
+            "id": "linen",
+            "label": "Linen Cycle",
+            "friction": 0,
+            "gaps": 4,
+            "quality": 20,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "rooms",
+                "owner": "Housekeeping",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "laundry",
+                "owner": "Laundry",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "house",
+                "owner": "Housekeeping",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "rooms",
+                "owner": "Housekeeping",
+                "resolved": false,
+                "uid": null
+              }
+            ]
+          },
+          {
+            "id": "goods",
+            "label": "Goods-In",
+            "friction": 0,
+            "gaps": 3,
+            "quality": 40,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "service",
+                "owner": null,
+                "resolved": true,
+                "uid": null
+              },
+              {
+                "tag": "recv",
+                "owner": "Receiving",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "steward",
+                "owner": "Stewarding",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "kitchen",
+                "owner": "Kitchen",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "fnb",
+                "owner": "Food & Beverage",
+                "resolved": false,
+                "uid": null
+              }
+            ]
+          },
+          {
+            "id": "colleague",
+            "label": "Colleague Day",
+            "friction": 0,
+            "gaps": 3,
+            "quality": 40,
+            "optionalHits": 0,
+            "stops": [
+              {
+                "tag": "service",
+                "owner": null,
+                "resolved": true,
+                "uid": null
+              },
+              {
+                "tag": "locker",
+                "owner": "People & Culture",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "canteen",
+                "owner": "People & Culture",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "train",
+                "owner": "Learning & Development",
+                "resolved": false,
+                "uid": null
+              },
+              {
+                "tag": "house",
+                "owner": "Housekeeping",
+                "resolved": false,
+                "uid": null
+              }
+            ]
+          }
+        ],
+        "placements": []
+      }
+    }
+  }
+}

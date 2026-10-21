@@ -1,0 +1,157 @@
+/* board.css — the facilitator's laptop page: join cards for the room, and the board
+   the projector shows. It shares tokens.css with the game so the room looks like one
+   product, and it carries no colour literals of its own (the brand gate counts them). */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--ivory);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+header.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--ink-08);
+  background: var(--paper);
+}
+.brand .eyebrow { margin-bottom: 4px; }
+.brand h1 { font-family: var(--font-display); font-weight: 400; letter-spacing: var(--ls-display); margin: 0; font-size: 30px; }
+.brand p { margin: 2px 0 0; font-size: 12px; color: var(--ink-45); }
+
+.tabs { display: flex; gap: var(--sp-2); }
+.tab {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-70);
+  background: var(--ivory);
+  border: 1px solid var(--ink-14);
+  border-radius: var(--r-sm);
+  padding: 10px 16px;
+  cursor: pointer;
+}
+.tab[aria-pressed="true"] { background: var(--ink); color: var(--ivory); border-color: var(--ink); }
+
+main { padding: var(--sp-5); }
+.panel { display: none; }
+.panel.is-on { display: block; }
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--sp-3);
+  /* Start, not end: the team-names box is a two-line textarea, so bottom-aligning the
+     row pushed its label higher than every other label. Labels now share one baseline. */
+  align-items: start;
+  margin-bottom: var(--sp-4);
+}
+/* Actions span the full width under the fields: at 1440 the buttons were stranded in
+   the last narrow column, far from the room code they act on. */
+.controls > .row { grid-column: 1 / -1; }
+.field label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-45);
+  margin-bottom: 4px;
+}
+.field input, .field textarea, .field select {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--ink-14);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+}
+.field textarea { min-height: 86px; resize: vertical; font-size: 13px; }
+.field input:focus, .field textarea:focus { outline: none; border-color: var(--gold); }
+.hint { font-size: 12px; color: var(--ink-45); margin: 0 0 var(--sp-3); }
+
+.btn {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--ink-14);
+  border-radius: var(--r-sm);
+  padding: 11px 16px;
+  cursor: pointer;
+}
+.btn:hover { border-color: var(--gold); }
+.btn--primary { background: var(--ink); color: var(--ivory); border-color: var(--ink); }
+.btn--small { padding: 7px 11px; font-size: 10px; }
+.row { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+
+/* ------------------------------------------------------------- join cards */
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: var(--sp-3); }
+.card {
+  margin: 0;
+  background: var(--paper);
+  border: 1px solid var(--ink-08);
+  border-top: 3px solid var(--gold);
+  border-radius: var(--r-md);
+  padding: var(--sp-3);
+  break-inside: avoid;
+}
+.card .qr { display: block; margin: 0 auto var(--sp-2); width: 100%; max-width: 210px; }
+.card .qr svg { display: block; width: 100%; height: auto; }
+.card figcaption { text-align: center; }
+.card b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 19px; letter-spacing: 0.04em; }
+.card .code { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.28em; color: var(--gold); margin: 2px 0 6px; }
+/* Break at the query delimiters, not mid-token: break-all split the room code itself
+   ("…HB2" / "48team=…") on a printed card. */
+.card .link { display: block; font-size: 9.5px; color: var(--ink-45); word-break: normal; overflow-wrap: anywhere; line-height: 1.35; }
+
+/* ------------------------------------------------------------ leaderboard */
+
+.board { width: 100%; border-collapse: collapse; background: var(--paper); }
+.board th {
+  text-align: left;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ivory);
+  background: var(--ink);
+  padding: 10px 12px;
+}
+.board td { padding: 11px 12px; border-bottom: 1px solid var(--ink-08); font-size: 14px; }
+.board td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.board tr:first-child td { background: var(--gold-soft); }
+.board .rank { font-family: var(--font-display); font-size: 20px; width: 56px; }
+.board .comp { font-family: var(--font-display); font-size: 24px; text-align: right; }
+.board .team b { display: block; }
+.board .team span { font-size: 11px; color: var(--ink-45); }
+.board .hash { font-size: 10px; color: var(--ink-45); letter-spacing: 0.04em; }
+.empty { padding: var(--sp-5); text-align: center; color: var(--ink-45); border: 1px dashed var(--ink-14); border-radius: var(--r-md); }
+
+.paste { display: grid; grid-template-columns: 1fr auto; gap: var(--sp-3); align-items: end; margin-bottom: var(--sp-4); }
+.paste textarea { min-height: 96px; font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; font-size: 11px; }
+.foot { margin-top: var(--sp-4); font-size: 11px; color: var(--ink-45); }
+
+@media print {
+  header.bar .tabs, .controls .row, .paste, .foot, .btn { display: none !important; }
+  body { background: var(--paper); }
+  main { padding: 0; }
+  .cards { grid-template-columns: repeat(3, 1fr); }
+  .panel:not(.is-on) { display: none; }
+}

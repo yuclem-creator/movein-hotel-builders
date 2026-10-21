@@ -1,0 +1,18 @@
+{
+  "name": "movein-hotel-builders",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "MOVEin Hotel Builders - static procedural Three.js hotel-simulation prototype. Demo mode needs no server and no network.",
+  "scripts": {
+    "start": "node serve.js",
+    "check": "node tools/check-syntax.mjs && node tools/sim-check.mjs && node tools/brand-gate.mjs && node tools/bytes.mjs",
+    "smoke": "node tools/smoke.mjs",
+    "visual": "node tools/visual-check.mjs",
+    "input": "node tools/input-check.mjs",
+    "qr": "node tools/qr-check.mjs",
+    "class": "node tools/class-check.mjs",
+    "share": "node tools/share.mjs",
+    "verify": "node tools/check-syntax.mjs && node tools/sim-check.mjs && node tools/brand-gate.mjs && node tools/bytes.mjs && node tools/qr-check.mjs && node tools/smoke.mjs && node tools/visual-check.mjs && node tools/input-check.mjs && node tools/class-check.mjs"
+  }
+}

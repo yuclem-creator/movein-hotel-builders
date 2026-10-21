@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#232323">
+<title>MOVEin — Session board</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23232323'/%3E%3Cpath d='M8 22 L16 9 L24 22 Z' fill='none' stroke='%23B59060' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/board.css">
+</head>
+<body>
+
+<header class="bar">
+  <div class="brand">
+    <p class="eyebrow">MOVEin</p>
+    <h1>Session board</h1>
+    <p id="roomLine">No session set up yet</p>
+  </div>
+  <div class="tabs">
+    <button class="tab" id="tabJoin" aria-pressed="true">Join cards</button>
+    <button class="tab" id="tabBoard" aria-pressed="false">Leaderboard</button>
+  </div>
+</header>
+
+<main>
+  <section class="panel is-on" id="panelJoin">
+    <div class="controls">
+      <div class="field"><label for="room">Room code</label>
+        <input id="room" maxlength="6" value="HB24" autocomplete="off"></div>
+      <div class="field"><label for="teams">Teams</label>
+        <input id="teams" type="number" min="1" max="12" value="6"></div>
+      <div class="field"><label for="mins">Build minutes per round</label>
+        <input id="mins" type="number" min="3" max="30" value="8"></div>
+      <div class="field"><label for="site">Site address</label>
+        <input id="site" placeholder="https://…/index.html" autocomplete="off"></div>
+      <div class="field"><label for="names">Team names (optional, one per line)</label>
+        <textarea id="names" placeholder="Blue&#10;Green&#10;Gold"></textarea></div>
+      <div class="row">
+        <button class="btn btn--primary" id="makeCards">Make join cards</button>
+        <button class="btn" id="printCards">Print</button>
+        <button class="btn" id="randomRoom">New code</button>
+      </div>
+    </div>
+    <p class="hint">Each card carries the room code, the team name and the build clock in
+      its link, so a scanned team starts in the right mode. Print the set, cut it up and
+      put one on each table — and keep the room code written on the whiteboard as a
+      fallback for a phone that will not scan.</p>
+    <div class="cards" id="cards"></div>
+    <p class="foot" id="cardsFoot"></p>
+  </section>
+
+  <section class="panel" id="panelBoard">
+    <div class="paste">
+      <div class="field"><label for="paste">Score codes</label>
+        <textarea id="paste" spellcheck="false"
+          placeholder="Paste one code per line — teams show theirs at the end of round 4"></textarea></div>
+      <div class="row">
+        <button class="btn btn--primary" id="addCodes">Add to board</button>
+        <button class="btn" id="clearBoard">Clear</button>
+      </div>
+    </div>
+    <table class="board" id="board" hidden>
+      <thead>
+        <tr>
+          <th>#</th><th>Team</th><th class="num">Composite</th><th class="num">Fan</th>
+          <th class="num">Profit</th><th class="num">Colleague</th><th class="num">Brand</th>
+          <th class="num">Functions</th>
+        </tr>
+      </thead>
+      <tbody id="boardBody"></tbody>
+    </table>
+    <p class="empty" id="boardEmpty">No scores yet. Collect each team's code when it
+      finishes round 4 and paste the set above.</p>
+    <p class="foot" id="boardFoot"></p>
+  </section>
+</main>
+
+<script type="module" src="js/board.js"></script>
+</body>
+</html>

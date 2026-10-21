@@ -1,0 +1,67 @@
+/* tokens.css — MO brand canon. Every colour and typeface the app uses is defined
+   here and nowhere else; the brand gate fails the build if another hex appears. */
+
+@font-face {
+  font-family: 'MO Exceptional';
+  src: url('../assets/fonts/MOExceptional-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Avenir Next LT Pro';
+  src: url('../assets/fonts/AvenirNextLTPro-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Avenir Next LT Pro';
+  src: url('../assets/fonts/AvenirNextLTPro-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Canon */
+  --gold: #B59060;
+  --sage: #B7CDC2;
+  --ink: #232323;
+  --ivory: #F6F2EA;
+
+  /* Derived neutrals — all warm, nothing cool or pure white */
+  --stone: #E4DCCC;
+  --stone-2: #D6CCB9;
+  --paper: #FBF8F2;
+  --ink-70: rgba(35, 35, 35, 0.7);
+  --ink-80: rgba(35, 35, 35, 0.8);
+  --ink-45: rgba(35, 35, 35, 0.45);
+  --ink-14: rgba(35, 35, 35, 0.14);
+  --ink-08: rgba(35, 35, 35, 0.08);
+  --gold-soft: rgba(181, 144, 96, 0.18);
+  --sage-soft: rgba(183, 205, 194, 0.32);
+  --alert: #A85B45;
+  --positive: #4F7A5E;
+
+  /* Type. MO Exceptional is display-only and Regular-only: weight is never synthesised. */
+  --font-display: 'MO Exceptional', 'Avenir Next LT Pro', serif;
+  --font-body: 'Avenir Next LT Pro', 'Segoe UI', sans-serif;
+
+  --ls-display: 0.06em;
+  --ls-eyebrow: 0.22em;
+
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 14px;
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 18px;
+  --sp-5: 26px;
+  --sp-6: 38px;
+
+  --shadow-1: 0 1px 2px rgba(35, 35, 35, 0.08), 0 8px 24px rgba(35, 35, 35, 0.1);
+  --shadow-2: 0 2px 6px rgba(35, 35, 35, 0.12), 0 24px 60px rgba(35, 35, 35, 0.18);
+}

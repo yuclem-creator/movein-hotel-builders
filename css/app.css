@@ -1,0 +1,765 @@
+/* app.css — layout. Phone-first: every panel is reachable with a thumb, the canvas
+   always fills the viewport, and nothing depends on hover. */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--ivory);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 400;           /* MO Exceptional is Regular only — never synthesise weight */
+  letter-spacing: var(--ls-display);
+  margin: 0 0 var(--sp-2);
+  line-height: 1.15;
+}
+h1 { font-size: clamp(30px, 7vw, 54px); }
+h2 { font-size: clamp(19px, 3.6vw, 28px); }
+h3 { font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-70); }
+
+p { margin: 0 0 var(--sp-2); }
+
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 var(--sp-2);
+}
+
+.note { font-size: 12px; color: var(--ink-45); }
+.lede { font-size: 14px; color: var(--ink-70); max-width: 46ch; }
+
+#scene {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+#ui { position: fixed; inset: 0; pointer-events: none; }
+
+/*
+ * Screens are full-viewport layers. Only their CONTENTS take the pointer, so a screen
+ * that is meant to sit over the scene can never eat an orbit or a tap.
+ *
+ * This used to be `#ui > * { pointer-events: auto; }`. An ID-level rule (1,0,0)
+ * outranks `.screen--build { pointer-events: none; }` (0,1,0), so the build screen
+ * itself became a transparent click-catcher over the whole canvas: the terrain could
+ * not be rotated, no building could be tapped, and every pixel gate still passed
+ * because nothing was visually wrong. Keep the modal screens listed explicitly — a
+ * modal SHOULD block the scene while it is up.
+ */
+#ui > .screen { pointer-events: none; }
+#ui > .screen > * { pointer-events: auto; }
+#ui > .screen--lobby,
+#ui > .screen--panel,
+#ui > .screen--modal { pointer-events: auto; }
+
+.screen { position: absolute; inset: 0; }
+.screen[hidden] { display: none; }
+
+/* ------------------------------------------------------------------ buttons */
+
+.btn {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--ink-14);
+  border-radius: var(--r-sm);
+  padding: 12px 18px;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+.btn:hover { border-color: var(--gold); }
+.btn:active { transform: translateY(1px); }
+.btn--primary { background: var(--ink); color: var(--ivory); border-color: var(--ink); }
+.btn--primary:hover { background: var(--gold); border-color: var(--gold); color: var(--ivory); }
+.btn--small { padding: 8px 12px; font-size: 11px; }
+.btn--danger { color: var(--alert); border-color: rgba(168, 91, 69, 0.4); }
+.btn--ghost { background: rgba(246, 242, 234, 0.86); }
+.row { display: flex; gap: var(--sp-2); flex-wrap: wrap; margin-top: var(--sp-3); }
+
+/* -------------------------------------------------------------------- lobby */
+
+.screen--lobby {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, rgba(246, 242, 234, 0.94) 0%, rgba(246, 242, 234, 0.7) 55%, rgba(246, 242, 234, 0.9) 100%);
+  padding: var(--sp-4);
+  overflow-y: auto;
+}
+.lobby-card {
+  width: min(520px, 100%);
+  background: var(--paper);
+  border: 1px solid var(--ink-08);
+  border-top: 3px solid var(--gold);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-2);
+  padding: var(--sp-5);
+}
+.field { display: block; margin-bottom: var(--sp-3); }
+.field span {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-45);
+  margin-bottom: var(--sp-1);
+}
+.field input {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--ivory);
+  border: 1px solid var(--ink-14);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+}
+.field input:focus { outline: none; border-color: var(--gold); }
+
+/* ------------------------------------------------------------------- panels */
+
+.screen--panel {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: var(--sp-4);
+  overflow-y: auto;
+  background: linear-gradient(90deg, rgba(246, 242, 234, 0.95) 0%, rgba(246, 242, 234, 0.82) 40%, rgba(246, 242, 234, 0) 72%);
+}
+.panel {
+  width: min(430px, 100%);
+  background: var(--paper);
+  border: 1px solid var(--ink-08);
+  border-left: 3px solid var(--gold);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-2);
+  padding: var(--sp-4);
+}
+.choice-group { margin-bottom: var(--sp-4); }
+.choices { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+
+.choice {
+  flex: 1 1 120px;
+  text-align: left;
+  background: var(--ivory);
+  border: 1px solid var(--ink-14);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  color: var(--ink);
+}
+.choice b { display: block; font-size: 13px; letter-spacing: 0.02em; }
+.choice small { display: block; font-size: 11px; color: var(--ink-45); margin-top: 2px; }
+.choice[aria-pressed="true"] { border-color: var(--gold); background: var(--gold-soft); }
+
+.swatches { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+.swatch {
+  width: 62px;
+  height: 46px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--ink-14);
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+}
+.swatch span {
+  position: absolute;
+  left: 0; right: 0; bottom: 4px;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ivory);
+  text-shadow: 0 1px 2px rgba(35, 35, 35, 0.6);
+}
+.swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--ink); }
+
+/* --------------------------------------------------------------------- HUD */
+
+.screen--build { pointer-events: none; }
+.screen--build > * { pointer-events: auto; }
+
+.hud {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  background: linear-gradient(180deg, rgba(246, 242, 234, 0.94), rgba(246, 242, 234, 0));
+}
+.hud-left h2 { margin-bottom: 2px; }
+.hud-hotel { font-size: 12px; color: var(--ink-45); margin: 0; }
+.hud-right { text-align: right; min-width: 210px; }
+
+.metrics { display: flex; gap: var(--sp-2); justify-content: flex-end; flex-wrap: wrap; }
+.metric {
+  background: var(--paper);
+  border: 1px solid var(--ink-08);
+  border-radius: var(--r-sm);
+  padding: 5px 9px;
+  min-width: 62px;
+  box-shadow: var(--shadow-1);
+}
+.metric span {
+  display: block;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+}
+.metric b { font-family: var(--font-display); font-size: 19px; letter-spacing: 0.04em; }
+.metric i { font-style: normal; font-size: 10px; color: var(--ink-45); margin-left: 3px; }
+.metric i.up { color: var(--positive); }
+.metric i.down { color: var(--alert); }
+
+.budget { margin-top: var(--sp-2); }
+.budget-bar { height: 5px; background: var(--stone); border-radius: 3px; overflow: hidden; }
+.budget-bar span { display: block; height: 100%; background: var(--gold); width: 0%; transition: width 200ms ease; }
+.budget-text { font-size: 11px; color: var(--ink-45); margin: 4px 0 0; }
+.budget-text b { color: var(--ink); }
+
+/* ------------------------------------------------------------------- tools */
+
+.tools {
+  position: absolute;
+  left: var(--sp-4);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.tool {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-70);
+  background: rgba(251, 248, 242, 0.9);
+  border: 1px solid var(--ink-14);
+  border-radius: var(--r-sm);
+  padding: 9px 11px;
+  cursor: pointer;
+}
+.tool[aria-pressed="true"] { background: var(--ink); color: var(--ivory); border-color: var(--ink); }
+
+/* ---------------------------------------------------------- selected panel */
+
+.selected-panel {
+  position: absolute;
+  right: var(--sp-4);
+  /* Anchored between the HUD and the tray rather than centred: the tray is 264px tall at
+     1280x800 and 1440x900, so a centred panel put its Done button 59px under the tray's
+     cards and it could not be tapped (found by input-check, 2026-10-21). Whatever the
+     window height, the panel now ends above the tray and scrolls inside. */
+  top: 170px;
+  bottom: 280px;
+  width: min(300px, 46vw);
+  overflow-y: auto;
+  background: var(--paper);
+  border: 1px solid var(--ink-08);
+  border-right: 3px solid var(--gold);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-2);
+  padding: var(--sp-3);
+}
+
+/* ------------------------------------------------------- customise controls */
+
+.customise { margin: var(--sp-2) 0 var(--sp-1); }
+.customise-group { margin-bottom: var(--sp-3); }
+.customise-group h3 { margin: 0 0 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  flex: 1 1 46%;
+  text-align: left;
+  background: var(--ivory);
+  border: 1px solid var(--ink-14);
+  border-radius: var(--r-sm);
+  padding: 6px 8px;
+  font-family: var(--font-body);
+  color: var(--ink);
+  cursor: pointer;
+}
+.chip b { display: block; font-size: 11.5px; font-weight: 600; letter-spacing: 0.02em; }
+.chip small { display: block; font-size: 10px; color: var(--ink-80); margin-top: 1px; }
+.chip[aria-pressed="true"] { border-color: var(--gold); background: var(--gold-soft); }
+.chip:disabled { opacity: 0.45; cursor: not-allowed; }
+.stepper { display: flex; align-items: center; gap: var(--sp-2); }
+.stepper b { font-family: var(--font-display); font-size: 18px; min-width: 18px; text-align: center; }
+
+/* --------------------------------------------------------- manpower panel */
+
+/* Shares the right-hand column with Customise: the two are never open together
+   (syncPanels() in main.js enforces it), so neither can bury the other. */
+.mp-panel {
+  position: absolute;
+  right: var(--sp-4);
+  /* Same anchor as Customise: the two share the column, so they share the box. */
+  top: 170px;
+  bottom: 280px;
+  width: min(332px, 88vw);
+  overflow-y: auto;
+  background: var(--paper);
+  border: 1px solid var(--ink-08);
+  border-right: 3px solid var(--gold);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-2);
+  padding: var(--sp-3);
+  z-index: 4;
+}
+/* The fade that marks a roster taller than the column (see syncPanelEdge). Sticky, so it
+   rides the bottom edge of the scroll box rather than the end of the content, and painted
+   in paper so it fades into the card instead of masking the card's own border. */
+.mp-panel.can-scroll-down::after {
+  content: '';
+  position: sticky;
+  bottom: 0;
+  display: block;
+  height: 26px;
+  margin: 0 -12px -12px;
+  background: linear-gradient(to bottom, rgba(251, 248, 242, 0), var(--paper));
+  pointer-events: none;
+}
+.mp-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2); }
+.mp-head h3 { margin: 0; }
+/* Dismissal for the phone sheet only: at 700px and up the tool button is always on screen,
+   so a second way out would be one control too many. */
+.mp-close {
+  display: none;
+  position: absolute; top: 9px; right: 9px;
+  width: 32px; height: 32px;
+  border: 1px solid var(--ink-14); border-radius: var(--r-sm);
+  background: var(--ivory); color: var(--ink-70);
+  font-size: 18px; line-height: 1; cursor: pointer;
+}
+.mp-close:hover { border-color: var(--gold); color: var(--ink); }
+.mp-tag {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--gold); text-align: right;
+}
+.mp-list { margin: var(--sp-2) 0 var(--sp-3); }
+.mp-row { border-top: 1px solid var(--ink-08); padding: var(--sp-2) 0; }
+.mp-row:first-child { border-top: 0; padding-top: 0; }
+.mp-rowhead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2); }
+.mp-rowhead b { font-size: 12px; letter-spacing: 0.02em; }
+.mp-rowhead small { font-size: 9.5px; color: var(--ink-45); text-align: right; }
+.mp-rowbody { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin-top: 4px; }
+.mp-counts { display: flex; gap: var(--sp-3); font-size: 11px; color: var(--ink-70); }
+.mp-counts b { font-family: var(--font-display); font-size: 15px; color: var(--ink); margin-left: 3px; }
+.mp-stepper { display: flex; gap: 6px; }
+.mp-step {
+  width: 30px; height: 30px; border-radius: var(--r-sm); border: 1px solid var(--ink-14);
+  background: var(--ivory); color: var(--ink); font-size: 15px; line-height: 1;
+  font-family: var(--font-body); cursor: pointer;
+}
+.mp-step:hover { border-color: var(--gold); }
+/* 30px is a comfortable mouse target and a poor thumb target. On touch devices the
+   stepper is the panel's primary control, so it gets a real one (44px is the guideline;
+   40 keeps two of them plus the counts inside a 320px panel). */
+@media (pointer: coarse) {
+  .mp-step { width: 40px; height: 40px; font-size: 17px; }
+  .mp-stepper { gap: 8px; }
+}
+.mp-step:disabled { opacity: 0.35; cursor: not-allowed; }
+.mp-bar { position: relative; height: 5px; margin-top: 6px; background: var(--stone); border-radius: 3px; overflow: hidden; }
+.mp-bar span { display: block; height: 100%; background: var(--gold); }
+.mp-bar.is-short span { background: var(--alert); }
+.mp-bar.is-over span { background: var(--stone-2); }
+.mp-bar i { position: absolute; top: -1px; width: 1px; height: 7px; background: var(--ink); }
+.mp-money { display: block; margin-top: 4px; font-size: 10px; color: var(--ink-45); }
+.mp-none { display: block; margin-top: 2px; font-size: 10px; color: var(--ink-45); font-style: italic; }
+.mp-label {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink-45); margin: 0 0 6px;
+}
+.mp-total {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2);
+  margin: var(--sp-3) 0 0; padding-top: var(--sp-2);
+  border-top: 1px solid var(--ink-14); font-size: 11px; color: var(--ink-70);
+}
+.mp-total span b { font-size: 11px; font-weight: 700; }
+.mp-total small { font-size: 10px; color: var(--ink-45); }
+.mp-total > b { font-family: var(--font-display); font-size: 19px; color: var(--ink); }
+/* Three tiers on one line. As wrapping flex chips the third (Advanced) grew to the full
+   panel width and read as a different kind of control; a 3-up grid keeps None /
+   Foundation / Advanced comparable at a glance, which is the whole point of the choice. */
+#mpTraining { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+#mpTraining .chip { min-width: 0; padding-inline: 7px; }
+#mpTraining .chip b, #mpTraining .chip small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Below a laptop the panel would sit over the tray, so it is anchored above it and
+   capped: the tray and the Run button must stay reachable at every size. */
+@media (max-width: 1199px) {
+  .mp-panel { top: 170px; bottom: 300px; width: min(320px, 86vw); }
+}
+/* On a phone a 320px card next to the tool column leaves the tools half-covered — the left
+   third of each button showing behind the panel read as a bug, not as a modal. Below 700px
+   both right-hand panels span the screen instead, so the sheet edge is the screen edge and
+   no control is half-drawn. */
+@media (max-width: 700px) and (min-height: 620px) {
+  /* Ends above the tool column rather than through it: at 300 the sheet cut the top off the
+     Manpower plan button, which read as a rendering fault even once the sheet had its own
+     close control. 330 clears the button by ~26px at 390x844 and still leaves three rows. */
+  .mp-panel { left: var(--sp-4); right: var(--sp-4); width: auto; bottom: 330px; }
+  .selected-panel { left: var(--sp-4); right: var(--sp-4); width: auto; top: 170px; bottom: 300px; }
+  /* The sheet covers the tool column that opened it, so it carries its own way out. */
+  .mp-close { display: block; }
+  .mp-head { padding-right: 40px; }
+}
+
+/* ----------------------------------------------------------------- land panel */
+
+.plot-panel {
+  position: absolute;
+  left: var(--sp-4);
+  /* Clears the tray: at 1280 the tray wraps to two rows plus the hint and the run
+     button, and a panel at 200px sat behind it with its Buy button unclickable. */
+  bottom: 260px;
+  z-index: 5;
+  width: min(280px, 62vw);
+  background: var(--paper);
+  border: 1px solid var(--ink-08);
+  border-left: 3px solid var(--gold);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-2);
+  padding: var(--sp-3);
+}
+
+/* -------------------------------------------------------------------- tray */
+
+.tray-wrap {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  background: linear-gradient(0deg, rgba(246, 242, 234, 0.97) 60%, rgba(246, 242, 234, 0));
+  padding: var(--sp-2) var(--sp-4) var(--sp-3);
+}
+.tray-hint { font-size: 11px; color: var(--ink-80); margin: 0 0 var(--sp-2); text-align: center; }
+.tray { display: flex; gap: var(--sp-2); overflow-x: auto; padding-bottom: var(--sp-2); scrollbar-width: thin; }
+/* Below 1280px the tray is one scrolling row, and a tablet hides the scrollbar until you
+   drag it — a card cut off at the right edge then reads as a clipped layout rather than
+   "there are twelve more functions". The mask fades the trailing edge while there is more
+   to scroll to and is removed at the end, so the affordance never lies. It paints, it does
+   not lay out: no card is clipped and no tap is intercepted. */
+.tray.can-scroll-right {
+  -webkit-mask-image: linear-gradient(to right, var(--ink) calc(100% - 44px), transparent);
+  mask-image: linear-gradient(to right, var(--ink) calc(100% - 44px), transparent);
+}
+/* Same affordance for the wrapped tray at 1280 and up, where the overflow is vertical. */
+.tray.can-scroll-down {
+  -webkit-mask-image: linear-gradient(to bottom, var(--ink) calc(100% - 30px), transparent);
+  mask-image: linear-gradient(to bottom, var(--ink) calc(100% - 30px), transparent);
+}
+.tray.can-scroll-right.can-scroll-down {
+  -webkit-mask-image: linear-gradient(to right, var(--ink) calc(100% - 44px), transparent),
+    linear-gradient(to bottom, var(--ink) calc(100% - 30px), transparent);
+  mask-image: linear-gradient(to right, var(--ink) calc(100% - 44px), transparent),
+    linear-gradient(to bottom, var(--ink) calc(100% - 30px), transparent);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+/* The lounge note under the primary action needs to breathe; it was sitting flush. */
+#lobbyNote { margin-top: var(--sp-3); }
+/* At 1280 the font tray's twenty cards no longer fit on one row and the last of them
+   were being cut off with no affordance that more existed. Wrapping to two rows is
+   honest: every function stays reachable and the row break is visible. Below 1280 the
+   tray stays ONE scrolling row instead: at 1024x768 wrapping produced a third row that
+   the 170px cap clipped, so the back-of-house functions were half hidden behind the Run
+   button — the exact functions a New Joiner is meant to discover. */
+@media (min-width: 1280px) {
+  .tray { flex-wrap: wrap; overflow-x: visible; max-height: 170px; overflow-y: auto; }
+}
+.fn {
+  flex: 0 0 auto;
+  min-width: 118px;
+  text-align: left;
+  background: var(--paper);
+  border: 1px solid var(--ink-14);
+  border-radius: var(--r-sm);
+  padding: 8px 10px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  color: var(--ink);
+  box-shadow: var(--shadow-1);
+}
+.fn b { display: block; font-size: 12px; }
+.fn small { display: block; font-size: 10.5px; color: var(--ink-80); }
+.fn em { font-style: normal; font-size: 10px; font-weight: 700; color: var(--gold); }
+.fn[aria-pressed="true"] { border-color: var(--gold); background: var(--gold-soft); }
+.fn:disabled { opacity: 0.4; cursor: not-allowed; }
+.fn--cat-G { border-top: 2px solid var(--gold); }
+.fn--cat-B { border-top: 2px solid var(--stone-2); }
+.fn--cat-P { border-top: 2px solid var(--sage); }
+.btn--run { display: block; width: 100%; margin-top: var(--sp-2); padding: 14px; }
+/* ------------------------------------------------------------------- cards */
+
+.screen--modal {
+  display: grid;
+  place-items: center;
+  padding: var(--sp-4);
+  overflow-y: auto;
+  background: rgba(35, 35, 35, 0.42);
+}
+.card {
+  width: min(620px, 100%);
+  background: var(--paper);
+  border-top: 3px solid var(--gold);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-2);
+  padding: var(--sp-5);
+  max-height: 86vh;
+  overflow-y: auto;
+}
+/*
+ * The scroll cue. A tablet draws no scrollbar, and the reveal is where a team hunts for the
+ * score code, so a card with more below must say so — and must not simply cut a line of
+ * text in half, which reads as a rendering fault. This fade is a sticky child of the card,
+ * so it sits above the content and travels with the scrollport; `.is-more` is added by
+ * main.js while there is more to see and removed at the end and on cards that never
+ * scroll. Negative margins pull it across the card's own padding; the negative bottom
+ * margin cancels its height so it never adds a phantom scroll of its own.
+ */
+.card::after {
+  content: '';
+  position: sticky;
+  bottom: 0;
+  display: block;
+  height: 34px;
+  margin: var(--sp-2) calc(-1 * var(--sp-5)) calc(-1 * var(--sp-5));
+  background: linear-gradient(transparent, var(--paper) 82%);
+  opacity: 0;
+  transition: opacity 140ms ease;
+  pointer-events: none;
+}
+.card.is-more::after { opacity: 1; }
+.score-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-2); margin: var(--sp-3) 0; }
+.score { border: 1px solid var(--ink-08); border-radius: var(--r-sm); padding: 10px 12px; background: var(--ivory); }
+.score span { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-45); }
+.score b { display: block; font-family: var(--font-display); font-size: 30px; letter-spacing: 0.04em; line-height: 1.1; }
+.score i { font-style: normal; font-size: 11px; color: var(--ink-45); }
+.composite { display: flex; align-items: baseline; gap: var(--sp-3); border-top: 1px solid var(--ink-14); padding-top: var(--sp-3); margin-top: var(--sp-3); }
+.composite b { font-family: var(--font-display); font-size: 46px; letter-spacing: 0.03em; }
+.causes { list-style: none; margin: var(--sp-3) 0 0; padding: 0; }
+.causes li {
+  display: flex;
+  gap: var(--sp-2);
+  align-items: baseline;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--ink-08);
+  font-size: 12.5px;
+}
+.causes li em { font-style: normal; font-weight: 700; min-width: 38px; text-align: right; }
+.causes li em.up { color: var(--positive); }
+.causes li em.down { color: var(--alert); }
+.causes li code { font-size: 9px; color: var(--ink-45); letter-spacing: 0.06em; }
+.events { list-style: none; margin: var(--sp-3) 0 0; padding: 0; }
+.events li { padding: 8px 0; border-bottom: 1px solid var(--ink-08); font-size: 12.5px; }
+.events li b { display: block; }
+.events li.good b::before { content: '\2713\00a0\00a0'; color: var(--positive); }
+.events li.bad b::before { content: '\26A0\00a0\00a0'; color: var(--alert); }
+
+/* ---------------------------------------------------------------- showcase */
+
+.screen--showcase { pointer-events: none; }
+.screen--showcase > * { pointer-events: auto; }
+.plate {
+  position: absolute;
+  left: var(--sp-5);
+  bottom: var(--sp-6);
+  color: var(--ivory);
+  text-shadow: 0 2px 12px rgba(35, 35, 35, 0.7);
+}
+.plate h2 { color: var(--ivory); font-size: clamp(24px, 5vw, 40px); }
+.plate .caption { font-size: 13px; color: rgba(246, 242, 234, 0.82); letter-spacing: 0.08em; text-transform: uppercase; }
+#btnSkipShowcase { position: absolute; right: var(--sp-5); bottom: var(--sp-6); }
+
+/* ------------------------------------------------------------------- toast */
+
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: 168px;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: var(--ivory);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  padding: 9px 16px;
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-2);
+  max-width: 84vw;
+  text-align: center;
+}
+
+/* --------------------------------------------------------------- classroom */
+
+.room-chip {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  border: 1px solid var(--gold);
+  background: var(--gold-soft);
+  border-radius: var(--r-sm);
+  padding: 6px 10px;
+  margin-bottom: var(--sp-3);
+}
+.room-chip span {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-45);
+}
+.room-chip b { font-family: var(--font-display); font-size: 18px; letter-spacing: 0.14em; }
+
+.resume {
+  border: 1px dashed var(--gold);
+  border-radius: var(--r-sm);
+  padding: var(--sp-3);
+  margin: var(--sp-3) 0;
+  background: var(--ivory);
+}
+.resume .row { margin-top: var(--sp-2); }
+
+.join-details { margin-top: var(--sp-3); border-top: 1px solid var(--ink-08); padding-top: var(--sp-3); }
+.join-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ink-70);
+}
+.join-details[open] summary { margin-bottom: var(--sp-2); }
+.join-row { display: flex; gap: var(--sp-2); align-items: flex-end; }
+.join-row .field { flex: 1 1 auto; margin-bottom: 0; }
+.join-row .btn { flex: 0 0 auto; }
+#roomCode { text-transform: uppercase; letter-spacing: 0.2em; font-family: var(--font-display); }
+
+/* The clock has to read at arm's length on a tablet on a classroom table. */
+.clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--ink-14);
+  background: var(--paper);
+  border-radius: var(--r-sm);
+  padding: 4px 10px;
+  margin-bottom: var(--sp-2);
+  box-shadow: var(--shadow-1);
+}
+.clock-label {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+}
+.clock b { font-family: var(--font-display); font-size: 20px; letter-spacing: 0.06em; min-width: 3.4em; }
+.clock-share { font-size: 10px; letter-spacing: 0.06em; color: var(--ink-45); }
+.clock-bar { width: 84px; height: 4px; background: var(--stone); border-radius: 2px; overflow: hidden; }
+.clock-bar span { display: block; height: 100%; width: 100%; background: var(--gold); transition: width 250ms linear; }
+.clock[data-state="over"] { border-color: var(--alert); }
+.clock[data-state="over"] b,
+.clock[data-state="over"] .clock-share { color: var(--alert); }
+.clock[data-state="over"] .clock-bar span { background: var(--alert); }
+.clock[data-state="paused"] { border-style: dashed; }
+
+.code-block {
+  border: 1px solid var(--ink-14);
+  border-radius: var(--r-sm);
+  background: var(--ivory);
+  padding: var(--sp-3);
+  margin: var(--sp-3) 0;
+}
+.code-block textarea {
+  width: 100%;
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ink-70);
+  background: var(--paper);
+  border: 1px solid var(--ink-14);
+  border-radius: var(--r-sm);
+  padding: 8px;
+  resize: none;
+  word-break: break-all;
+}
+.code-block .row { margin-top: var(--sp-2); }
+
+/* -------------------------------------------------------------- responsive */
+
+/* Notches and rounded corners: the HUD and the tray must clear both. */
+.hud { padding-top: max(var(--sp-3), env(safe-area-inset-top)); }
+.tray-wrap { padding-bottom: max(var(--sp-2), env(safe-area-inset-bottom)); }
+
+/* Touch has no hover: pin the target size and stop hover styles sticking. */
+@media (pointer: coarse) {
+  .btn, .tool, .chip { min-height: 44px; }
+  .btn:hover { border-color: var(--ink-14); }
+  .btn--primary:hover { background: var(--ink); border-color: var(--ink); }
+}
+
+/* Tablets, landscape (1024x768 and 1194x834 are the classroom norms). These are
+   deliberately not the phone rules scaled up: there is room for the tools to stay
+   vertical and the metrics to stay on one line. */
+@media (min-width: 721px) and (max-width: 1100px) {
+  .hud { padding: var(--sp-2) var(--sp-3); }
+  .hud-right { min-width: 280px; }
+  .metrics { gap: 6px; }
+  .metric { min-width: 54px; padding: 4px 7px; }
+  .metric b { font-size: 17px; }
+  .tools { left: var(--sp-2); gap: 6px; }
+  .tool { padding: 10px 12px; }
+  .selected-panel { width: min(300px, 38vw); max-height: calc(100vh - 190px); }
+  .tray-wrap { padding: var(--sp-2) var(--sp-3); }
+  .lobby-card { width: min(520px, 92vw); }
+  .clock b { font-size: 18px; }
+}
+
+@media (max-width: 720px) {
+  .hud { flex-direction: column; gap: var(--sp-2); padding: var(--sp-2) var(--sp-3); }
+  .hud-right { text-align: left; min-width: 0; width: 100%; }
+  .metrics { justify-content: flex-start; }
+  .metric { min-width: 0; flex: 1 1 0; padding: 4px 6px; }
+  .metric b { font-size: 16px; }
+  .tools { left: var(--sp-2); top: auto; bottom: 176px; transform: none; flex-direction: row; flex-wrap: wrap; max-width: 60vw; }
+  .selected-panel { right: var(--sp-2); top: auto; bottom: 214px; transform: none; width: min(240px, 62vw); }
+  .tray-wrap { padding: var(--sp-2) var(--sp-3) var(--sp-2); }
+  .btn--run { padding: 12px; }
+  .toast { bottom: 226px; }
+  .plate { left: var(--sp-3); bottom: var(--sp-5); }
+  #btnSkipShowcase { right: var(--sp-3); bottom: var(--sp-5); }
+  .join-row { flex-wrap: wrap; }
+  .join-row .field { flex: 1 1 100%; }
+  .join-row .btn { flex: 1 1 100%; }
+  .clock b { font-size: 17px; }
+  .clock-bar { width: 56px; }
+  .clock-share { display: none; }
+}
+
