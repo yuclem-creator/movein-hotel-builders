@@ -37,8 +37,15 @@ const timed = async (fn) => {
 console.log(`== relay: ${url} (room ${room}) ==`);
 
 try {
-  const reach = await timed(() => fetch(`${url}/rest/v1/`, { headers: auth }));
-  check('the project answers on its REST endpoint', reach.out.ok, `HTTP ${reach.out.status}, ${reach.ms} ms`);
+  // Connectivity is proven by any structured answer from PostgREST — including "no such
+  // table", which is the answer before the schema exists. A bare 401 on `/rest/v1/` means
+  // nothing: that endpoint wants a schema cache hit, not an anon key.
+  const reach = await timed(() => fetch(`${url}/rest/v1/rooms?select=code&limit=1`, { headers: auth }));
+  const reachBody = await reach.out.text().catch(() => '');
+  const reachJson = (() => { try { return JSON.parse(reachBody); } catch { return null; } })();
+  check('the project answers and accepts the key',
+    reach.out.ok || reachJson?.code === 'PGRST205',
+    `HTTP ${reach.out.status}, ${reach.ms} ms${reach.out.status === 401 ? ' — key refused' : ''}`);
   if (reach.out.status === 401 || reach.out.status === 403) {
     console.log('       the key was refused: check that this is the publishable/anon key for THIS project');
   }

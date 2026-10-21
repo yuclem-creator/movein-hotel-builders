@@ -153,6 +153,16 @@ try {
     JSON.stringify(parsed));
   check('a malformed relay payload is ignored rather than trusted', parseNet('not-base64!!') === null);
 
+  // A relay-carrying card once exceeded the QR encoder's version ceiling at ECC M, and the
+  // board silently fell back to a relay-less card — the failure looked like "cards ignore the
+  // project". A realistic Pages link with a real-length publishable key must still encode.
+  const { qrSvg } = await import('../js/qr/qr.js');
+  const longCard = 'https://yuclem-creator.github.io/movein-hotel-builders/index.html'
+    + `?room=HB24&team=Team%2012&mins=8&net=${encodeNet('https://bacagknsardeqikanbyi.supabase.co', `sb_publishable_${'x'.repeat(42)}`)}`;
+  let fits = true;
+  try { qrSvg(longCard, { module: 6 }); } catch { fits = false; }
+  check('a relay-carrying card still fits the QR encoder', fits, `${longCard.length} bytes`);
+
   const cfg = await ctx.newPage();
   await cfg.goto(`${BASE}/index.html?room=HB24&team=Cfg&mins=8&collab=1&net=${payload}`,
     { waitUntil: 'load', timeout: 40000 });

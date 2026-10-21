@@ -126,7 +126,7 @@ function makeCards() {
       url.searchParams.set('team', name);
       url.searchParams.set('mins', String(mins));
       if (relay) {
-        url.searchParams.set('collab', '1');
+        // `net` implies collaboration, which keeps the QR under its version ceiling.
         url.searchParams.set('net', encodeNet(relay.url, relay.anonKey));
       }
       return { name, url: url.toString() };

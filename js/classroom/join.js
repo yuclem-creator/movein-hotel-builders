@@ -18,26 +18,35 @@ export function normaliseRoom(value) {
 
 /**
  * A join card can carry the relay configuration (`net=`), so a phone needs no setup of its
- * own: the payload is the same public pair a facilitator would otherwise paste into a
- * console, encoded into the link they scanned. Base64url of `{"url":"…","anonKey":"…"}`.
+ * own. The payload is compact because it has to fit a QR that a phone camera can still read:
+ * `ref|publishable-key`, base64url — the project URL is derived from the ref, and the JSON
+ * form is accepted on decode for older cards.
  */
 export function parseNet(raw) {
   if (!raw) return null;
   try {
     const padded = raw.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - (raw.length % 4)) % 4);
     const text = new TextDecoder().decode(Uint8Array.from(atob(padded), (c) => c.charCodeAt(0)));
-    const net = JSON.parse(text);
-    return typeof net?.url === 'string' && typeof net?.anonKey === 'string' && net.url.startsWith('http')
-      ? { url: net.url, anonKey: net.anonKey }
-      : null;
+
+    if (text.startsWith('{')) {          // legacy JSON cards
+      const net = JSON.parse(text);
+      return typeof net?.url === 'string' && net.url.startsWith('http') && typeof net?.anonKey === 'string'
+        ? { url: net.url, anonKey: net.anonKey }
+        : null;
+    }
+
+    const [ref, anonKey] = text.split('|');
+    if (!ref || !anonKey || !/^[a-z0-9]{6,}$/i.test(ref)) return null;
+    return { url: `https://${ref}.supabase.co`, anonKey };
   } catch {
     return null;
   }
 }
 
-/** The same public pair, encoded for a URL. */
+/** The same pair, compact: the project ref and the key, nothing the phone can derive. */
 export function encodeNet(url, anonKey) {
-  const text = JSON.stringify({ url, anonKey });
+  const ref = String(url).replace(/^https?:\/\//, '').split('.')[0];
+  const text = `${ref}|${anonKey}`;
   return btoa(String.fromCharCode(...new TextEncoder().encode(text)))
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
@@ -59,10 +68,10 @@ export function parseJoin(search = '') {
     minutes: Number.isFinite(minutes) && minutes > 0 ? Math.min(60, Math.round(minutes)) : 8,
     facilitator: params.get('facilitator') === '1',
     // Team build: several devices on one hotel, one of them sequencing. Off unless the card
-    // asks for it, because a solo session must keep behaving exactly as it did.
-    collab: params.get('collab') === '1',
-    // The relay configuration carried by the card, so a phone needs nothing typed in.
+    // asks for it; carrying a relay implies it, which also keeps the card's QR small enough
+    // to scan.
     net: parseNet(params.get('net')),
+    collab: params.get('collab') === '1' || Boolean(parseNet(params.get('net'))),
   };
 }
 
