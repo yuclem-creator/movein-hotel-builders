@@ -407,13 +407,32 @@ export function groundTexture() {
   g.fillStyle = '#E4DBC7';
   g.fillRect(0, 0, S, S);
 
-  // Broad tonal patches first: dry ground is uneven at a scale much larger than grass.
-  for (let i = 0; i < 14; i++) {
-    const x = hash1(i + 11) * S, y = hash1(i + 22) * S, r = S * (0.12 + hash1(i + 33) * 0.22);
+  // Broad tonal patches: dry ground IS uneven, but the first version drew fourteen
+  // patches up to a third of the tile across at 0.44 alpha on a 9 m tile — which tiled
+  // into a repeating field of soft mounds and read as DUNES rather than ground. The
+  // large-scale variation now stays under 1.5 m of real ground, and the variation it
+  // gives up is replaced by mid-frequency mottle below, which tiles without a pattern.
+  for (let i = 0; i < 6; i++) {
+    const x = hash1(i + 11) * S, y = hash1(i + 22) * S, r = S * (0.06 + hash1(i + 33) * 0.09);
     const rad = g.createRadialGradient(x, y, 0, x, y, r);
     const warm = hash1(i + 44) > 0.45;
-    rad.addColorStop(0, warm ? 'rgba(206,192,162,0.44)' : 'rgba(188,198,176,0.32)');
+    rad.addColorStop(0, warm ? 'rgba(206,192,162,0.20)' : 'rgba(188,198,176,0.15)');
     rad.addColorStop(1, 'rgba(206,192,162,0)');
+    g.fillStyle = rad;
+    g.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+
+  // Mid-frequency mottle: the scale that actually reads as ground at a camera height of
+  // 30-110 m. Soft-edged and small enough that the eye cannot lock onto the tile repeat.
+  for (let i = 0; i < 900; i++) {
+    const x = hash1(i + 1201) * S, y = hash1(i + 1303) * S;
+    const r = S * (0.015 + hash1(i + 1407) * 0.030);
+    const light = hash1(i + 1509) > 0.5;
+    const rad = g.createRadialGradient(x, y, 0, x, y, r);
+    rad.addColorStop(0, light
+      ? `rgba(240,231,209,${(0.05 + hash1(i + 1611) * 0.07).toFixed(3)})`
+      : `rgba(168,157,131,${(0.04 + hash1(i + 1713) * 0.07).toFixed(3)})`);
+    rad.addColorStop(1, 'rgba(200,190,166,0)');
     g.fillStyle = rad;
     g.fillRect(x - r, y - r, r * 2, r * 2);
   }
@@ -769,6 +788,40 @@ export function canopyTexture() {
   return t;
 }
 
+/**
+ * A tree crown as GEOMETRY, not a ball.
+ *
+ * The crown used to be a bare icosahedron with flat shading: five faceted spheres per
+ * tree, which at establishing scale resolved to "clustered balls" — the last obviously
+ * non-photographic element left in the wide shot. Three changes, all of them free:
+ *   - every vertex is pushed along its own radius by a hash OF ITS POSITION, so the
+ *     silhouette is irregular and adjacent faces stay welded (a per-index hash on a
+ *     non-indexed icosahedron tears the mesh open at every shared edge);
+ *   - the underside is drawn in, because a canopy hangs rather than sitting like a ball;
+ *   - shading is smooth (see kit.foliage) — faceted normals are what made it read as a
+ *     polyhedron, and no amount of extra lobes fixes that.
+ *
+ * Deliberately NOT cached: view.disposeGroup frees geometries on every rebuild, so a
+ * cached geometry would be disposed out from under the next build. One 80-triangle
+ * geometry per landscape build is not worth that bug.
+ */
+export function crownGeometry(detail = 1) {
+  const geo = new THREE.IcosahedronGeometry(1, detail);
+  const pos = geo.attributes.position;
+  const v = new THREE.Vector3();
+  for (let i = 0; i < pos.count; i++) {
+    v.fromBufferAttribute(pos, i);
+    const h1 = Math.abs(Math.sin(v.x * 12.9898 + v.y * 78.233 + v.z * 37.719) * 43758.5453) % 1;
+    const h2 = Math.abs(Math.sin(v.x * 39.346 + v.y * 11.135 + v.z * 83.155) * 24634.6345) % 1;
+    v.multiplyScalar(1 + (h1 * 0.30 + h2 * 0.16) - 0.23);
+    if (v.y < 0) v.y *= 0.78;
+    pos.setXYZ(i, v.x, v.y, v.z);
+  }
+  pos.needsUpdate = true;
+  geo.computeVertexNormals();
+  return geo;
+}
+
 /** The same sky, mapped the way `scene.background` expects. */
 export function skyBackground(dusk = false) {
   const key = dusk ? 'skybg:dusk' : 'skybg:day';
@@ -826,6 +879,21 @@ export function environment(renderer, dusk = false) {
 export function makeKit(paletteId) {
   const accent = accentFor(paletteId);
   const accentCol = new THREE.Color(accent);
+  // Accent chroma. The four brand accents are deliberately muted neutrals, and the palette
+  // gate measures how much a palette switch changes the rendered frame: with the accents
+  // exactly as declared it scored 4 of 6 pairs — passing, but with gold/sage at 1.6 against
+  // a floor of 1.5. A 30% saturation gain on the colour that tints the envelope and the trim
+  // puts real margin behind a check that protects the one thing a palette is for, while
+  // `accentHex` below stays the DECLARED brand hex, so nothing downstream can claim a colour
+  // the brand does not have. Gold lands near #C08B55, still inside the 34-unit window the
+  // "gold reads as gold" check measures. (The gain was found while testing AgX, which scored
+  // 2 of 6; AgX was reverted in view.js on that evidence, but the gain earns its place on
+  // its own — it is the accent reading more clearly, not the curve being flattered.)
+  {
+    const hsl = { h: 0, s: 0, l: 0 };
+    accentCol.getHSL(hsl);
+    accentCol.setHSL(hsl.h, Math.min(1, hsl.s * 1.30), hsl.l);
+  }
   const pave = pavingTexture();
   const membrane = roofMembraneTexture();
   const tiles = roofTileTexture();
@@ -884,7 +952,7 @@ export function makeKit(paletteId) {
     makeFacade: (role, jitter) => buildFacade(role, jitter, true),
     // Polished metal needs an environment to reflect: 0.7+ metalness with no env map
     // renders almost black, which is how the gold turned brown.
-    accent: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color(accent), roughness: 0.38, metalness: 0.18 })),
+    accent: keep(new THREE.MeshStandardMaterial({ color: accentCol.clone(), roughness: 0.38, metalness: 0.18 })),
     gold: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color(BRAND.gold), roughness: 0.3, metalness: 0.35 })),
     goldLine: keep(new THREE.LineBasicMaterial({ color: new THREE.Color(BRAND.gold), transparent: true, opacity: 0.55 })),
     gridLine: keep(new THREE.LineBasicMaterial({ color: new THREE.Color(BRAND.gold), transparent: true, opacity: 0.16 })),
@@ -907,7 +975,10 @@ export function makeKit(paletteId) {
     // Roof gardens and beds: same green, mottled, so a planted deck does not read as a
     // flat plastic sheet or as a pool.
     planting: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#8FB3A4'), map: plantingTexture(), roughness: 0.97, userData: { tileWorld: 2.6 } })),
-    foliage: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#7E9C8E'), map: canopyTexture(), flatShading: true, roughness: 0.92 })),
+    // Smooth-shaded, not flat: the crown GEOMETRY now carries the irregularity
+    // (crownGeometry), and faceted normals on top of it re-introduce the polyhedron read
+    // that made every tree look like a cluster of balls.
+    foliage: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#7E9C8E'), map: canopyTexture(), roughness: 0.92 })),
     trunk: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#8A7A66'), roughness: 1 })),
     ink: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color(BRAND.ink), roughness: 0.6 })),
     warm: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#FFF0D6'), emissive: new THREE.Color(BRAND.warmLight), emissiveIntensity: 0.6, roughness: 0.5, userData: { dayEmissive: 0.15, duskEmissive: 1.4 } })),

@@ -119,8 +119,13 @@ export function tileConeUV(geo, w, d, h, mat) {
  * Built long-axis-along-x and rotated for tall plans, so there is only one winding
  * convention to get right. UVs are in world metres / tileWorld, the same rule every box
  * and cone follows, so a course is the same size on a 3 m kiosk and a 16 m ballroom.
+ *
+ * Exported because site.js's heritage pavilion used a four-sided cone instead, whose UV
+ * unwrap is RADIAL: the courses fanned out from the apex and every pavilion roof read as
+ * a diamond. A square plan collapses this function to an apex, which is exactly right for
+ * a pavilion — so the pavilion can have eave-parallel courses for free.
  */
-function hipRoof(w, d, h, mat, x = 0, y = 0, z = 0) {
+export function hipRoof(w, d, h, mat, x = 0, y = 0, z = 0) {
   const tile = (mat.userData && mat.userData.tileWorld) || 3.2;
   const alongX = w >= d;
   const W = alongX ? w : d, D = alongX ? d : w;

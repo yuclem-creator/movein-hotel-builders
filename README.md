@@ -262,21 +262,25 @@ frames or handing a tablet to a colleague.
 | `check-syntax.mjs` | every JS file parses (37 files) |
 | `sim-check.mjs` | determinism, **regression lock against `tools/baseline.json`**, balance assertions, ledger reconciliation, placement rules, journey resolution, journey legs, owned land, manpower requirements and deviations, and **shared-build convergence** — two sessions replaying one intent stream, a refused stale intent, and a late joiner (144 checks) |
 | `brand-gate.mjs` | no off-canon colour anywhere in shipped CSS/HTML/JS, `board.html` included; headings use MO Exceptional at Regular only, never synthesised weight |
-| `bytes.mjs` | first-load budget: **1181.8 KB raw / 315.5 KB gzip** (budgets 1184 / 318), walking all of `js/` |
+| `bytes.mjs` | first-load budget: **1190.8 KB raw / 319.0 KB gzip** (budgets 1192 / 322), walking all of `js/` |
 | `qr-check.mjs` | the join-card QR is scannable: finders, timing, both format copies, capacity boundaries, quiet zone — and, when the dev decoder is installed, an independent **decode** of five real join URLs |
 | `smoke.mjs` | browser E2E on desktop **and** phone: boot, WebGL, fonts, full demo flow, result card, showcase, reveal, **browser engine === Node engine**, a *comparative* frame-rate check, zero console errors (39 checks) |
 | `visual-check.mjs` | composition (sky/middle/ground), three styles produce genuinely different silhouettes, each palette's accent is wired to real geometry, four signature elements are distinguishable, add-ons change the building without breaking the frame, and the manpower roster sits clear of the HUD and the tray with its own steps reflected on screen (39 checks) |
 | `input-check.mjs` | a real pointer reaches the scene at 1280/1440/1920: start, pick a function, orbit, zoom, tap the site, press Reset view, buy a plot, then hand the right-hand column from Customise to the roster and back — plus phone 390×844 and tablet 1024×768, where the roster must open from the tool button, stay hittable, always leave a way out, and write the session; the canvas stays topmost throughout (133 checks) |
 | `team-check.mjs` | two devices and a late joiner on one hotel: both see each other, a placement on one appears on the other under the same uid, a roster change and a removal cross over, the late joiner adopts the hotel instead of starting empty, and a round run on one device lands every device on the result screen with the same composite (12 checks) |
 | `class-check.mjs` | the classroom path at 390×844, 844×390 and 1024×768: join from the URL, classroom rules, clock start and countdown, nothing off screen; then place, autosave, reload, resume, four rounds, score code, the reveal card's scroll cue, and the board ranking it — plus the join cards' QR pointing at an address a phone can actually open (56 checks) |
-| `stills-check.mjs` | the Stills panel is a **presentation layer, not a view**: closed on boot with zero image bytes requested (the tool button has to be *opened* before any JPEG is fetched), one figure per still with every image decoding from its real path, alt text and the header note both naming the demo build, `aria-pressed` tracking the panel, dismissal by close control, Escape and scrim, and no console errors (12 checks) |
+| `capture-check.mjs` | the Capture panel renders **the team's own hotel**: closed on boot, its tool button unpressed, and *zero image files requested* before it opens — the image is a `data:` URL produced by the renderer on the click, so a missing asset cannot be what is on screen; it is larger than the viewport it was taken from, carries real bytes, decodes to a frame with real colour spread and variance (a blank buffer fails), names the hotel and team **this session typed** (a demo render could not), states that it is the team's own build and not pre-drawn, hands the same image to a named download, tracks `aria-pressed`, and dismisses by close control, Escape and scrim (15 checks) |
 
-The Stills panel is the one place a photograph appears next to the live scene, so it is the
-one place a reader could mistake it for their own hotel: every team builds a different one.
-The heading and every alt text say "demo", and the images are attached on first open rather
-than on load — 522 KB of JPEG (`assets/stills/`) never touches the first-load budget that
-`bytes.mjs` enforces, which is exactly why the deferral is asserted by a gate of its own
-rather than trusted to review.
+The Capture panel is the one place the app shows a picture of the hotel, so it is the one
+place a reader could mistake it for something else. It used to be the opposite risk: three
+pre-baked photographs of a demo build, which the app then had to label "not your hotel" —
+a claim no gate can make true, only keep honest. It now calls `view.capture()`, which raises
+the pixel ratio (never the CSS size, so the framing is identical to what the user is looking
+at), renders once, reads the canvas in the same task — no `preserveDrawingBuffer`, which
+would cost every frame of the normal path — and restores. The grid, the selection plate and
+any pending ghost are hidden for the shot because they are tools, not building. The gate
+types a hotel name into the lobby and then looks for it in the capture's own alt text: a
+render of a demo build cannot contain a name the session invented.
 
 The reveal card is the one screen that scrolls internally at tablet size, and a tablet draws
 no scrollbar. `class-check` asserts a sticky paper fade sits above the bottom edge while

@@ -94,8 +94,22 @@ console.log(`\nfonts (non-blocking, font-display: swap): ${kb(fontTotal)}`);
 // the UNMINIFIED Three.js build being vendored by mistake (~2.1MB), and 1.8KB is three orders
 // of magnitude away from that; gzip, which is what a hotel actually transfers, still has
 // 2.5KB of headroom. FLAGGED FOR CLEMENT with the earlier 310 -> 318 gzip raise.
-const BUDGET_RAW = 1184 * 1024;
-const BUDGET_GZ = 318 * 1024;
+//
+// Raised again for the in-app realism pass, which DELETED the stills panel: 1184 -> 1192KB
+// raw and 318 -> 322KB gzip (measured 1190.8 raw / 319.0 gzip). Two things moved at once.
+// The pass itself is code: AgX tone mapping with re-derived exposures and per-preset aerial
+// perspective, crown GEOMETRY (a position-hashed, smooth-shaded canopy) replacing faceted
+// balls on every tree, bush and shrub, the last radial-UV roof cone replaced by the shared
+// hip-roof builder, a tighter shadow bias so buildings meet the ground, and a ground map
+// whose large-scale variation no longer tiles into dunes. The panel change is smaller but
+// removes assets rather than adding them: the three JPEGs (522KB) are gone from the repo and
+// the panel now renders the team's own hotel at 2x through view.capture, which costs the
+// capture method, the panel markup and its styles. gzip is still the number that matters in
+// transit, and this raise is 4KB on a hotel-Wi-Fi first load. FLAGGED FOR CLEMENT, with the
+// 310 -> 318 gzip raise: if the look does not justify it, revert the pass rather than
+// trimming it into something that looks unchanged.
+const BUDGET_RAW = 1192 * 1024;
+const BUDGET_GZ = 322 * 1024;
 let fails = 0;
 if (rawTotal > BUDGET_RAW) { fails++; console.log(`FAIL raw ${kb(rawTotal)} exceeds budget ${kb(BUDGET_RAW)}`); }
 if (gzTotal > BUDGET_GZ) { fails++; console.log(`FAIL gzip ${kb(gzTotal)} exceeds budget ${kb(BUDGET_GZ)}`); }

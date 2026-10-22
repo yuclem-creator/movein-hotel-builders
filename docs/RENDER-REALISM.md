@@ -64,27 +64,69 @@ zero and it survives a palette switch with no network request.
 
 ## Known remaining defects (not fixed by this pass)
 
-1. **Hip-roof UVs.** The pitched roofs project their tiling as a fan/diamond, so courses run
-   diagonally instead of parallel to the eave. The single most obviously synthetic surface
-   left in the wide shot. Fixing it means replacing the cone UV projection in
-   `tileConeUV` with a per-face planar projection.
-2. **Tree crowns** now have an irregular silhouette but still read as clustered spheres at
-   close range, not foliage.
-3. **No ambient occlusion.** Buildings meet the paving with a hard edge and only a painted
-   blob shadow under them; FLORA's images had soft contact darkening everywhere.
-4. **Ground** low-frequency variation is doing too much work at the establishing camera and
-   reads as dune-like patches rather than dry grass.
+1. **Hip-roof UVs** — FIXED in the in-app pass below. The team's own buildings already used a
+   planar, eave-parallel projection; the diamond read came from the heritage pavilion's
+   four-sided `ConeGeometry`, whose UV unwrap is radial. It now uses the same `hipRoof`
+   builder (a square plan collapses to an apex, so the pavilion keeps its pyramid) and its
+   courses run parallel to its eaves. `tileConeUV` has no callers left in `js/`.
+2. **Tree crowns** — FIXED in the in-app pass below. The lobes had an irregular *silhouette*
+   but were still faceted spheres: an icosahedron with `flatShading: true`. The crown is now
+   geometry (`crownGeometry()`): every vertex pushed along its own radius by a hash of its
+   **position** (a per-index hash tears a non-indexed icosahedron open at every shared edge),
+   the underside drawn in so the canopy hangs, and smooth shading so nothing reads as a
+   polyhedron. Seven lobes per tree, and the same geometry on bushes and deck shrubs.
+3. **No ambient occlusion** — partly addressed. The painted contact blob was always there, but
+   `shadow.normalBias` 0.5 lifted the shadow map off the wall/ground junction, which is what
+   made buildings look like they floated. Now 0.28 with a shallower depth bias, so the shadow
+   map supplies a real contact edge and the blob darkens under it. There is still no
+   screen-space AO: that needs a depth pass this renderer does not have.
+4. **Ground** — FIXED in the in-app pass below. The dune read was fourteen tonal patches up to
+   a third of the tile across at 0.44 alpha on a 9 m tile, i.e. a repeating field of soft
+   mounds. Large-scale variation is now under 1.5 m of real ground, and the variation it gave
+   up is replaced by 900 mid-frequency mottles — the scale that actually reads as ground from
+   a 30-110 m camera.
+
+## The in-app pass: the cues drawn into the live renderer
+
+Everything above was extracted as *cues* from the FLORA references and then rebuilt as
+procedural code in the live scene — which is the point of using a reference atelier at all.
+The four defects above, plus two changes that were tried and one that was measured and
+rejected:
+
+| Change | Where | Why |
+|---|---|---|
+| `crownGeometry()` — position-hashed, smooth-shaded, underside drawn in | `materials.js`, used by `site.js` | A tree was five faceted spheres. Geometry, not more lobes, was the fix. |
+| Seven lobes, wider spread, per-lobe squash and droop | `site.js` | The silhouette is what the establishing camera reads. |
+| `hipRoof` exported and used by the pavilion | `massing.js`, `site.js` | Kills the last radial-UV roof: courses parallel to the eave. |
+| `normalBias` 0.5 -> 0.28, `bias` -0.0004 -> -0.00025 | `view.js` | Puts the shadow map's contact edge back at the wall/ground junction. |
+| Ground map: 6 small patches, 900 mid-frequency mottles | `materials.js` | Removes the dune-scale repeat without losing variation. |
+| Fog per preset (day 120-360, dusk 90-330) | `view.js` | Aerial perspective; the old 160 m start did nothing inside a 110 m shot. |
+| Accent chroma +30% (envelope tint and trim) | `materials.js` | Puts margin behind the palette gate; `accentHex` stays the declared brand hex, so nothing downstream claims a colour the brand does not have. Gold lands near `#C08B55`, inside the 34-unit window the gold check measures. |
+
+**AgX was tried and rejected, on evidence.** The vendored Three.js supports
+`AgXToneMapping`, and it is the more filmic curve — long highlight rolloff, film-like
+highlight desaturation, closer to the reference frames in a still. Against the same frames it
+also compressed exactly the signals this app teaches with: palette separation fell to **2 of 6**
+pairs (gate needs 4), tower vs courtyard fell to **3.73** mean pixel difference (floor 4), and
+ivory paving fell to **1%** of frame (floor 1%). A teaching tool whose style and palette choices
+stop reading is not more photoreal, it is just darker. The tone curve went back to ACES; the
+accent chroma gain it exposed stayed, because it earns its place on its own terms.
 
 ## Byte cost
 
-+21.2 KB raw / +6.8 KB gzip (measured 1177.1 / 314.3, budgets raised 310 -> 318 gzip).
-Still zero image assets: every map is drawn on canvas at runtime.
++21.2 KB raw / +6.8 KB gzip for the canvas material pass (measured 1177.1 / 314.3, budgets
+raised 310 -> 318 gzip). Still zero image assets: every map is drawn on canvas at runtime.
 
-The Stills panel later added +1.8 KB raw / +1.3 KB gzip of *interface* (button, overlay,
-styles, deferred-src wiring) — measured 1181.8 / 315.5, raw budget raised 1180 -> 1184 with
-gzip left at 318. Its own 522 KB of JPEG sits in `assets/stills/`, outside `js/`, and is
-fetched only on first open, so it is deliberately outside the first-load budget rather than
-hidden inside it; `tools/stills-check.mjs` asserts the deferral.
+The Stills panel then added +1.8 KB raw / +1.3 KB gzip of *interface* (measured 1181.8 /
+315.5). It is gone: the in-app pass below replaced it with a capture of the team's own hotel,
+which **deleted** its three JPEGs (522 KB) from the repo.
+
+The in-app realism pass is +9.0 KB raw / +3.5 KB gzip (measured **1190.8 / 319.0**, budgets
+raised 1184 -> 1192 raw and 318 -> 322 gzip, flagged for approval rather than absorbed).
+That is the crown geometry, the hip-roof pavilion, the ground rebalance, the fog and shadow
+work, the accent chroma gain, and the capture panel with its styles. Every byte of it is
+code; the renderer still ships no image assets at all, so a palette switch, a style change
+and a capture all cost zero network requests.
 
 
 ## Render set (Workspace 12) — full-frame passes on the built game
@@ -123,29 +165,41 @@ account.
 
 Evidence: `review/flora-render/`, with the sources alongside as `review/tex-after-*.png`.
 
-## Shipped: the Stills panel (a presentation layer, not the renderer)
+## Shipped: Capture — the panel renders the team's own hotel
 
-Three of those renders now ship in the app as **Stills** (`#btnStills`), and the distinction
-that matters is that they change nothing about what the game draws. The runtime is still the
-canvas material pass; the panel is a labelled illustration of the demo build, and the label is
-load-bearing, because each team assembles a different hotel and a photograph cannot stand in
-for theirs.
+The FLORA renders were a **reference atelier, not pixels**. Three of them did ship for a while
+as a labelled **Stills** panel (`#btnStills`), on the argument that a labelled illustration is
+honest; the label was load-bearing precisely because the panel showed a demo build and every
+team assembles a different hotel. That is a claim the app can only keep honest, never make
+true — so the panel is gone, and what replaced it does not need the disclaimer.
 
-What shipped: web-weight 1600px JPEG derivations of `aerial-day` (1600×679), `court-day` and
-`aerial-dusk` (1600×756), a `Stills` tool button, a full-bleed overlay with a header note and
-three captioned figures, and `tools/stills-check.mjs` as the eleventh gate.
+`view.capture()` renders **the live scene** at twice the pixel ratio: raise the ratio (never
+the CSS size, so the framing is identical to what the user is looking at), render once, read
+the canvas in the same task, restore. No `preserveDrawingBuffer` — that would cost every frame
+of the normal path for one screenshot. The grid, the selection plate and any pending ghost are
+hidden for the shot, because they are tools rather than building. The panel shows the frame,
+its pixel size, and a download of the same image named after the hotel and the team.
+
+The three JPEGs are deleted from the repo (522 KB), and the eleventh gate changed with them:
+`tools/capture-check.mjs` types a hotel name into the lobby and then looks for that name in
+the capture's own alt text and note. A render of a demo build cannot contain a name the
+session invented, and the gate also decodes the capture and measures its colour spread, so a
+blank canvas buffer — the failure mode of a broken `toDataURL` — fails the gate rather than
+shipping as an empty panel.
 
 Decisions worth keeping:
 
-- **Nano Banana 2.1 for the set, once a set matters.** Pro reframes (2.357:1 against 2.115:1),
-  so a mixed-source gallery has visibly different framings in one grid. Day plates are
+- **Nano Banana 2.1 for the reference set.** Pro reframes (2.357:1 against 2.115:1), so a
+  mixed-source gallery has visibly different framings in one grid. Day plates are
   frame-preserving; the dusk pair needed the colour-locked v2 to avoid the blue-hour flip.
-- **Deferred attachment, asserted.** `src` is written on first open, not in the markup, and
-  the gate counts image requests before the panel opens — it must be zero. Without that
-  assertion the deferral would silently regress on any refactor.
-- **`width`/`height` on every `<img>`.** The three plates reserve their box before decode, so
-  opening the panel does not shift the layout under the reader's thumb.
-- **Only the frames that survived the structural test.** The Pro wide pass scored 0.316 with a
-  reframe; it is evidence in `review/`, not a shipped plate. A still that is not faithful to
-  the build it claims to illustrate is worse than no still.
+  This still matters for future reference work, even though no FLORA output ships now.
+- **Deferred work, asserted.** The panel used to defer its images; now there are none to
+  defer, and the gate asserts the stronger property instead: **zero** image requests in the
+  whole session, before and after the panel opens. A baked asset creeping back in fails.
+- **A capture is a picture of the hotel, not of the tools.** The grid, the selection plate and
+  a pending ghost are hidden for the shot and restored after it — otherwise the "still" would
+  carry a translucent gold plate and a dashed grid across the building.
+- **Only faithful reference frames were ever considered.** The Pro wide pass scored 0.316 with a
+  reframe; it stayed evidence in `review/`. A still that is not faithful to the build it claims
+  to illustrate is worse than no still — which is the argument that ended the panel entirely.
 

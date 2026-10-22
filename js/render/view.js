@@ -20,6 +20,16 @@ const D = SITE.rows * SITE.cell;
 const LIMITS = { radius: [26, 118], phi: [0.42, 1.24] };
 
 const DAY = {
+  // ACES, and the exposure it needs. AgX was tried here and REJECTED ON EVIDENCE: it is
+  // the more filmic curve (long highlight rolloff, film-like highlight desaturation) and
+  // it looks better in a still, but it compressed exactly the signals this app teaches
+  // with. Measured against the same frames: palette separation fell to 2 of 6 pairs (the
+  // gate needs 4), tower vs courtyard fell to 3.7 mean pixel difference (floor 4), and
+  // ivory paving dropped to 1% of frame (floor 1%). A teaching tool whose style and
+  // palette choices stop reading is not more photoreal, it is just darker. The rest of
+  // the realism pass — crown geometry, eave-parallel roofs, contact shadow, ground — is
+  // independent of the curve and stayed.
+  //
   // ACES compresses highlights hard, so an ivory surface needs well over 1.0 of
   // incident light to read as ivory. These values are measured, not guessed: with
   // the earlier sun 1.55 / exposure 1.0 the paving sampled at rgb(169,164,143)
@@ -31,10 +41,14 @@ const DAY = {
   // the model stops looking like a flat-lit render.
   bg: '#EFE9DF', fog: '#EFE9DF', hemiSky: '#FFF8EC', hemiGround: '#C9C0AE', hemiI: 0.4,
   sunColor: '#FFF6E8', sunI: 3.4, sunPos: [42, 62, 34], exposure: 1.02, envI: 0.45,
+  // Aerial perspective: the reference frames lose contrast with distance, and a fog that
+  // only starts at 160 m does nothing inside a 110 m establishing shot.
+  fogNear: 120, fogFar: 360,
 };
 const DUSK = {
   bg: '#22252A', fog: '#22252A', hemiSky: '#4A5A6E', hemiGround: '#191713', hemiI: 0.22,
   sunColor: '#FFB27A', sunI: 1.15, sunPos: [-54, 20, 44], exposure: 1.12, envI: 0.3,
+  fogNear: 90, fogFar: 330,
 };
 
 const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
@@ -65,7 +79,7 @@ export function createView(canvas) {
   // rarely more than a sliver of the frame — but it is what every metal and every pane of
   // glass reflects, and that is where most of the perceived realism comes from.
   scene.background = skyBackground(false);
-  scene.fog = new THREE.Fog(DAY.fog, 160, 380);
+  scene.fog = new THREE.Fog(DAY.fog, DAY.fogNear, DAY.fogFar);
   // Metals and glass need something real to reflect: without this every gold band
   // renders near-black and reads as brown plastic (see materials.environment).
   scene.environment = environment(renderer, false);
@@ -88,8 +102,13 @@ export function createView(canvas) {
   // Required: three builds the shadow matrices from the camera's projection, and a
   // changed left/right/top/bottom does nothing until the projection is rebuilt.
   sun.shadow.camera.updateProjectionMatrix();
-  sun.shadow.bias = -0.0004;
-  sun.shadow.normalBias = 0.5;
+  // Contact edge. normalBias 0.5 pushed the shadow back half a metre along the surface
+  // normal to stop acne on the facades, which also lifted the shadow off the wall/ground
+  // junction — the "floating building" tell. 0.28 with a slightly shallower depth bias
+  // keeps the acne away (the scene is static and the map is baked, so acne shows up
+  // immediately in the review frames if it returns) and puts the contact edge back.
+  sun.shadow.bias = -0.00025;
+  sun.shadow.normalBias = 0.28;
   scene.add(sun);
   scene.add(sun.target);
   // Two warm practicals, off by day and on at dusk: arrival court and heritage pavilion.
@@ -450,6 +469,8 @@ export function createView(canvas) {
     scene.background = skyBackground(dusk);
     scene.environment = environment(renderer, dusk);
     scene.fog.color.set(L.fog);
+    scene.fog.near = L.fogNear;
+    scene.fog.far = L.fogFar;
     hemi.color.set(L.hemiSky);
     hemi.groundColor.set(L.hemiGround);
     hemi.intensity = L.hemiI;
@@ -640,6 +661,41 @@ export function createView(canvas) {
     if (overlaysRef.group.visible) overlaysRef.update(dt);
   }
 
+  /* ---------------------------------------------------------------- capture */
+
+  /**
+   * Render the CURRENT view at a multiple of its on-screen size and return a JPEG data URL.
+   *
+   * This is what replaced the panel of pre-baked photographs. Those were renders of a
+   * demo build, so the app had to keep telling the user the picture was not their hotel;
+   * this renders the hotel actually on screen — the team's own layout, their palette,
+   * their camera, their day/dusk — so the panel cannot claim anything the session does
+   * not contain.
+   *
+   * The pixel ratio is raised rather than the CSS size, so the framing is identical to
+   * what the user is looking at: only the drawing buffer grows. The capture happens in
+   * the same task as the render, which is why no preserveDrawingBuffer is needed (that
+   * would cost every frame of the normal path).
+   */
+  function capture(scale = 2, quality = 0.92) {
+    const w = canvas.clientWidth || window.innerWidth;
+    const h = canvas.clientHeight || window.innerHeight;
+    const pr = renderer.getPixelRatio();
+    // Build furniture, not the building: the grid, the selection plate and a pending ghost
+    // are tools. A capture is a picture of the hotel.
+    const hidden = [grid, selHolder, ghostHolder].filter(Boolean).map((o) => [o, o.visible]);
+    for (const [o] of hidden) o.visible = false;
+    renderer.setPixelRatio(Math.min(pr * scale, 4));
+    renderer.setSize(w, h, false);
+    renderer.render(scene, camera);
+    const url = canvas.toDataURL('image/jpeg', quality);
+    renderer.setPixelRatio(pr);
+    renderer.setSize(w, h, false);
+    for (const [o, v] of hidden) o.visible = v;
+    renderer.render(scene, camera);
+    return { url, w: Math.round(w * Math.min(pr * scale, 4)), h: Math.round(h * Math.min(pr * scale, 4)) };
+  }
+
   function resize() {
     const w = canvas.clientWidth || window.innerWidth;
     const h = canvas.clientHeight || window.innerHeight;
@@ -669,7 +725,7 @@ export function createView(canvas) {
     get showcaseTotal() { return SHOWCASE_TOTAL; },
     rebuild, setPalette, setStyle, setDusk, setGrid, setExpandMode, setSelection,
     setGhost, moveGhost, hideGhost,
-    pick, groundCell, fit, focusOn, snap, resize, render, update, dispose,
+    pick, groundCell, fit, focusOn, snap, resize, render, update, dispose, capture,
     startShowcase, stopShowcase,
     set onTap(fn) { onTap = fn; },
     set onHover(fn) { onHover = fn; },

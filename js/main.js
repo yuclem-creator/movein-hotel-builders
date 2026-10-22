@@ -1299,28 +1299,39 @@ function bindBuild() {
     view.setDusk(duskOn);
   });
 
-  // Stills: photoreal renders of the DEMO build (docs/RENDER-REALISM.md), a labelled
-  // presentation layer, never the team's own hotel. Bytes attach on first open so three
-  // full-frame photographs stay off the critical path.
-  const stills = $('#stills');
-  const stillImgs = [...stills.querySelectorAll('img[data-still]')];
-  function showStills(on) {
-    if (on && !stills.hidden) return;
+  // Capture: a render of the TEAM'S OWN hotel, taken from the live scene at twice the
+  // on-screen resolution. This replaced a panel of pre-baked photographs of a demo build
+  // — pictures the app then had to label as "not your hotel". Nothing is fetched and
+  // nothing is pre-rendered: the image is produced by the renderer on the click, from
+  // wherever the camera happens to be, so it cannot show a hotel the session lacks.
+  const capturePanel = $('#capture');
+  function showCapture(on) {
+    if (on && !capturePanel.hidden) return;
     if (on) {
-      for (const img of stillImgs) {
-        if (!img.getAttribute('src')) img.setAttribute('src', img.dataset.still);
-      }
+      const shot = view.capture();
+      const img = $('#captureImg');
+      img.setAttribute('src', shot.url);
+      // The alt text is the claim: this is the team's hotel, and it says so with the
+      // names the team typed. Built as text, not markup — a hotel name is user input.
+      img.setAttribute('alt', `A render of ${session.hotelName} as built by ${session.teamName}`);
+      const save = $('#captureSave');
+      save.setAttribute('href', shot.url);
+      save.setAttribute('download', `${session.hotelName} - ${session.teamName}.jpg`);
+      $('#captureNote').textContent = `Your own build — ${session.hotelName}, exactly as it stands `
+        + `on screen, re-rendered at twice this screen's resolution (${shot.w} × ${shot.h}) `
+        + `${duskOn ? 'at dusk' : 'in daylight'}. Nothing here is pre-drawn.`;
+      $('#captureSize').textContent = `${shot.w} × ${shot.h} JPEG`;
     }
-    stills.hidden = !on;
-    $('#btnStills').setAttribute('aria-pressed', on ? 'true' : 'false');
-    if (on) $('#stillsClose').focus();
-    else $('#btnStills').focus();
+    capturePanel.hidden = !on;
+    $('#btnCapture').setAttribute('aria-pressed', on ? 'true' : 'false');
+    if (on) $('#captureClose').focus();
+    else $('#btnCapture').focus();
   }
-  $('#btnStills').addEventListener('click', () => showStills(stills.hidden));
-  $('#stillsClose').addEventListener('click', () => showStills(false));
-  stills.addEventListener('click', (e) => { if (e.target === stills) showStills(false); });
+  $('#btnCapture').addEventListener('click', () => showCapture(capturePanel.hidden));
+  $('#captureClose').addEventListener('click', () => showCapture(false));
+  capturePanel.addEventListener('click', (e) => { if (e.target === capturePanel) showCapture(false); });
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !stills.hidden) showStills(false);
+    if (e.key === 'Escape' && !capturePanel.hidden) showCapture(false);
   });
 
   $('#btnGrid').addEventListener('click', () => {

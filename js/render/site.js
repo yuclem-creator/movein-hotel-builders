@@ -4,8 +4,8 @@
 // makes the same footprint score differently in different positions.
 import * as THREE from '../../vendor/three/three.module.min.js';
 import { SITE, SIGNATURES, LANDSCAPES, PLOTS } from '../sim/catalogue.js';
-import { tileToMaterial, tilePlaneUV, footprintCentre, tileConeUV } from './massing.js';
-import { hash1 } from './materials.js';
+import { tileToMaterial, tilePlaneUV, footprintCentre, hipRoof } from './massing.js';
+import { hash1, crownGeometry } from './materials.js';
 
 const W = SITE.cols * SITE.cell;   // 48
 const D = SITE.rows * SITE.cell;   // 36
@@ -210,10 +210,11 @@ export function buildHeritage(kit) {
   // Tiled courses plus an eave fascia: a bare cone reads as a tent however good the
   // texture is, and this pavilion is the standard the team's buildings are judged on.
   g.add(mesh(new THREE.BoxGeometry(w * 1.12, 0.14, d * 1.12), kit.roofDark, c.x, body + 0.52, c.z));
-  const roof = mesh(tileConeUV(new THREE.ConeGeometry(1, 1, 4), w * 1.06, d * 1.06, 2.1, kit.roofSlate), kit.roofSlate, c.x, body + 1.5, c.z);
-  roof.scale.set(w * 0.82, 2.1, d * 0.82);
-  roof.rotation.y = Math.PI / 4;
-  g.add(roof);
+  // Same hip-roof builder the team's own buildings use. It was a four-sided ConeGeometry
+  // here, whose radial UV unwrap fanned the courses out of the apex — the diamond read
+  // that survived every texture pass. A square plan collapses this to an apex anyway, so
+  // the pavilion keeps its pyramid and gains courses parallel to its eaves.
+  g.add(hipRoof(w * 1.12, d * 1.12, 2.1, kit.roofSlate, c.x, body + 1.5, c.z));
   g.add(mesh(new THREE.CylinderGeometry(0.05, 0.09, 1.1, 6), kit.gold, c.x, body + 3.0, c.z));
   g.add(mesh(new THREE.SphereGeometry(0.16, 10, 8), kit.gold, c.x, body + 3.6, c.z));
 
@@ -245,18 +246,19 @@ export function buildLandscape(kit, landscapeId) {
     }
   }
 
-  // Trees are instanced: one trunk batch and one crown batch, five lobes per tree.
+  // Trees are instanced: one trunk batch and one crown batch, seven lobes per tree.
   // The naive version was two meshes per tree — 30+ trees of the same two geometries.
   //
   // Three lobes at +-0.4 of the crown radius overlapped almost completely, so every tree
-  // resolved to a single ball on a stick — the most obvious non-photographic element in
-  // the wide shot. Five lobes, spread out to the silhouette edge, squashed and rotated
-  // independently, give an irregular outline that survives the establishing camera.
-  const LOBES = 5;
+  // resolved to a single ball on a stick. Five lobes fixed the silhouette and left the
+  // other half of the problem: each lobe was still a faceted sphere. Seven lobes of
+  // crownGeometry (irregular, smooth-shaded, undersides drawn in) is the combination that
+  // stops a tree reading as a cluster of balls at establishing scale.
+  const LOBES = 7;
   const trunkGeo = new THREE.CylinderGeometry(0.10, 0.15, 1, 6);
   trunkGeo.translate(0, 0.5, 0);
   const trunks = new THREE.InstancedMesh(trunkGeo, kit.trunk, spots.length);
-  const crowns = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1), kit.foliage, spots.length * LOBES);
+  const crowns = new THREE.InstancedMesh(crownGeometry(), kit.foliage, spots.length * LOBES);
   trunks.castShadow = crowns.castShadow = true;
   trunks.receiveShadow = crowns.receiveShadow = true;
   const dummy = new THREE.Object3D();
@@ -276,12 +278,17 @@ export function buildLandscape(kit, landscapeId) {
     trunks.setMatrixAt(i, dummy.matrix);
 
     // Offset, radius and squash per lobe. Deterministic per tree so a re-render matches.
+    // Seven now, and the outer five are pushed further out than before: the silhouette is
+    // what the establishing camera reads, and a tight cluster of small lobes still reads
+    // as one ball however good each lobe's geometry is.
     const lobes = [
-      [0.00, 1.02, 0.00, 0.72, 1.00],
-      [-0.62, 0.80, 0.20, 0.52, 0.86],
-      [0.58, 0.84, -0.24, 0.56, 0.90],
-      [0.16, 0.62, 0.52, 0.46, 0.82],
-      [-0.28, 0.66, -0.50, 0.44, 0.88],
+      [0.00, 1.06, 0.00, 0.70, 0.98],
+      [-0.72, 0.84, 0.22, 0.54, 0.84],
+      [0.68, 0.88, -0.26, 0.58, 0.88],
+      [0.18, 0.64, 0.60, 0.46, 0.80],
+      [-0.32, 0.68, -0.58, 0.44, 0.86],
+      [0.44, 0.52, 0.18, 0.38, 0.78],
+      [-0.40, 0.50, -0.14, 0.36, 0.76],
     ];
     for (let li = 0; li < lobes.length; li++) {
       const [dx, dy, dz, r, squash] = lobes[li];
@@ -331,7 +338,9 @@ export function buildLandscape(kit, landscapeId) {
   const potGeo = new THREE.CylinderGeometry(0.42, 0.34, 0.5, 10);
   potGeo.translate(0, 0.25, 0);
   const potMesh = new THREE.InstancedMesh(potGeo, kit.pavingDark, pots.length);
-  const bushMesh = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.46, 1), kit.foliage, pots.length);
+  // Same irregular, smooth-shaded crown as the trees: a pot bush used to be a small
+  // faceted ball, and next to a corrected tree it was the remaining polyhedron.
+  const bushMesh = new THREE.InstancedMesh(crownGeometry(), kit.foliage, pots.length);
   pots.forEach((p, i) => {
     dummy.position.set(p.x, 0, p.z);
     dummy.rotation.set(0, 0, 0);
@@ -339,7 +348,9 @@ export function buildLandscape(kit, landscapeId) {
     dummy.updateMatrix();
     potMesh.setMatrixAt(i, dummy.matrix);
     dummy.position.set(p.x, 0.92, p.z);
-    dummy.scale.setScalar(0.85 + (i % 3) * 0.12);
+    // crownGeometry has unit radius; the old bush geometry was 0.46, so the size is kept
+    // here rather than in the geometry.
+    dummy.scale.setScalar(0.46 * (0.85 + (i % 3) * 0.12));
     dummy.updateMatrix();
     bushMesh.setMatrixAt(i, dummy.matrix);
   });
@@ -427,7 +438,13 @@ export function buildSignature(kit, signatureId) {
     g.add(mesh(new THREE.BoxGeometry(4.6, 2.6, 3.4), kit.facadeGuest, x, 1.3, z));
     g.add(mesh(new THREE.BoxGeometry(5.0, 0.2, 3.8), kit.gold, x, 2.7, z));
     g.add(mesh(new THREE.BoxGeometry(4.2, 0.16, 2.8), kit.lawn, x, 2.86, z));
-    for (let i = 0; i < 4; i++) g.add(mesh(new THREE.IcosahedronGeometry(0.42, 0), kit.foliage, x - 1.5 + i * 1.0, 3.2, z + (i % 2 ? 0.8 : -0.8)));
+    // Shrubs on the planted deck: the same crown geometry as the trees, sized by scale.
+    const shrubGeo = crownGeometry(0);
+    for (let i = 0; i < 4; i++) {
+      const shrub = mesh(shrubGeo, kit.foliage, x - 1.5 + i * 1.0, 3.2, z + (i % 2 ? 0.8 : -0.8));
+      shrub.scale.setScalar(0.42);
+      g.add(shrub);
+    }
   } else if (sig.id === 'art') {
     g.add(mesh(new THREE.BoxGeometry(5.4, 0.3, 1.0), kit.pavingDark, x, 0.15, z));
     g.add(mesh(new THREE.BoxGeometry(5.0, 3.0, 0.3), kit.ink, x, 1.7, z));
