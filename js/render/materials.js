@@ -1,9 +1,9 @@
-// materials.js — brand-locked materials and procedural textures. No image assets:
+// materials.js â€” brand-locked materials and procedural textures. No image assets:
 // every texture is drawn on a canvas at runtime, so the app stays asset-light and a
 // palette switch costs zero network requests.
 //
 // Resolution: a facade tile is 512px (256 on touch). At 128px a window was 18 pixels
-// wide, so a camera move toward a wall showed mush — that is what made the first
+// wide, so a camera move toward a wall showed mush â€” that is what made the first
 // detail pass read as a sticker rather than a building.
 import * as THREE from '../../vendor/three/three.module.min.js';
 import { PALETTES } from '../sim/catalogue.js';
@@ -194,28 +194,89 @@ export function facadeTexture(role = 'G') { return facadeSet(role).map; }
 export function windowLightTexture(role = 'G') { return facadeSet(role).lights; }
 
 /** Paving texture for the site plinth: stone joints plus faint grain. */
+/**
+ * Deterministic per-index noise. A texture that redraws differently on every reload
+ * makes two screenshots incomparable, and the visual gate compares screenshots.
+ */
+const hash1 = (i) => { const s = Math.sin(i * 127.1 + 13.7) * 43758.5453; return s - Math.floor(s); };
+
+/** Exported for the render modules that need the same deterministic jitter. */
+export { hash1 };
+
+/**
+ * Paving: large honed slabs with real joint depth.
+ *
+ * The 128 px version drew a 32 px grid with 1 px lines, so at the wide camera the
+ * entire forecourt was one uniform sheet of graph paper â€” the flattest thing in the
+ * frame. A generated limestone reference (FLORA, review/flora-ref/paving.png) showed
+ * what was missing: four or five slabs of visibly different tone, a chamfer that
+ * catches a highlight on one edge and a shadow on the other, and a few faint damp
+ * patches. All four are cheap to draw and none of them cost a network byte.
+ */
 export function pavingTexture() {
   if (cache.has('pave')) return cache.get('pave');
+  const S = isTouch() ? 256 : 512;
   const c = document.createElement('canvas');
-  c.width = 128; c.height = 128;
+  c.width = c.height = S;
   const g = c.getContext('2d');
-  g.fillStyle = '#EFE9DE';
-  g.fillRect(0, 0, 128, 128);
-  g.strokeStyle = 'rgba(166,156,138,0.55)';
-  g.lineWidth = 1;
-  for (let i = 0; i <= 4; i++) {
-    const p = i * 32;
-    g.beginPath(); g.moveTo(p, 0); g.lineTo(p, 128); g.stroke();
-    g.beginPath(); g.moveTo(0, p); g.lineTo(128, p); g.stroke();
+  const n = 4, cell = S / n, joint = Math.max(1.5, S / 220);
+
+  // The joint is the BASE, not a stroke: filling every slab inset by the joint width
+  // guarantees a continuous line in both directions, including across the tile seam.
+  g.fillStyle = '#C9C0AE';
+  g.fillRect(0, 0, S, S);
+
+  const tone = ['#F2ECE2', '#EAE3D5', '#F4EFE6', '#E5DDCD', '#EEE7D9', '#F0E9DD'];
+  for (let cy = 0; cy < n; cy++) {
+    for (let cx = 0; cx < n; cx++) {
+      const k = cx + cy * n;
+      const x = cx * cell + joint * 0.5, y = cy * cell + joint * 0.5;
+      const w = cell - joint, h = cell - joint;
+      g.fillStyle = tone[Math.floor(hash1(k) * tone.length)];
+      g.fillRect(x, y, w, h);
+      // Chamfer: one lit edge, one shadowed edge. This is the whole difference between
+      // a printed grid and stone that has thickness.
+      const e = Math.max(1, joint * 1.4);
+      g.fillStyle = 'rgba(255,255,255,0.26)';
+      g.fillRect(x, y, w, e);
+      g.fillRect(x, y, e, h);
+      g.fillStyle = 'rgba(96,88,76,0.20)';
+      g.fillRect(x, y + h - e, w, e);
+      g.fillRect(x + w - e, y, e, h);
+      // Slight per-slab wear: a corner scuff, never more than a hint.
+      if (hash1(k + 21) > 0.55) {
+        g.fillStyle = 'rgba(150,140,122,0.10)';
+        g.fillRect(x + w * 0.1, y + h * 0.62, w * 0.45, h * 0.3);
+      }
+    }
   }
-  for (let i = 0; i < 900; i++) {
-    const x = (i * 37) % 128, y = (i * 61) % 128;
-    g.fillStyle = `rgba(150,140,124,${0.03 + ((i * 13) % 7) / 200})`;
+
+  // Low-frequency patchiness across several slabs at once, then damp stains.
+  for (let i = 0; i < 9; i++) {
+    const x = hash1(i + 40) * S, y = hash1(i + 80) * S, r = S * (0.09 + hash1(i + 120) * 0.14);
+    const rad = g.createRadialGradient(x, y, 0, x, y, r);
+    rad.addColorStop(0, 'rgba(174,164,144,0.13)');
+    rad.addColorStop(1, 'rgba(174,164,144,0)');
+    g.fillStyle = rad;
+    g.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+
+  // Fossil speck and grain: limestone is never a flat colour field.
+  for (let i = 0; i < 4200; i++) {
+    const x = hash1(i + 900) * S, y = hash1(i + 2100) * S;
+    g.fillStyle = `rgba(146,136,118,${0.03 + hash1(i + 3000) * 0.07})`;
     g.fillRect(x, y, 1, 1);
   }
+  for (let i = 0; i < 90; i++) {
+    const x = hash1(i + 5000) * S, y = hash1(i + 5600) * S;
+    g.fillStyle = `rgba(132,122,104,${0.06 + hash1(i + 6200) * 0.08})`;
+    g.beginPath(); g.arc(x, y, 0.7 + hash1(i + 6800) * 1.3, 0, Math.PI * 2); g.fill();
+  }
+
   const t = new THREE.CanvasTexture(c);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4;
   cache.set('pave', t);
   return t;
 }
@@ -249,37 +310,89 @@ export function roofMembraneTexture() {
 
 /**
  * Pitched-roof courses. A scaled cone's UVs run base-to-apex in v, so horizontal
- * course lines in this texture wrap the pyramid as tile courses — the difference
+ * course lines in this texture wrap the pyramid as tile courses â€” the difference
  * between a tiled roof and a painted tent.
+ */
+/**
+ * Roof tiling, used by every pitched roof on the site â€” and the pitched roofs are the
+ * largest continuous surfaces in the wide shot, which is why the 128 px version read as
+ * a grey smear from the inspection camera. The generated slate reference
+ * (review/flora-ref/roof.png) had two things this was missing: per-tile tonal range
+ * (warm grey-brown through charcoal, not one flat hue) and a crisp shadow line under
+ * every course, which is what makes a roof read as overlapping plates.
  */
 export function roofTileTexture() {
   if (cache.has('tile')) return cache.get('tile');
+  const S = isTouch() ? 256 : 512;
   const c = document.createElement('canvas');
-  c.width = c.height = 128;
+  c.width = c.height = S;
   const g = c.getContext('2d');
-  g.fillStyle = '#EDE7DA';
-  g.fillRect(0, 0, 128, 128);
-  g.strokeStyle = 'rgba(104,94,78,0.42)';
-  g.lineWidth = 2.5;
-  for (let i = 0; i <= 8; i++) {
-    g.beginPath(); g.moveTo(0, i * 16 + 0.5); g.lineTo(128, i * 16 + 0.5); g.stroke();
-  }
-  g.strokeStyle = 'rgba(118,108,92,0.30)';
-  g.lineWidth = 1;
-  for (let row = 0; row < 8; row++) {
-    for (let col = 0; col < 4; col++) {
-      const x = col * 32 + (row % 2 ? 16 : 0);
-      g.beginPath(); g.moveTo(x + 0.5, row * 16); g.lineTo(x + 0.5, row * 16 + 16); g.stroke();
+  const rows = 10, cols = 6, ch = S / rows, cw = S / cols, lw = Math.max(1, S / 320);
+
+  g.fillStyle = '#B6AE9E';
+  g.fillRect(0, 0, S, S);
+
+  // The map MODULATES; the material colour does the tinting (every other material in this
+  // kit works that way). Painting the slate tints dark here as well made the roofs
+  // multiply twice and go near-black â€” a regression the wide shot showed immediately.
+  // So: a light modulation field with per-tile range, and the darkness lives in the
+  // material colour where it belongs.
+  const tint = ['#F2ECDE', '#E3DCCC', '#EDE6D6', '#D9D2C2', '#E8E1D1', '#CFC8B8'];
+  for (let r = 0; r < rows; r++) {
+    for (let k = 0; k < cols; k++) {
+      const x = k * cw + (r % 2 ? cw * 0.5 : 0) - cw * 0.5;
+      const y = r * ch;
+      const t = tint[Math.floor(hash1(r * 31 + k) * tint.length)];
+      g.fillStyle = t;
+      g.fillRect(x + lw * 0.5, y, cw - lw, ch);
+      // Wrap the half-tile that hangs past the right edge so the course stays bonded
+      // across the tile seam instead of showing a cut column.
+      if (x < 0) {
+        g.fillRect(x + S + lw * 0.5, y, cw - lw, ch);
+      } else if (x + cw > S) {
+        g.fillRect(x - S + lw * 0.5, y, cw - lw, ch);
+      }
+      // Vertical slate edges.
+      g.fillStyle = 'rgba(96,90,80,0.34)';
+      g.fillRect(x + cw - lw, y, lw, ch);
+      // Weathering: a soft darkening down each slate, never a hard line.
+      const grad = g.createLinearGradient(x, y, x, y + ch);
+      grad.addColorStop(0, 'rgba(255,255,255,0.10)');
+      grad.addColorStop(1, 'rgba(60,56,50,0.14)');
+      g.fillStyle = grad;
+      g.fillRect(x + lw * 0.5, y, cw - lw, ch);
+      if (hash1(r * 71 + k + 9) > 0.82) {
+        g.fillStyle = 'rgba(228,230,214,0.22)';   // lichen speck
+        g.fillRect(x + cw * 0.3, y + ch * 0.35, cw * 0.28, ch * 0.18);
+      }
     }
+    // Course shadow: the single strongest depth cue on a slate roof â€” but shallow. At
+    // 0.55 alpha it reads as a black stripe every 0.5 m and the roof turns into a grate.
+    const sg = g.createLinearGradient(0, r * ch + ch * 0.78, 0, r * ch + ch);
+    sg.addColorStop(0, 'rgba(48,45,40,0)');
+    sg.addColorStop(1, 'rgba(48,45,40,0.26)');
+    g.fillStyle = sg;
+    g.fillRect(0, r * ch + ch * 0.78, S, ch * 0.22);
   }
+
+  for (let i = 0; i < 2600; i++) {
+    const x = hash1(i + 300) * S, y = hash1(i + 1300) * S;
+    g.fillStyle = `rgba(${hash1(i + 2300) > 0.5 ? '210,206,192' : '40,38,34'},0.05)`;
+    g.fillRect(x, y, 1, 1);
+  }
+
   const t = new THREE.CanvasTexture(c);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  // No bake-in repeat: the roof materials declare their world tile size and every roof —
-  // box or cone — scales its own UVs to it, so courses are the same size on every roof.
+  // No bake-in repeat: the roof materials declare their world tile size and every roof â€”
+  // box or cone â€” scales its own UVs to it, so courses are the same size on every roof.
   t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4;
   cache.set('tile', t);
   return t;
 }
+
+/** Relief for the roof comes from the albedo, as for the paving: the course shadow and the
+ *  slate edges are already the darkest pixels, so they read as the recesses. */
 
 /**
  * Open ground outside the plot: dry gravel and scrub. Flat #DED6C6 fill was 60% of the
@@ -287,24 +400,59 @@ export function roofTileTexture() {
  */
 export function groundTexture() {
   if (cache.has('ground')) return cache.get('ground');
+  const S = isTouch() ? 256 : 512;
   const c = document.createElement('canvas');
-  c.width = c.height = 256;
+  c.width = c.height = S;
   const g = c.getContext('2d');
-  g.fillStyle = '#E6DECC';
-  g.fillRect(0, 0, 256, 256);
-  for (let i = 0; i < 90; i++) {
-    const x = (i * 89) % 256, y = (i * 151) % 256, r = 8 + ((i * 17) % 26);
-    g.fillStyle = i % 3 ? 'rgba(206,196,174,0.30)' : 'rgba(183,205,194,0.20)';
-    g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+  g.fillStyle = '#E4DBC7';
+  g.fillRect(0, 0, S, S);
+
+  // Broad tonal patches first: dry ground is uneven at a scale much larger than grass.
+  for (let i = 0; i < 14; i++) {
+    const x = hash1(i + 11) * S, y = hash1(i + 22) * S, r = S * (0.12 + hash1(i + 33) * 0.22);
+    const rad = g.createRadialGradient(x, y, 0, x, y, r);
+    const warm = hash1(i + 44) > 0.45;
+    rad.addColorStop(0, warm ? 'rgba(206,192,162,0.44)' : 'rgba(188,198,176,0.32)');
+    rad.addColorStop(1, 'rgba(206,192,162,0)');
+    g.fillStyle = rad;
+    g.fillRect(x - r, y - r, r * 2, r * 2);
   }
+
+  // Brushed streaks: the single most useful cue. The old version scattered filled
+  // circles, which read as blotches of paint; sun-bleached ground has directional
+  // grain, so every stroke here is a short, nearly horizontal arc.
+  g.lineWidth = 1;
   for (let i = 0; i < 2600; i++) {
-    const x = (i * 61) % 256, y = (i * 43) % 256;
-    g.fillStyle = `rgba(132,123,106,${0.04 + ((i * 11) % 8) / 130})`;
+    const x = hash1(i + 101) * S, y = hash1(i + 202) * S;
+    const len = S * (0.012 + hash1(i + 303) * 0.05);
+    const tilt = (hash1(i + 404) - 0.5) * 0.22;
+    const light = hash1(i + 505) > 0.5;
+    g.strokeStyle = light
+      ? `rgba(246,238,218,${(0.09 + hash1(i + 606) * 0.20).toFixed(3)})`
+      : `rgba(150,140,116,${(0.07 + hash1(i + 707) * 0.16).toFixed(3)})`;
+    g.beginPath();
+    g.moveTo(x, y);
+    g.lineTo(x + len, y + len * tilt);
+    g.stroke();
+  }
+
+  // Tufts and pebbles at a real scale, then fine dust.
+  for (let i = 0; i < 220; i++) {
+    const x = hash1(i + 808) * S, y = hash1(i + 909) * S;
+    const r = 1 + hash1(i + 111) * 2.6;
+    g.fillStyle = hash1(i + 222) > 0.55 ? 'rgba(158,168,132,0.30)' : 'rgba(176,160,126,0.34)';
+    g.beginPath(); g.ellipse(x, y, r, r * 0.6, 0, 0, Math.PI * 2); g.fill();
+  }
+  for (let i = 0; i < 5200; i++) {
+    const x = hash1(i + 333) * S, y = hash1(i + 444) * S;
+    g.fillStyle = `rgba(132,123,106,${0.03 + hash1(i + 555) * 0.09})`;
     g.fillRect(x, y, 1, 1);
   }
+
   const t = new THREE.CanvasTexture(c);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4;
   cache.set('ground', t);
   return t;
 }
@@ -312,30 +460,64 @@ export function groundTexture() {
 /** Water: pale ripple bands. Pairs with the environment map for a real sheen. */
 export function waterTexture() {
   if (cache.has('water')) return cache.get('water');
+  // 26 lone arcs on a 128 px tile was a flat sage sheet with three faint stripes on it,
+  // and the canal is a fifth of the wide frame. Water reads as water because of the
+  // *density* of overlapping wavelets at several scales, all nearly horizontal, plus the
+  // sheer the environment map supplies â€” so: three sizes of wavelet, one tile, no assets.
+  const S = isTouch() ? 256 : 512;
   const c = document.createElement('canvas');
-  c.width = c.height = 128;
+  c.width = c.height = S;
   const g = c.getContext('2d');
-  g.fillStyle = '#E4F1EC';
-  g.fillRect(0, 0, 128, 128);
-  g.lineWidth = 1.5;
+  g.fillStyle = '#DCEBE6';
+  g.fillRect(0, 0, S, S);
+
+  // Broad swell: low-contrast bands, the thing that reads at a distance.
   for (let i = 0; i < 26; i++) {
-    const y = (i * 71) % 128, x = (i * 37) % 128;
-    g.strokeStyle = i % 2 ? 'rgba(150,186,178,0.45)' : 'rgba(255,255,255,0.40)';
+    const y = (i / 26) * S + hash1(i + 5) * 6;
+    g.strokeStyle = `rgba(146,180,172,${(0.10 + hash1(i + 15) * 0.10).toFixed(3)})`;
+    g.lineWidth = 3 + hash1(i + 25) * 5;
     g.beginPath();
-    g.moveTo(x, y);
-    g.quadraticCurveTo(x + 18, y - 4, x + 36, y);
+    g.moveTo(0, y);
+    for (let x = 0; x <= S; x += S / 4) {
+      g.quadraticCurveTo(x + S / 8, y + (hash1(i * 9 + x) - 0.5) * 5, x + S / 4, y);
+    }
     g.stroke();
   }
+
+  // Mid wavelets.
+  g.lineWidth = 1.6;
+  for (let i = 0; i < 220; i++) {
+    const y = hash1(i + 101) * S, x = hash1(i + 202) * S;
+    const len = S * (0.03 + hash1(i + 303) * 0.09);
+    const light = hash1(i + 404) > 0.45;
+    g.strokeStyle = light
+      ? `rgba(255,255,255,${(0.16 + hash1(i + 505) * 0.30).toFixed(3)})`
+      : `rgba(120,158,150,${(0.10 + hash1(i + 606) * 0.20).toFixed(3)})`;
+    g.beginPath();
+    g.moveTo(x, y);
+    g.quadraticCurveTo(x + len * 0.5, y - 2 - hash1(i + 707) * 3, x + len, y);
+    g.stroke();
+  }
+
+  // Fine chop: the sparkle that only shows when the sun is behind the camera.
+  g.lineWidth = 1;
+  for (let i = 0; i < 900; i++) {
+    const x = hash1(i + 808) * S, y = hash1(i + 909) * S, len = 2 + hash1(i + 111) * 5;
+    g.strokeStyle = `rgba(255,255,255,${(0.20 + hash1(i + 222) * 0.35).toFixed(3)})`;
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x + len, y); g.stroke();
+  }
+
   const t = new THREE.CanvasTexture(c);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4;
   cache.set('water', t);
   return t;
 }
 
 /**
- * Roof and bed planting. `lawn` on its own is one flat #9CBBAE, and 40 m² of it on a
- * planted roof read as a plastic lid — or, worse, as water. This map is the same green
+ * Roof and bed planting. `lawn` on its own is one flat #9CBBAE, and 40 mÂ² of it on a
+ * planted roof read as a plastic lid â€” or, worse, as water. This map is the same green
  * with groundcover scale under it, so a roof garden reads as vegetation from the
  * inspection camera without a single extra draw call: one 128 px tile, repeated at 2.6 m.
  */
@@ -402,7 +584,7 @@ export function plantingTexture() {
 
   // (2) Groundcover: leaf-scale ellipses in clusters, with one highlight per leaf on its sun
   // side. At this tile (2.6 m) a leaf is ~0.1 m, i.e. 5 px, and one screen pixel is ~2 cm,
-  // so the pattern is at the limit of resolution on purpose — it averages to vegetation
+  // so the pattern is at the limit of resolution on purpose â€” it averages to vegetation
   // instead of resolving as speckle.
   for (let i = 0; i < 40; i++) {
     const cx = rand() * TILE, cy = rand() * TILE;
@@ -452,28 +634,162 @@ export function blobTexture() {
  *
  * Gold, accent and glass are METALS: with nothing to reflect they render near-black.
  * That is exactly why every accent band in the review screenshot read as dull brown
- * rather than #B59060. Contrast in the environment — a warm sun, a cool bounce card —
+ * rather than #B59060. Contrast in the environment â€” a warm sun, a cool bounce card â€”
  * is what turns a metal surface into gold instead of orange plastic. Costs one small
  * cube render at boot and zero network bytes.
  */
-export function environment(renderer) {
-  if (cache.has('env')) return cache.get('env');
+/**
+ * A real sky, drawn once at 1024x512 and used twice: as the visible background and as
+ * the source of the PMREM environment. It is the highest-leverage surface in the whole
+ * renderer and it used to be a 16x64 three-band gradient. Every metal in the scene
+ * reflects it â€” the gold bands reflected a grey stripe and read as dull brown, and glass
+ * reflected nothing at all, which is most of the reason the first wide shot read as a
+ * diagram rather than a photograph.
+ *
+ * Palette and structure are taken from a generated reference sky (FLORA, Workspace 12,
+ * review/flora-ref/sky.png): high-key ivory at the horizon, cool grey-blue at the
+ * zenith, one broad diffuse bloom instead of a hard disc, cirrus faint enough that it
+ * only registers in a reflection.
+ */
+export function skyTexture(dusk = false) {
+  const key = dusk ? 'sky:dusk' : 'sky:day';
+  if (cache.has(key)) return cache.get(key);
+  const W = 1024, H = 512;
+  const c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  const g = c.getContext('2d');
+
+  // v runs from zenith (0) to below-horizon (1). The horizon sits at 0.52, so a low
+  // camera sees sky in the top half and ground bounce underneath.
+  const grad = g.createLinearGradient(0, 0, 0, H);
+  if (dusk) {
+    grad.addColorStop(0.00, '#1A2230');
+    grad.addColorStop(0.30, '#3A4A63');
+    grad.addColorStop(0.46, '#8A7C7E');
+    grad.addColorStop(0.52, '#D9A277');
+    grad.addColorStop(0.60, '#6E5A48');
+    grad.addColorStop(1.00, '#2A2521');
+  } else {
+    grad.addColorStop(0.00, '#8FA9BC');
+    grad.addColorStop(0.26, '#AFC5CE');
+    grad.addColorStop(0.44, '#DCE4E0');
+    grad.addColorStop(0.52, '#F6EEDF');
+    grad.addColorStop(0.58, '#EFE4D0');
+    grad.addColorStop(1.00, '#C6BBA4');
+  }
+  g.fillStyle = grad;
+  g.fillRect(0, 0, W, H);
+
+  // Sun bloom, broad and disc-less. A hard disc in an IBL puts a small bright dot in
+  // every polished surface â€” a specular artefact, not a sun.
+  const sx = dusk ? W * 0.16 : W * 0.72;
+  const sy = dusk ? H * 0.53 : H * 0.30;
+  const bloom = g.createRadialGradient(sx, sy, 0, sx, sy, W * 0.40);
+  bloom.addColorStop(0.00, dusk ? 'rgba(255,196,138,0.85)' : 'rgba(255,250,236,0.90)');
+  bloom.addColorStop(0.18, dusk ? 'rgba(255,168,110,0.40)' : 'rgba(255,244,214,0.45)');
+  bloom.addColorStop(0.55, dusk ? 'rgba(190,120,80,0.12)' : 'rgba(255,238,206,0.12)');
+  bloom.addColorStop(1.00, 'rgba(255,238,206,0)');
+  g.fillStyle = bloom;
+  g.fillRect(0, 0, W, H);
+
+  // Horizon haze: the reason a distant roof edge sits *in* the air rather than on it.
+  const haze = g.createLinearGradient(0, H * 0.40, 0, H * 0.62);
+  haze.addColorStop(0, 'rgba(255,248,236,0)');
+  haze.addColorStop(0.55, dusk ? 'rgba(226,168,124,0.30)' : 'rgba(255,250,240,0.42)');
+  haze.addColorStop(1, 'rgba(255,248,236,0)');
+  g.fillStyle = haze;
+  g.fillRect(0, H * 0.40, W, H * 0.22);
+
+  // Cirrus: thin, high and almost invisible, until something reflects it.
+  for (let i = 0; i < 9; i++) {
+    const y = H * (0.06 + hash1(i + 3) * 0.30);
+    const x = hash1(i + 17) * W;
+    const w = W * (0.10 + hash1(i + 29) * 0.22);
+    g.strokeStyle = dusk
+      ? `rgba(226,206,196,${(0.02 + hash1(i + 41) * 0.05).toFixed(3)})`
+      : `rgba(255,255,252,${(0.03 + hash1(i + 41) * 0.08).toFixed(3)})`;
+    g.lineWidth = 1 + hash1(i + 53) * 3.5;
+    g.beginPath();
+    g.moveTo(x, y);
+    g.quadraticCurveTo(x + w * 0.5, y - H * 0.02, x + w, y + H * 0.006);
+    g.stroke();
+  }
+
+  // Dither: an 8-bit gradient bands visibly across 512 rows, and ACES amplifies it.
+  g.fillStyle = 'rgba(255,255,255,0.012)';
+  for (let i = 0; i < 9000; i++) {
+    g.fillRect(hash1(i + 601) * W, hash1(i + 811) * H, 1, 1);
+  }
+  g.fillStyle = 'rgba(0,0,0,0.012)';
+  for (let i = 0; i < 9000; i++) {
+    g.fillRect(hash1(i + 907) * W, hash1(i + 1013) * H, 1, 1);
+  }
+
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  cache.set(key, t);
+  return t;
+}
+
+/**
+ * Canopy mottle. A tree crown is not one green: it is a hundred clumps catching light at
+ * different angles. This map is deliberately near-white so it MODULATES the material
+ * colour and the instance tints (the same rule the roofs taught: a dark map plus a dark
+ * colour multiplies twice and everything goes to mud).
+ */
+export function canopyTexture() {
+  if (cache.has('canopy')) return cache.get('canopy');
+  const S = 128;
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const g = c.getContext('2d');
+  g.fillStyle = '#EFEFEA';
+  g.fillRect(0, 0, S, S);
+  // Clumps: overlapping soft discs, half lighter, half darker, nothing circular enough
+  // to read as a shape.
+  for (let i = 0; i < 130; i++) {
+    const x = hash1(i + 7) * S, y = hash1(i + 19) * S, r = 3 + hash1(i + 31) * 9;
+    const light = hash1(i + 43) > 0.5;
+    const rad = g.createRadialGradient(x, y, 0, x, y, r);
+    rad.addColorStop(0, light ? 'rgba(255,255,250,0.42)' : 'rgba(120,132,118,0.34)');
+    rad.addColorStop(1, light ? 'rgba(255,255,250,0)' : 'rgba(120,132,118,0)');
+    g.fillStyle = rad;
+    g.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+  // Leaf flecks: the detail that survives a close camera on a balcony tree.
+  for (let i = 0; i < 700; i++) {
+    const x = hash1(i + 61) * S, y = hash1(i + 73) * S;
+    g.fillStyle = hash1(i + 87) > 0.5 ? 'rgba(255,255,252,0.30)' : 'rgba(110,124,112,0.22)';
+    g.fillRect(x, y, 1 + (i % 2), 1);
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.colorSpace = THREE.SRGBColorSpace;
+  cache.set('canopy', t);
+  return t;
+}
+
+/** The same sky, mapped the way `scene.background` expects. */
+export function skyBackground(dusk = false) {
+  const key = dusk ? 'skybg:dusk' : 'skybg:day';
+  if (cache.has(key)) return cache.get(key);
+  const t = new THREE.CanvasTexture(skyTexture(dusk).image);
+  t.mapping = THREE.EquirectangularReflectionMapping;
+  t.colorSpace = THREE.SRGBColorSpace;
+  cache.set(key, t);
+  return t;
+}
+
+export function environment(renderer, dusk = false) {
+  const envKey = dusk ? 'env:dusk' : 'env:day';
+  if (cache.has(envKey)) return cache.get(envKey);
   const s = new THREE.Scene();
 
-  const c = document.createElement('canvas');
-  c.width = 16; c.height = 64;
-  const g = c.getContext('2d');
-  const grad = g.createLinearGradient(0, 0, 0, 64);
-  grad.addColorStop(0, '#FFFDF6');
-  grad.addColorStop(0.42, '#E4E9E5');
-  grad.addColorStop(0.60, '#CDC4B0');
-  grad.addColorStop(1, '#8B8272');
-  g.fillStyle = grad;
-  g.fillRect(0, 0, 16, 64);
-  const skyTex = new THREE.CanvasTexture(c);
-  skyTex.colorSpace = THREE.SRGBColorSpace;
+  // The sky sphere is the IBL source. 48x32 segments: with 24x16 the PMREM picked up
+  // faceting along the horizon and gold showed visible banding.
+  const skyTex = skyTexture(dusk);
   s.add(new THREE.Mesh(
-    new THREE.SphereGeometry(50, 24, 16),
+    new THREE.SphereGeometry(50, 48, 32),
     new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide }),
   ));
 
@@ -486,18 +802,20 @@ export function environment(renderer) {
     m.lookAt(0, 0, 0);
     s.add(m);
   };
-  panel('#FFF3DC', 3.2, 26, 26, 30, 44, 22);    // sun
-  panel('#CFE0E6', 1.1, 40, 18, -34, 12, -18);  // cool bounce
-  panel('#FFF0D8', 0.9, 30, 14, 10, 6, 46);     // warm bounce
+  panel(dusk ? '#FFC79A' : '#FFF3DC', dusk ? 1.4 : 3.2, 26, 26, dusk ? -30 : 30, dusk ? 14 : 44, 22);  // sun
+  panel(dusk ? '#5A6E86' : '#CFE0E6', dusk ? 0.5 : 1.1, 40, 18, -34, 12, -18);                           // cool bounce
+  panel(dusk ? '#E7A374' : '#FFF0D8', dusk ? 0.6 : 0.9, 30, 14, 10, 6, 46);                              // warm bounce
 
   const pmrem = new THREE.PMREMGenerator(renderer);
   const rt = pmrem.fromScene(s, 0.02);
   pmrem.dispose();
+  // Dispose the panels but NOT the sky map: it is the cached texture the visible
+  // background is drawn from, and disposing it here blanks the sky on the next frame.
   s.traverse((o) => {
     if (o.geometry) o.geometry.dispose();
-    if (o.material) { if (o.material.map) o.material.map.dispose(); o.material.dispose(); }
+    if (o.material) { if (o.material.map && o.material.map !== skyTex) o.material.map.dispose(); o.material.dispose(); }
   });
-  cache.set('env', rt.texture);
+  cache.set(envKey, rt.texture);
   return rt.texture;
 }
 
@@ -529,7 +847,7 @@ export function makeKit(paletteId) {
    * One facade material: shared textures (same GPU upload, one sampler), tinted by
    * the palette. The albedo doubles as the bump map and the matching rough map makes
    * glass glossy and stone matte. `jitter` shifts lightness a few percent so fifteen
-   * walls never read as one flat tone — derived from the placement, so the same hotel
+   * walls never read as one flat tone â€” derived from the placement, so the same hotel
    * always looks the same.
    *
    * `isDynamic` marks per-building copies for disposal on rebuild; kit-shared ones
@@ -576,20 +894,20 @@ export function makeKit(paletteId) {
     // tileWorld 4.8, not 3.2: eight courses over 3.2 m is a 0.4 m course, which is about
     // four pixels in the establishing camera and mips down to flat noise. At 4.8 m the
     // courses survive at ~8 px and the roofs read as tiled rather than spray-textured.
-    roofTile: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#8D8271'), map: tiles, roughness: 0.9, userData: { tileWorld: 4.8 } })),
-    roofSlate: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#625E54'), map: tiles, roughness: 0.88, userData: { tileWorld: 4.8 } })),
+    roofTile: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#8D8271'), map: tiles, bumpMap: tiles, bumpScale: 0.30, roughness: 0.9, userData: { tileWorld: 4.8 } })),
+    roofSlate: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#625E54'), map: tiles, bumpMap: tiles, bumpScale: 0.30, roughness: 0.88, userData: { tileWorld: 4.8 } })),
     roofDark: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#8E8577'), roughness: 0.95 })),
     glass: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color(BRAND.glass), roughness: 0.06, metalness: 0.62, transparent: true, opacity: 0.6 })),
-    water: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#6F9A92'), map: ripple, roughness: 0.14, metalness: 0.25, transparent: true, opacity: 0.95, userData: { tileWorld: 6 } })),
-    paving: keep(new THREE.MeshStandardMaterial({ color: mix('#EDE7DC', 0.10), roughness: 0.9, map: pave, userData: { tileWorld: 3 } })),
-    pavingDark: keep(new THREE.MeshStandardMaterial({ color: mix('#D8D0C1', 0.10), roughness: 0.92, map: pave, userData: { tileWorld: 3 } })),
-    path: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#C4B79C'), roughness: 0.88, map: pave, userData: { tileWorld: 2.2 } })),
+    water: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#6F9A92'), map: ripple, bumpMap: ripple, bumpScale: 0.10, roughness: 0.12, metalness: 0.42, transparent: true, opacity: 0.95, userData: { tileWorld: 6 } })),
+    paving: keep(new THREE.MeshStandardMaterial({ color: mix('#EDE7DC', 0.10), roughness: 0.9, map: pave, bumpMap: pave, bumpScale: 0.45, userData: { tileWorld: 4 } })),
+    pavingDark: keep(new THREE.MeshStandardMaterial({ color: mix('#D8D0C1', 0.10), roughness: 0.92, map: pave, bumpMap: pave, bumpScale: 0.45, userData: { tileWorld: 4 } })),
+    path: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#C4B79C'), roughness: 0.88, map: pave, bumpMap: pave, bumpScale: 0.40, userData: { tileWorld: 2.2 } })),
     ground: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#D2C8B2'), map: soil, roughness: 1, userData: { tileWorld: 9 } })),
     lawn: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#9CBBAE'), roughness: 0.95 })),
     // Roof gardens and beds: same green, mottled, so a planted deck does not read as a
     // flat plastic sheet or as a pool.
     planting: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#8FB3A4'), map: plantingTexture(), roughness: 0.97, userData: { tileWorld: 2.6 } })),
-    foliage: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#7E9C8E'), roughness: 0.92 })),
+    foliage: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#7E9C8E'), map: canopyTexture(), flatShading: true, roughness: 0.92 })),
     trunk: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#8A7A66'), roughness: 1 })),
     ink: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color(BRAND.ink), roughness: 0.6 })),
     warm: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#FFF0D6'), emissive: new THREE.Color(BRAND.warmLight), emissiveIntensity: 0.6, roughness: 0.5, userData: { dayEmissive: 0.15, duskEmissive: 1.4 } })),

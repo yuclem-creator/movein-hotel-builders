@@ -4,7 +4,8 @@
 // makes the same footprint score differently in different positions.
 import * as THREE from '../../vendor/three/three.module.min.js';
 import { SITE, SIGNATURES, LANDSCAPES, PLOTS } from '../sim/catalogue.js';
-import { tileToMaterial, footprintCentre, tileConeUV } from './massing.js';
+import { tileToMaterial, tilePlaneUV, footprintCentre, tileConeUV } from './massing.js';
+import { hash1 } from './materials.js';
 
 const W = SITE.cols * SITE.cell;   // 48
 const D = SITE.rows * SITE.cell;   // 36
@@ -79,8 +80,18 @@ export function buildTerrain(kit) {
   // River along the view edge (east): the reason the east frontage is premium. The
   // revetment and the far bank give the water a real shoreline instead of letting it
   // bleed into the ground plane, and stop two long lines running off the frame.
-  const river = mesh(new THREE.PlaneGeometry(76, 260), kit.water, 79, -0.5, 0, false);
+  //
+  // The river gets its OWN tile size (20 m, not the kit's 6 m). At 6 m a 76 x 260 m
+  // stretch of water repeats 13 x 43 times, so at the establishing camera every wavelet
+  // mips down to a flat average and the canal reads as a sheet of painted card — which
+  // is exactly what the review frame showed. Wind lanes want tens of metres.
+  const river = new THREE.Mesh(
+    tilePlaneUV(new THREE.PlaneGeometry(76, 260), 76, 260, 20),
+    kit.water,
+  );
+  river.position.set(79, -0.5, 0);
   river.rotation.x = -Math.PI / 2;
+  river.receiveShadow = true;
   g.add(river);
   g.add(mesh(new THREE.BoxGeometry(10, 0.5, 260), kit.lawn, 36, -0.42, 0, false));
   g.add(mesh(new THREE.BoxGeometry(1.2, 1.2, 260), kit.roofDark, 40.4, -0.35, 0, false));
@@ -234,12 +245,18 @@ export function buildLandscape(kit, landscapeId) {
     }
   }
 
-  // Trees are instanced: one trunk batch and one crown batch, three lobes per tree.
+  // Trees are instanced: one trunk batch and one crown batch, five lobes per tree.
   // The naive version was two meshes per tree — 30+ trees of the same two geometries.
+  //
+  // Three lobes at +-0.4 of the crown radius overlapped almost completely, so every tree
+  // resolved to a single ball on a stick — the most obvious non-photographic element in
+  // the wide shot. Five lobes, spread out to the silhouette edge, squashed and rotated
+  // independently, give an irregular outline that survives the establishing camera.
+  const LOBES = 5;
   const trunkGeo = new THREE.CylinderGeometry(0.10, 0.15, 1, 6);
   trunkGeo.translate(0, 0.5, 0);
   const trunks = new THREE.InstancedMesh(trunkGeo, kit.trunk, spots.length);
-  const crowns = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1), kit.foliage, spots.length * 3);
+  const crowns = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1), kit.foliage, spots.length * LOBES);
   trunks.castShadow = crowns.castShadow = true;
   trunks.receiveShadow = crowns.receiveShadow = true;
   const dummy = new THREE.Object3D();
@@ -258,15 +275,20 @@ export function buildLandscape(kit, landscapeId) {
     dummy.updateMatrix();
     trunks.setMatrixAt(i, dummy.matrix);
 
+    // Offset, radius and squash per lobe. Deterministic per tree so a re-render matches.
     const lobes = [
-      [0, th * 0.98, 0, 0.95],
-      [-0.40, th * 0.76, 0.16, 0.62],
-      [0.38, th * 0.80, -0.18, 0.68],
+      [0.00, 1.02, 0.00, 0.72, 1.00],
+      [-0.62, 0.80, 0.20, 0.52, 0.86],
+      [0.58, 0.84, -0.24, 0.56, 0.90],
+      [0.16, 0.62, 0.52, 0.46, 0.82],
+      [-0.28, 0.66, -0.50, 0.44, 0.88],
     ];
-    for (const [dx, dy, dz, r] of lobes) {
-      dummy.position.set(sp.x + dx * sp.s, -0.6 + dy, sp.z + dz * sp.s);
-      dummy.rotation.set(0, (i * 1.7) % 6.28, 0);
-      dummy.scale.setScalar(r * sp.s);
+    for (let li = 0; li < lobes.length; li++) {
+      const [dx, dy, dz, r, squash] = lobes[li];
+      const j = hash1(i * 17 + li * 5);
+      dummy.position.set(sp.x + dx * sp.s, -0.6 + dy * th * 0.62 + th * 0.42, sp.z + dz * sp.s);
+      dummy.rotation.set((j - 0.5) * 0.5, (i * 1.7 + li * 2.1) % 6.28, (j - 0.5) * 0.5);
+      dummy.scale.set(r * sp.s * (0.9 + j * 0.3), r * sp.s * squash, r * sp.s * (0.9 + (1 - j) * 0.3));
       dummy.updateMatrix();
       crowns.setMatrixAt(k, dummy.matrix);
       tint.set(TINTS[k % TINTS.length]);

@@ -4,7 +4,7 @@
 import * as THREE from '../../vendor/three/three.module.min.js';
 import { SITE, FUNCTION_BY_ID, PLOTS } from '../sim/catalogue.js';
 import { isOwned, ownedBounds } from '../sim/engine.js';
-import { makeKit, applyDusk, environment } from './materials.js';
+import { makeKit, applyDusk, environment, skyBackground } from './materials.js';
 import {
   buildTerrain, buildGrid, buildHeritage, buildLandscape, buildSignature, buildPaths,
   buildPlots, buildPlotOffers, cellCentre,
@@ -61,11 +61,14 @@ export function createView(canvas) {
   renderer.shadowMap.needsUpdate = true;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(DAY.bg);
+  // A real sky rather than a flat fill. The camera is high and looks down, so the sky is
+  // rarely more than a sliver of the frame — but it is what every metal and every pane of
+  // glass reflects, and that is where most of the perceived realism comes from.
+  scene.background = skyBackground(false);
   scene.fog = new THREE.Fog(DAY.fog, 160, 380);
   // Metals and glass need something real to reflect: without this every gold band
   // renders near-black and reads as brown plastic (see materials.environment).
-  scene.environment = environment(renderer);
+  scene.environment = environment(renderer, false);
   scene.environmentIntensity = DAY.envI;
 
   const camera = new THREE.PerspectiveCamera(42, 1, 0.5, 900);
@@ -441,7 +444,11 @@ export function createView(canvas) {
   function setDusk(on) {
     dusk = !!on;
     const L = dusk ? DUSK : DAY;
-    scene.background.set(L.bg);
+    // The background is a texture now, not a Color, so it is swapped rather than set().
+    // The environment is re-derived from the dusk sky: a warm low sun must light the gold
+    // from a warm sphere, which a single shared IBL cannot do without dulling both.
+    scene.background = skyBackground(dusk);
+    scene.environment = environment(renderer, dusk);
     scene.fog.color.set(L.fog);
     hemi.color.set(L.hemiSky);
     hemi.groundColor.set(L.hemiGround);
