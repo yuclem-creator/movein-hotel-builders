@@ -123,8 +123,8 @@ The Stills panel then added +1.8 KB raw / +1.3 KB gzip of *interface* (measured 
 315.5). It is gone: the in-app pass below replaced it with a capture of the team's own hotel,
 which **deleted** its three JPEGs (522 KB) from the repo.
 
-The in-app realism pass is +10.0 KB raw / +3.7 KB gzip (measured **1191.8 / 319.2**, budgets
-raised 1184 -> 1196 raw and 318 -> 322 gzip, flagged for approval rather than absorbed).
+The in-app realism pass is +12.4 KB raw / +4.5 KB gzip (measured **1194.2 / 320.0**, budgets
+raised 1184 -> 1200 raw and 318 -> 324 gzip, flagged for approval rather than absorbed).
 That is the crown geometry, the hip-roof pavilion, the ground rebalance, the fog and shadow
 work, the accent chroma gain, and the capture panel with its styles. Every byte of it is
 code; the renderer still ships no image assets at all, so a palette switch, a style change

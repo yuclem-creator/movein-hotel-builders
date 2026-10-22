@@ -449,8 +449,8 @@ export function groundTexture() {
     const light = hash1(i + 2309) > 0.45;
     const rad = g.createRadialGradient(x, y, 0, x, y, r);
     rad.addColorStop(0, light
-      ? `rgba(238,228,205,${(0.08 + hash1(i + 2411) * 0.10).toFixed(3)})`
-      : `rgba(164,152,126,${(0.07 + hash1(i + 2503) * 0.11).toFixed(3)})`);
+      ? `rgba(238,228,205,${(0.14 + hash1(i + 2411) * 0.16).toFixed(3)})`
+      : `rgba(164,152,126,${(0.13 + hash1(i + 2503) * 0.17).toFixed(3)})`);
     rad.addColorStop(1, 'rgba(200,190,166,0)');
     g.fillStyle = rad;
     g.fillRect(x - r, y - r, r * 2, r * 2);

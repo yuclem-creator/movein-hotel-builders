@@ -95,6 +95,67 @@ export function buildTerrain(kit) {
   g.add(river);
   g.add(mesh(new THREE.BoxGeometry(10, 0.5, 260), kit.lawn, 36, -0.42, 0, false));
   g.add(mesh(new THREE.BoxGeometry(1.2, 1.2, 260), kit.roofDark, 40.4, -0.35, 0, false));
+
+  // Dry scrub across the apron. The wide frame showed the surrounding ground as a flat
+  // sandy field, and no amount of texture fixes it: at a 100 m camera, 1 m of ground is a
+  // handful of pixels, so mottling averages back to flat. What the reference frames have —
+  // and what the eye reads as ground rather than as a backdrop — is SCATTER. One instanced
+  // batch, so ~420 tufts cost one draw call.
+  //
+  // SCALE IS THE WHOLE THING HERE, and it took two frames to get right. The apron camera
+  // resolves ~23 px per metre, so a tuft has to be 0.2-0.5 m across to read as ground
+  // cover. The first attempt (up to 1.7 m, squashed) read as flat green plates; the second
+  // (same size, full height) read as green BOULDERS scattered on sand. Tussock-sized, and
+  // denser, is the version that reads as ground.
+  //
+  // Deterministic, and kept off the plot, its apron, the east bank and the river, so
+  // planting can never contradict the buildable area.
+  const scrubGeo = crownGeometry(0);
+  // CLUMPED, not spread. Evenly scattered dots read as litter however small they are;
+  // ground cover grows in patches, so each cluster centre gets 2-4 tufts within a couple of
+  // metres. Deterministic, and kept off the plot, its apron, the east bank and the river,
+  // so planting can never contradict the buildable area.
+  const tufts = [];
+  for (let c = 0; c < 260 && tufts.length < 460; c++) {
+    const cx = (hash1(c + 3301) - 0.5) * 190;
+    const cz = (hash1(c + 3407) - 0.5) * 190;
+    if (Math.abs(cx) < 32 && Math.abs(cz) < 26) continue;   // the plot and its apron
+    if (cx > 30) continue;                                  // the east bank and the river
+    if (Math.hypot(cx, cz) > 100) continue;
+    const n = 2 + Math.floor(hash1(c + 3511) * 3);
+    for (let k = 0; k < n; k++) {
+      const a = hash1(c * 7 + k * 13 + 3607) * 6.28;
+      const r = hash1(c * 11 + k * 17 + 3701) * 2.2;
+      tufts.push({
+        x: cx + Math.cos(a) * r,
+        z: cz + Math.sin(a) * r,
+        s: 0.12 + hash1(c * 5 + k * 23 + 3803) * 0.16,
+      });
+    }
+  }
+  const scrub = new THREE.InstancedMesh(scrubGeo, kit.lawn, tufts.length);
+  scrub.receiveShadow = true;
+  const sDummy = new THREE.Object3D();
+  const sTint = new THREE.Color();
+  // Pale and dry. Instance colour MULTIPLIES the material, so on the foliage green these
+  // tufts came out near-black against the sand and read as litter; kit.lawn's lighter base
+  // with a straw tint is what makes them read as dry ground cover.
+  const S_TINTS = ['#E9E3C6', '#D8D8B4', '#F0EAD2', '#CBCFA8', '#E2DDC4'];
+  tufts.forEach((t, i) => {
+    // crownGeometry's underside sits at -0.78 of its radius, so this rests the tuft on the
+    // ground plane at -0.62 rather than sinking it. Taller than wide (1.15): a tussock, not
+    // a pebble — and the height is what stops it reading as a stone on sand.
+    sDummy.position.set(t.x, -0.62 + t.s * 1.15 * 0.78, t.z);
+    sDummy.rotation.set(0, hash1(i + 3607) * 6.28, 0);
+    sDummy.scale.set(t.s, t.s * 1.15, t.s);
+    sDummy.updateMatrix();
+    scrub.setMatrixAt(i, sDummy.matrix);
+    sTint.set(S_TINTS[i % S_TINTS.length]);
+    scrub.setColorAt(i, sTint);
+  });
+  scrub.instanceMatrix.needsUpdate = true;
+  if (scrub.instanceColor) scrub.instanceColor.needsUpdate = true;
+  g.add(scrub);
   g.add(mesh(new THREE.BoxGeometry(6, 0.7, 260), kit.lawn, 119, -0.3, 0, false));
 
   // The plot: an ivory plinth with a gold edge.
