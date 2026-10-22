@@ -437,6 +437,25 @@ export function groundTexture() {
     g.fillRect(x - r, y - r, r * 2, r * 2);
   }
 
+  // Mid-scale patches: the scale the camera can actually see. The dune fix removed the
+  // 3-9 m mounds, and the mottle below is 13-40 cm — correct as grain, but from the
+  // establishing camera (30-110 m) it is sub-pixel, which left the ground reading as a flat
+  // sandy field, i.e. the largest surface in the frame as cardboard. These are 0.5-1.2 m
+  // of real ground at low alpha: big enough to break the field at 100 m, too small to tile
+  // into a pattern.
+  for (let i = 0; i < 40; i++) {
+    const x = hash1(i + 2003) * S, y = hash1(i + 2101) * S;
+    const r = S * (0.05 + hash1(i + 2203) * 0.08);
+    const light = hash1(i + 2309) > 0.45;
+    const rad = g.createRadialGradient(x, y, 0, x, y, r);
+    rad.addColorStop(0, light
+      ? `rgba(238,228,205,${(0.08 + hash1(i + 2411) * 0.10).toFixed(3)})`
+      : `rgba(164,152,126,${(0.07 + hash1(i + 2503) * 0.11).toFixed(3)})`);
+    rad.addColorStop(1, 'rgba(200,190,166,0)');
+    g.fillStyle = rad;
+    g.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+
   // Brushed streaks: the single most useful cue. The old version scattered filled
   // circles, which read as blotches of paint; sun-bleached ground has directional
   // grain, so every stroke here is a short, nearly horizontal arc.

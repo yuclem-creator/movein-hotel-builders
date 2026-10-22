@@ -80,11 +80,13 @@ zero and it survives a palette switch with no network request.
    made buildings look like they floated. Now 0.28 with a shallower depth bias, so the shadow
    map supplies a real contact edge and the blob darkens under it. There is still no
    screen-space AO: that needs a depth pass this renderer does not have.
-4. **Ground** — FIXED in the in-app pass below. The dune read was fourteen tonal patches up to
-   a third of the tile across at 0.44 alpha on a 9 m tile, i.e. a repeating field of soft
-   mounds. Large-scale variation is now under 1.5 m of real ground, and the variation it gave
-   up is replaced by 900 mid-frequency mottles — the scale that actually reads as ground from
-   a 30-110 m camera.
+4. **Ground** — FIXED in the in-app pass below, and then corrected once more. The dune read was
+   fourteen tonal patches up to a third of the tile across at 0.44 alpha on a 9 m tile, i.e. a
+   repeating field of soft mounds. Removing them was right; replacing them with 13-40 cm mottle
+   was wrong, because that is sub-pixel from the establishing camera — the review frame showed a
+   flat sandy field, the largest surface in the picture reading as cardboard. The map now carries
+   three deliberate scales: 6 patches under 1.5 m of ground, 40 patches at 0.5-1.2 m (the scale
+   the camera sees), and 900 mottles as grain.
 
 ## The in-app pass: the cues drawn into the live renderer
 
@@ -99,7 +101,7 @@ rejected:
 | Seven lobes, wider spread, per-lobe squash and droop | `site.js` | The silhouette is what the establishing camera reads. |
 | `hipRoof` exported and used by the pavilion | `massing.js`, `site.js` | Kills the last radial-UV roof: courses parallel to the eave. |
 | `normalBias` 0.5 -> 0.28, `bias` -0.0004 -> -0.00025 | `view.js` | Puts the shadow map's contact edge back at the wall/ground junction. |
-| Ground map: 6 small patches, 900 mid-frequency mottles | `materials.js` | Removes the dune-scale repeat without losing variation. |
+| Ground map: three scales — 6 small patches, 40 mid-scale, 900 mottles | `materials.js` | Removes the dune-scale repeat, then puts variation back at 0.5-1.2 m, which is the scale a 30-110 m camera can actually see. |
 | Fog per preset (day 120-360, dusk 90-330) | `view.js` | Aerial perspective; the old 160 m start did nothing inside a 110 m shot. |
 | Accent chroma +30% (envelope tint and trim) | `materials.js` | Puts margin behind the palette gate; `accentHex` stays the declared brand hex, so nothing downstream claims a colour the brand does not have. Gold lands near `#C08B55`, inside the 34-unit window the gold check measures. |
 
@@ -121,8 +123,8 @@ The Stills panel then added +1.8 KB raw / +1.3 KB gzip of *interface* (measured 
 315.5). It is gone: the in-app pass below replaced it with a capture of the team's own hotel,
 which **deleted** its three JPEGs (522 KB) from the repo.
 
-The in-app realism pass is +9.0 KB raw / +3.5 KB gzip (measured **1190.8 / 319.0**, budgets
-raised 1184 -> 1192 raw and 318 -> 322 gzip, flagged for approval rather than absorbed).
+The in-app realism pass is +10.0 KB raw / +3.7 KB gzip (measured **1191.8 / 319.2**, budgets
+raised 1184 -> 1196 raw and 318 -> 322 gzip, flagged for approval rather than absorbed).
 That is the crown geometry, the hip-roof pavilion, the ground rebalance, the fog and shadow
 work, the accent chroma gain, and the capture panel with its styles. Every byte of it is
 code; the renderer still ships no image assets at all, so a palette switch, a style change
