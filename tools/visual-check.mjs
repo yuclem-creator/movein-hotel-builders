@@ -566,7 +566,13 @@ try {
   // between 63% and 85% on identical code — a flaky number is not evidence.
   await page.evaluate(() => { window.__hb.view.resize(); window.__hb.view.fit(); window.__hb.view.snap(); });
   await page.waitForTimeout(450);
-  await saveFrame('26-ultrawide.png', await page.screenshot());
+  // The ultrawide capture costs what it costs: measured on this machine (SwiftShader, a user
+  // Chrome of 28 processes running) a 1280x800 frame captures in 16-17 s, and this 2509x1186
+  // frame — 2.9x the pixels, shadow map re-baked after the add-on frames — took 48-55 s in
+  // isolation and crossed the gate's 90 s default twice. The realism pass raised per-pixel
+  // cost, so the budget is re-measured rather than the check weakened: capture at 300 s, and
+  // `plotFill` still has to find the plot filling at least half the frame.
+  await saveFrame('26-ultrawide.png', await page.screenshot({ timeout: 300000 }));
   const wideFill = await plotFill();
   console.log(`  plot spans ${(wideFill * 100).toFixed(0)}% of frame width at 2509x1186`);
   check('ultrawide framing keeps the hotel large', wideFill >= 0.55, `${(wideFill * 100).toFixed(0)}%`);

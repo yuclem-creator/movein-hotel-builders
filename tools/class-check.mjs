@@ -49,10 +49,19 @@ const browser = await chromium.launch({
   ],
 });
 
+// The tablet frame renders at 1x. Nothing this gate measures — tray clipping, hit targets,
+// scroll width, the score code's position above the fold — depends on device pixel ratio:
+// they are all CSS pixels. What dpr 2 does buy is four times the rasterisation, and this gate
+// renders in software (SwiftShader, see the launch args below). Measured on this machine at
+// 1024x768: dpr 1 gives ~2.1 fps and acknowledges a tray click in 1.2 s; dpr 2 gives ~0.1 fps
+// and acknowledged the same click in 3.8 s once and 37.9 s on a loaded machine. The 30 s action
+// timeout then fails on a step whose element is topmost, unanimated and unobstructed — a gate
+// failing on rasteriser throughput, not on the classroom path. Phones keep 2x: their backing
+// store is small enough that it never showed this.
 const VIEWPORTS = [
   { label: 'phone portrait', viewport: { width: 390, height: 844 }, touch: true, dpr: 2 },
   { label: 'phone landscape', viewport: { width: 844, height: 390 }, touch: true, dpr: 2 },
-  { label: 'tablet 1024x768', viewport: { width: 1024, height: 768 }, touch: true, dpr: 2 },
+  { label: 'tablet 1024x768', viewport: { width: 1024, height: 768 }, touch: true, dpr: 1 },
 ];
 
 async function newPage(vp) {
@@ -67,6 +76,10 @@ async function newPage(vp) {
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
   page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
   page.on('requestfailed', (r) => errors.push(`requestfailed: ${r.url()} ${r.failure()?.errorText}`));
+  // A latency margin, not a loosened assertion. This renderer is software and shared, so an
+  // action can queue behind frames for seconds (see the dpr note above); 45 s is far past
+  // anything the product does, so a real hang still fails the gate.
+  page.setDefaultTimeout(45000);
   return { ctx, page, errors };
 }
 

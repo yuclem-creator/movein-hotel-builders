@@ -146,6 +146,7 @@
       <button class="tool" id="btnOverlays" aria-pressed="false">Journeys</button>
       <button class="tool" id="btnManpower" aria-pressed="true">Manpower plan</button>
       <button class="tool" id="btnDusk" aria-pressed="false">Dusk</button>
+      <button class="tool" id="btnStills" aria-pressed="false">Stills</button>
       <button class="tool" id="btnFit">Reset view</button>
       <button class="tool" id="btnGrid" aria-pressed="true">Grid</button>
       <button class="tool" id="btnExpand" aria-pressed="false">Expand site</button>
@@ -169,6 +170,34 @@
         <b id="mpTotal">—</b></p>
     </aside>
 
+
+    <!-- Stills: photoreal renders of the DEMO build (docs/RENDER-REALISM.md). Deliberately
+         labelled as the demo: every team builds a different hotel, so a photograph cannot
+         stand for theirs. Images are attached on first open, never on load. -->
+    <section class="stills" id="stills" hidden aria-label="Stills of the demo build">
+      <div class="stills-head">
+        <div>
+          <h3>Stills</h3>
+          <p class="stills-note">Photoreal renders of the <b>demo</b> build — an illustration of the
+            style and palette, not a live view of the hotel your team assembles.</p>
+        </div>
+        <button class="still-close" id="stillsClose" type="button" aria-label="Close the stills">×</button>
+      </div>
+      <div class="stills-grid">
+        <figure>
+          <img data-still="assets/stills/aerial-day.jpg" alt="Aerial view of the demo heritage hotel in daylight" width="1600" height="679">
+          <figcaption>Aerial, day — heritage style, gold palette</figcaption>
+        </figure>
+        <figure>
+          <img data-still="assets/stills/court-day.jpg" alt="Arrival court of the demo heritage hotel in daylight" width="1600" height="756">
+          <figcaption>Arrival court, day — the frontage the hotel is judged on</figcaption>
+        </figure>
+        <figure>
+          <img data-still="assets/stills/aerial-dusk.jpg" alt="Aerial view of the demo heritage hotel at warm dusk" width="1600" height="756">
+          <figcaption>Aerial, dusk — windows lit, trading look</figcaption>
+        </figure>
+      </div>
+    </section>
 
     <div class="selected-panel" id="selectedPanel" hidden>
       <h3 id="selLabel">—</h3>

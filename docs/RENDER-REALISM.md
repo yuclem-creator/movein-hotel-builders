@@ -80,6 +80,12 @@ zero and it survives a palette switch with no network request.
 +21.2 KB raw / +6.8 KB gzip (measured 1177.1 / 314.3, budgets raised 310 -> 318 gzip).
 Still zero image assets: every map is drawn on canvas at runtime.
 
+The Stills panel later added +1.8 KB raw / +1.3 KB gzip of *interface* (button, overlay,
+styles, deferred-src wiring) — measured 1181.8 / 315.5, raw budget raised 1180 -> 1184 with
+gzip left at 318. Its own 522 KB of JPEG sits in `assets/stills/`, outside `js/`, and is
+fetched only on first open, so it is deliberately outside the first-load budget rather than
+hidden inside it; `tools/stills-check.mjs` asserts the deferral.
+
 
 ## Render set (Workspace 12) — full-frame passes on the built game
 
@@ -116,3 +122,30 @@ Outputs of `i2i-*` runs land under `node-inputs/...` and are **unwatermarked**; 
 account.
 
 Evidence: `review/flora-render/`, with the sources alongside as `review/tex-after-*.png`.
+
+## Shipped: the Stills panel (a presentation layer, not the renderer)
+
+Three of those renders now ship in the app as **Stills** (`#btnStills`), and the distinction
+that matters is that they change nothing about what the game draws. The runtime is still the
+canvas material pass; the panel is a labelled illustration of the demo build, and the label is
+load-bearing, because each team assembles a different hotel and a photograph cannot stand in
+for theirs.
+
+What shipped: web-weight 1600px JPEG derivations of `aerial-day` (1600×679), `court-day` and
+`aerial-dusk` (1600×756), a `Stills` tool button, a full-bleed overlay with a header note and
+three captioned figures, and `tools/stills-check.mjs` as the eleventh gate.
+
+Decisions worth keeping:
+
+- **Nano Banana 2.1 for the set, once a set matters.** Pro reframes (2.357:1 against 2.115:1),
+  so a mixed-source gallery has visibly different framings in one grid. Day plates are
+  frame-preserving; the dusk pair needed the colour-locked v2 to avoid the blue-hour flip.
+- **Deferred attachment, asserted.** `src` is written on first open, not in the markup, and
+  the gate counts image requests before the panel opens — it must be zero. Without that
+  assertion the deferral would silently regress on any refactor.
+- **`width`/`height` on every `<img>`.** The three plates reserve their box before decode, so
+  opening the panel does not shift the layout under the reader's thumb.
+- **Only the frames that survived the structural test.** The Pro wide pass scored 0.316 with a
+  reframe; it is evidence in `review/`, not a shipped plate. A still that is not faithful to
+  the build it claims to illustrate is worse than no still.
+

@@ -1299,6 +1299,30 @@ function bindBuild() {
     view.setDusk(duskOn);
   });
 
+  // Stills: photoreal renders of the DEMO build (docs/RENDER-REALISM.md), a labelled
+  // presentation layer, never the team's own hotel. Bytes attach on first open so three
+  // full-frame photographs stay off the critical path.
+  const stills = $('#stills');
+  const stillImgs = [...stills.querySelectorAll('img[data-still]')];
+  function showStills(on) {
+    if (on && !stills.hidden) return;
+    if (on) {
+      for (const img of stillImgs) {
+        if (!img.getAttribute('src')) img.setAttribute('src', img.dataset.still);
+      }
+    }
+    stills.hidden = !on;
+    $('#btnStills').setAttribute('aria-pressed', on ? 'true' : 'false');
+    if (on) $('#stillsClose').focus();
+    else $('#btnStills').focus();
+  }
+  $('#btnStills').addEventListener('click', () => showStills(stills.hidden));
+  $('#stillsClose').addEventListener('click', () => showStills(false));
+  stills.addEventListener('click', (e) => { if (e.target === stills) showStills(false); });
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !stills.hidden) showStills(false);
+  });
+
   $('#btnGrid').addEventListener('click', () => {
     const on = $('#btnGrid').getAttribute('aria-pressed') !== 'true';
     $('#btnGrid').setAttribute('aria-pressed', on ? 'true' : 'false');
