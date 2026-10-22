@@ -79,3 +79,40 @@ zero and it survives a palette switch with no network request.
 
 +21.2 KB raw / +6.8 KB gzip (measured 1177.1 / 314.3, budgets raised 310 -> 318 gzip).
 Still zero image assets: every map is drawn on canvas at runtime.
+
+
+## Render set (Workspace 12) — full-frame passes on the built game
+
+Model ids matter, not names: `i2i-elote-gateway` is Nano Banana 2.1 image-to-image and
+`i2i-gemini-3-pro` is Nano Banana Pro. Passing the display name (`t2i-nano-banana-2.1`)
+returns a 400 listing the accessible ids — that is what made it look as though Workspace 12
+had no Nano Banana.
+
+What the passes establish, measured on a 64x32 luminance signature against the source:
+
+| Render | Model | Structural r | Mean RGB |
+|---|---|---|---|
+| court | NB 2.1 | **0.824** | 182,174,152 -> 175,163,144 |
+| fit wide | NB Pro | 0.316 | 185,184,161 -> 183,176,162 |
+| fit wide dusk | NB 2.1 | 0.421 | 68,44,27 -> 69,72,82 |
+
+Calibration for those numbers: the same camera in day and dusk scores **0.648**, and a
+genuinely different camera scores **0.19**. So 0.824 is at least as faithful as a relight,
+and 0.421 is not.
+
+Two reproducible findings:
+
+1. **`i2i-elote-gateway` preserves framing exactly** — output 2978x1408 against a
+   2509x1186 source, both 2.115:1. `i2i-gemini-3-pro` returns 3168x1344 (2.357:1) even with
+   `aspect_ratio: auto`, so it reframes. Use NB 2.1 for a matched set of stills; use Pro only
+   when a reformat is acceptable.
+2. **Neither model reliably obeys a colour instruction on a dark frame.** The dusk source is
+   warm amber (mean B=27); the first dusk pass returned cool blue (mean B=82), i.e. blue hour.
+   A prompt with an explicit colour lock and `thinking_level: HIGH` was required. Any dark or
+   graded pass needs its mean RGB checked, not just its subject.
+
+Outputs of `i2i-*` runs land under `node-inputs/...` and are **unwatermarked**; the earlier
+`node-outputs/wm-...` batch was watermarked. Watermarking follows the model/route, not the
+account.
+
+Evidence: `review/flora-render/`, with the sources alongside as `review/tex-after-*.png`.

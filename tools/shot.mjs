@@ -19,6 +19,10 @@ const PW = 'C:/Users/clementy/Downloads/email-automation/browser/node_modules/pl
 const STYLE = process.argv[2] || 'heritage';
 const PALETTE = process.argv[3] || 'gold';
 const FRAMING = process.argv[4] || 'all';
+// Fourth argument: `dusk`. The dusk look is a view state, not a camera move, so it is set
+// once per viewport before the framings are walked. Frames get a -dusk suffix so a day and
+// a dusk pass can sit side by side in review/ without overwriting each other.
+const DUSK = process.argv[5] === 'dusk';
 
 const server = spawn(process.execPath, [join(ROOT, 'serve.js')], {
   env: { ...process.env, PORT: String(PORT) }, stdio: ['ignore', 'pipe', 'pipe'],
@@ -61,6 +65,16 @@ for (const s of shots) {
   }, [STYLE, PALETTE]);
   await page.waitForTimeout(600);
 
+  // Dusk before the framings: one state change, then every frame in this viewport is dusk.
+  if (DUSK) {
+    await page.evaluate(() => {
+      const v = window.__hb.view;
+      if (typeof v.setDusk === 'function') v.setDusk(true);
+      else document.getElementById('btnDusk').click();
+    });
+    await page.waitForTimeout(900);
+  }
+
   const frames = [
     ['fit', () => { window.__hb.view.fit(); }],
     ['court', () => { window.__hb.view.focusOn(0, 8, 26, 0.9); }],
@@ -71,7 +85,7 @@ for (const s of shots) {
     await page.evaluate(move);
     await page.evaluate(() => window.__hb.view.snap());
     await page.waitForTimeout(400);
-    await writeFile(join(OUT, `shot-${name}-${STYLE}-${s.tag}.png`), await page.screenshot());
+    await writeFile(join(OUT, `shot-${name}-${STYLE}-${s.tag}${DUSK ? '-dusk' : ''}.png`), await page.screenshot());
   }
   console.log(`${s.tag}: ${errs.length} errors ${errs.slice(0, 2).join(' | ')}`);
   await ctx.close();
