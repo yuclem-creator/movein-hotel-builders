@@ -262,7 +262,7 @@ frames or handing a tablet to a colleague.
 | `check-syntax.mjs` | every JS file parses (37 files) |
 | `sim-check.mjs` | determinism, **regression lock against `tools/baseline.json`**, balance assertions, ledger reconciliation, placement rules, journey resolution, journey legs, owned land, manpower requirements and deviations, and **shared-build convergence** — two sessions replaying one intent stream, a refused stale intent, and a late joiner (144 checks) |
 | `brand-gate.mjs` | no off-canon colour anywhere in shipped CSS/HTML/JS, `board.html` included; headings use MO Exceptional at Regular only, never synthesised weight |
-| `bytes.mjs` | first-load budget: **1194.2 KB raw / 320.0 KB gzip** (budgets 1200 / 324), walking all of `js/` |
+| `bytes.mjs` | first-load budget: **1198.3 KB raw / 321.5 KB gzip** (budgets 1200 / 324), walking all of `js/` |
 | `qr-check.mjs` | the join-card QR is scannable: finders, timing, both format copies, capacity boundaries, quiet zone — and, when the dev decoder is installed, an independent **decode** of five real join URLs |
 | `smoke.mjs` | browser E2E on desktop **and** phone: boot, WebGL, fonts, full demo flow, result card, showcase, reveal, **browser engine === Node engine**, a *comparative* frame-rate check, zero console errors (39 checks) |
 | `visual-check.mjs` | composition (sky/middle/ground), three styles produce genuinely different silhouettes, each palette's accent is wired to real geometry, four signature elements are distinguishable, add-ons change the building without breaking the frame, and the manpower roster sits clear of the HUD and the tray with its own steps reflected on screen (39 checks) |
@@ -327,10 +327,20 @@ only prove the image is not empty and that the differences are real.
   Still unjudged: a green roof on the Tower and Courtyard styles, the other three
   palettes, and the terrace-on-green at 1920. Open `review/21-style-*.png` and
   `review/60-expand-mode.png` before approving those.
-- **Two palette pairs are barely distinguishable**: gold/ember (0.67/255 mean pixel) and
-  sage/moon (0.34) sit below the 1.5 floor, against 1.55–2.56 for every other pair.
+- **The renderer does not reach the fidelity of the reference renders, and there is a
+  measured inventory of why.** Clement's target is the FLORA reference set in
+  `review/flora-render/`. One pass has closed the cues that were implementable without new
+  dependencies — raking sun (49° -> 26° elevation, shadows 0.87× -> 2.05× object height),
+  contact darkening under every prop, paving slabs at 1.875 m instead of 1.0 m, sky-reflecting
+  water, real aerial perspective, legible slate courses on shaded slopes — at a cost of
+  ~1.2 KB. What is left is itemised with its price in `docs/RENDER-FIDELITY-GAP.md`: screen-space
+  AO needs the post-processing chain vendored (~40–60 KB, against ~1.7 KB of headroom), the
+  reference camera is a low architectural 3/4 while the game camera is a high aerial for
+  legibility, and the object set is still fewer, chunkier primitives.
+- **Two palette pairs are barely distinguishable**: gold/ember (0.75/255 mean pixel) and
+  sage/moon (0.40) sit below the 1.5 floor, against 1.90–2.91 for every other pair.
   Whether to widen the palette is a design call, not a code defect — the accent *is*
-  correctly applied to 38 of 223 meshes either way.
+  correctly applied to 38 of 225 meshes either way.
 - **The roster scrolls at 1280×800.** Four clusters plus the training selector are taller
   than the 350px column, so the payroll total sits below the fold and the panel fades its
   last row. It fits from 1440×900 up. Compacting the zero-requirement rows would buy back

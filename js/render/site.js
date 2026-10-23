@@ -158,8 +158,15 @@ export function buildTerrain(kit) {
   g.add(scrub);
   g.add(mesh(new THREE.BoxGeometry(6, 0.7, 260), kit.lawn, 119, -0.3, 0, false));
 
-  // The plot: an ivory plinth with a gold edge.
-  g.add(mesh(new THREE.BoxGeometry(W + PAD * 2, 0.6, D + PAD * 2), kit.paving, 0, -0.3, 0, false));
+  // The plot: an ivory plinth with a gold edge, and a base course under it.
+  //
+  // Both boxes cast a shadow now, and the base course is new: built with shadow=false, a
+  // 0.6 m slab of paving met the sand along a razor line with no step and no contact under
+  // it — the last obvious CG tell in the wide frame. A wider, darker tier gives the edge a
+  // step to read and puts a 1.2 m soft shadow on the sand at a 26 degree sun. It sits 2 cm
+  // into the ground plane rather than flush, so no two faces are coplanar.
+  g.add(mesh(new THREE.BoxGeometry(W + PAD * 2, 0.6, D + PAD * 2), kit.paving, 0, -0.3, 0));
+  g.add(mesh(new THREE.BoxGeometry(W + PAD * 2 + 0.8, 0.36, D + PAD * 2 + 0.8), kit.pavingDark, 0, -0.45, 0));
   g.add(rectLine(W + PAD * 2 - 0.2, D + PAD * 2 - 0.2, kit.goldLine, 0.012));
 
   // Arrival court (south): darker apron, driveway, bollards so it reads as a drop-off.
@@ -438,6 +445,29 @@ export function buildLandscape(kit, landscapeId) {
   seatMesh.instanceMatrix.needsUpdate = true;
   legMesh.instanceMatrix.needsUpdate = true;
   g.add(seatMesh, legMesh);
+  // Contact darkening under every prop, not only every building: the strongest photographic
+  // cue in the reference frames is that every object darkens the ground it stands on, and
+  // buildings had it while nothing else did. Same blob, one instanced batch, one draw call.
+  // Trees stand on the ground plane at -0.62, the rest on the plinth at 0.
+  const props = [];
+  spots.forEach((sp) => props.push({ x: sp.x, z: sp.z, r: 2.2 * sp.s, y: -0.60 }));
+  for (const l of lamps) props.push({ x: l.x, z: l.z, r: 0.55, y: 0.02 });
+  for (const p of pots) props.push({ x: p.x, z: p.z, r: 0.78, y: 0.02 });
+  for (const z of seats) props.push({ x: 37.2, z, r: 1.1, y: 0.02 });
+  const blobGeo = new THREE.PlaneGeometry(1, 1);
+  blobGeo.rotateX(-Math.PI / 2);
+  const blobs = new THREE.InstancedMesh(blobGeo, kit.contact, props.length);
+  blobs.renderOrder = 1;
+  props.forEach((b, i) => {
+    dummy.position.set(b.x, b.y, b.z);
+    dummy.rotation.set(0, 0, 0);
+    dummy.scale.set(b.r, 1, b.r);
+    dummy.updateMatrix();
+    blobs.setMatrixAt(i, dummy.matrix);
+  });
+  blobs.instanceMatrix.needsUpdate = true;
+  g.add(blobs);
+
   return g;
 }
 

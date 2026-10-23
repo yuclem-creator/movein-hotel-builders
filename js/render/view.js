@@ -40,15 +40,22 @@ const DAY = {
   // reflect. The sun is up to compensate, so every face still has a shadow side and
   // the model stops looking like a flat-lit render.
   bg: '#EFE9DF', fog: '#EFE9DF', hemiSky: '#FFF8EC', hemiGround: '#C9C0AE', hemiI: 0.4,
-  sunColor: '#FFF6E8', sunI: 3.4, sunPos: [42, 62, 34], exposure: 1.02, envI: 0.45,
+  // A RAKING sun, not a near-noon one: the largest fidelity gap against the reference
+  // renders, and arithmetic rather than taste. [42,62,34] is 49 degrees of elevation, so a
+  // 30 m tower cast a 26 m shadow; [58,32,30] is 26 degrees and casts 2.05x, which is what
+  // puts the colonnade, the eaves and the tree crowns into real shadow. sunI compensates for
+  // the horizontal light that a low sun loses: sin(26)/sin(49) = 0.58. Not 5.0 — a low sun
+  // does not simply dim the scene, it raises cos(elevation) on every wall, and 5.0 turned the
+  // gold fascia brass-yellow and blew the reveals. 4.3 keeps the horizontal/vertical ratio.
+  sunColor: '#FFF4E2', sunI: 4.3, sunPos: [58, 32, 30], exposure: 1.01, envI: 0.45,
   // Aerial perspective: the reference frames lose contrast with distance, and a fog that
   // only starts at 160 m does nothing inside a 110 m establishing shot.
-  fogNear: 120, fogFar: 360,
+  fogNear: 60, fogFar: 320,
 };
 const DUSK = {
   bg: '#22252A', fog: '#22252A', hemiSky: '#4A5A6E', hemiGround: '#191713', hemiI: 0.22,
   sunColor: '#FFB27A', sunI: 1.15, sunPos: [-54, 20, 44], exposure: 1.12, envI: 0.3,
-  fogNear: 90, fogFar: 330,
+  fogNear: 45, fogFar: 260,
 };
 
 const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);

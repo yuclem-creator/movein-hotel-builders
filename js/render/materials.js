@@ -337,7 +337,11 @@ export function roofTileTexture() {
   // multiply twice and go near-black â€” a regression the wide shot showed immediately.
   // So: a light modulation field with per-tile range, and the darkness lives in the
   // material colour where it belongs.
-  const tint = ['#F2ECDE', '#E3DCCC', '#EDE6D6', '#D9D2C2', '#E8E1D1', '#CFC8B8'];
+  //
+  // The spread is WIDE on purpose: at the original 14% a slope facing away from a low sun has
+  // no directional light to reveal its courses, so every hipped roof collapsed into a flat
+  // charcoal mass. Albedo contrast is the only lever that survives in shadow.
+  const tint = ['#F7F2E6', '#DED6C4', '#F0EADD', '#C9C1AF', '#E6DFCE', '#B3AC9B'];
   for (let r = 0; r < rows; r++) {
     for (let k = 0; k < cols; k++) {
       const x = k * cw + (r % 2 ? cw * 0.5 : 0) - cw * 0.5;
@@ -352,8 +356,9 @@ export function roofTileTexture() {
       } else if (x + cw > S) {
         g.fillRect(x - S + lw * 0.5, y, cw - lw, ch);
       }
-      // Vertical slate edges.
-      g.fillStyle = 'rgba(96,90,80,0.34)';
+      // Vertical slate edges. 0.44, up from 0.34, for the same reason as the tint range: on a
+      // shaded slope the albedo edge is the only thing left to read.
+      g.fillStyle = 'rgba(96,90,80,0.44)';
       g.fillRect(x + cw - lw, y, lw, ch);
       // Weathering: a soft darkening down each slate, never a hard line.
       const grad = g.createLinearGradient(x, y, x, y + ch);
@@ -370,7 +375,7 @@ export function roofTileTexture() {
     // 0.55 alpha it reads as a black stripe every 0.5 m and the roof turns into a grate.
     const sg = g.createLinearGradient(0, r * ch + ch * 0.78, 0, r * ch + ch);
     sg.addColorStop(0, 'rgba(48,45,40,0)');
-    sg.addColorStop(1, 'rgba(48,45,40,0.26)');
+    sg.addColorStop(1, 'rgba(48,45,40,0.34)');
     g.fillStyle = sg;
     g.fillRect(0, r * ch + ch * 0.78, S, ch * 0.22);
   }
@@ -981,13 +986,17 @@ export function makeKit(paletteId) {
     // tileWorld 4.8, not 3.2: eight courses over 3.2 m is a 0.4 m course, which is about
     // four pixels in the establishing camera and mips down to flat noise. At 4.8 m the
     // courses survive at ~8 px and the roofs read as tiled rather than spray-textured.
-    roofTile: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#8D8271'), map: tiles, bumpMap: tiles, bumpScale: 0.30, roughness: 0.9, userData: { tileWorld: 4.8 } })),
-    roofSlate: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#625E54'), map: tiles, bumpMap: tiles, bumpScale: 0.30, roughness: 0.88, userData: { tileWorld: 4.8 } })),
+    roofTile: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#968A78'), map: tiles, bumpMap: tiles, bumpScale: 0.30, roughness: 0.9, userData: { tileWorld: 4.8 } })),
+    roofSlate: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#6E6A5E'), map: tiles, bumpMap: tiles, bumpScale: 0.30, roughness: 0.88, userData: { tileWorld: 4.8 } })),
     roofDark: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#8E8577'), roughness: 0.95 })),
     glass: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color(BRAND.glass), roughness: 0.06, metalness: 0.62, transparent: true, opacity: 0.6 })),
-    water: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#6F9A92'), map: ripple, bumpMap: ripple, bumpScale: 0.10, roughness: 0.12, metalness: 0.42, transparent: true, opacity: 0.95, userData: { tileWorld: 6 } })),
-    paving: keep(new THREE.MeshStandardMaterial({ color: mix('#EDE7DC', 0.10), roughness: 0.9, map: pave, bumpMap: pave, bumpScale: 0.45, userData: { tileWorld: 4 } })),
-    pavingDark: keep(new THREE.MeshStandardMaterial({ color: mix('#D8D0C1', 0.10), roughness: 0.92, map: pave, bumpMap: pave, bumpScale: 0.45, userData: { tileWorld: 4 } })),
+    // Water that reflects the sky, not a teal sheet with a sky-coloured tint: the ripple map
+    // over a dark base at metalness 0.42 made the reflection weak AND tinted, so the canal
+    // read as painted card. A near-white base with 0.72 metalness lets the sky IBL do the
+    // work; envMapIntensity is raised because the scene-wide environment is only at 0.45.
+    water: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#9FB8B2'), map: ripple, bumpMap: ripple, bumpScale: 0.18, roughness: 0.07, metalness: 0.72, envMapIntensity: 2.4, transparent: true, opacity: 0.97, userData: { tileWorld: 6 } })),
+    paving: keep(new THREE.MeshStandardMaterial({ color: mix('#EDE7DC', 0.10), roughness: 0.9, map: pave, bumpMap: pave, bumpScale: 0.45, userData: { tileWorld: 7.5 } })),
+    pavingDark: keep(new THREE.MeshStandardMaterial({ color: mix('#D8D0C1', 0.10), roughness: 0.92, map: pave, bumpMap: pave, bumpScale: 0.45, userData: { tileWorld: 7.5 } })),
     path: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#C4B79C'), roughness: 0.88, map: pave, bumpMap: pave, bumpScale: 0.40, userData: { tileWorld: 2.2 } })),
     ground: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#D2C8B2'), map: soil, roughness: 1, userData: { tileWorld: 9 } })),
     lawn: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#9CBBAE'), roughness: 0.95 })),
