@@ -36,6 +36,47 @@ Measured on the same frames: ground-region variance 138 -> 194, sky mean 173 -> 
 middle-band variance 1133 -> 1160 — more shadow and more legible slab tone, which is what
 "photographic" shows up as numerically. Gold pixels within 34 of #B59060: 20885.
 
+## Retexture pass (2026-10-23): photographic surfaces
+
+The cue table above fixed light and scale; the surfaces were still drawn. Every large
+surface now carries a scanned CC0 photograph from Poly Haven, delivered by
+`tools/textures.mjs` into `assets/textures/` (provenance per file in `SOURCES.md`):
+
+| Surface | Before | Now | Tile |
+|---|---|---|---|
+| Paving, aprons, paths | drawn slabs, albedo-as-bump | `precast_stone_paving` diffuse + **normal map** | 6 m (1.5 m slabs), path 2.2 m |
+| Pitched roofs | drawn courses, albedo-as-bump | `roof_slates_03` diffuse + **normal map**, high-passed | 6.5 m (~26 cm courses) |
+| Open ground | drawn mottle and streaks | `aerial_sand` (wind ripple, footprints), high-passed | 15 m (true scan scale) |
+| Flat roofs | drawn membrane seams | `gravel_floor_02` ballast | 2.5 m |
+| Roof gardens, beds | drawn leaf ellipses | `leafy_grass` | 2.6 m |
+| Facade wall field | flat paint + 1 px grain | `white_plaster_02` render grain, multiplied under the drawn openings | 1.5 m |
+
+How it stays on-brand and gate-safe:
+
+- **Modulators, not pictures.** `textures.mjs` re-centres each photo on the average
+  colour of the drawn map it replaces, keeps only 0-40% of its chroma, and high-passes the
+  slate and sand so tonal blobs do not stamp a visible repeat. The MO palette still comes
+  from the material colours; the ivory, gold and palette-difference gates measure the
+  brand, not the photographer.
+- **Drawn first, photographed in place.** The first frame renders with the drawn maps; each
+  photo is then drawn into the same canvas, at the same size, and re-uploaded. No texture
+  object, material or shader changes (normal maps start flat, so the program is stable
+  through the swap). WebGL2's immutable texture storage cannot be resized, which is why a
+  photo is never swapped in as a new image.
+- **Fail loud.** A missing map is a `console.error`, which every gate fails on; in the
+  room the drawn map stays. `view.texturesReady()` lets gates and `tools/shot.mjs` wait.
+- **Bytes.** 8 JPEGs, **222 KB**, deferred (after the first frame), with their own 240 KB
+  budget line in `tools/bytes.mjs`. The critical path went **down** (1198.3 -> 1197.5 KB
+  raw) because the drawn sand and slate painters became short placeholders.
+- **capture-check** keeps "the capture is a data URL" and "zero image requests" for
+  everything except `assets/textures/*.jpg`, and now also asserts that every requested
+  map loaded.
+
+What it fixed, seen in `review/shot-{fit,court}-heritage-std.png`: slates read as
+individual stones with course shadow in light AND shade; the forecourt is honed slabs with
+real joint relief instead of graph paper; the open ground has the ripple and grain the
+reference shows instead of a tiled mottle; flat roofs read as gravel rather than lids.
+
 ## What is left, and what each one needs
 
 1. **Screen-space ambient occlusion.** The biggest remaining cue. Reference frames darken
@@ -55,9 +96,10 @@ middle-band variance 1133 -> 1160 — more shadow and more legible slab tone, wh
    window reveals, coping stones, roof plant with real depth, tree pits, bollards and much
    larger trees. The live model is fewer, chunkier primitives. Cheap in bytes, visible in
    every gate, and the largest remaining work item.
-4. **The surroundings.** Outside the plot is a flat sand field; the reference is fine
-   gravel and dust with structure at human scale.
-5. **Flat roofs.** The membrane roofs still read as lids at the establishing camera.
+4. ~~The surroundings~~ and ~~flat roofs~~: closed by the retexture pass above.
+5. **Trees.** Crowns are still smooth procedural geometry with a drawn canopy map; the
+   reference trees are much larger and photographic. A leaf-card or alpha-foliage pass is
+   the next surface item.
 
 ## What is deliberately NOT adopted
 
@@ -77,5 +119,5 @@ architectural visualisation. The reference is a diffusion photo pass. Two paths 
   feature: `view.capture()` already renders the team's own build, so a one-click
   image-to-image pass on that capture would produce a genuine photograph of *their* hotel
   — which is what the FLORA project demonstrates today. It costs API money per image and
-  it would break the current assertion that the app makes zero image requests, so it is a
-  separate, explicit decision.
+  would add a network call outside `assets/textures/`, so it is a separate, explicit
+  decision.

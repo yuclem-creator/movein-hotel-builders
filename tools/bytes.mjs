@@ -111,6 +111,19 @@ console.log(`\nfonts (non-blocking, font-display: swap): ${kb(fontTotal)}`);
 const BUDGET_RAW = 1200 * 1024;
 const BUDGET_GZ = 324 * 1024;
 let fails = 0;
+
+// Photographic surface maps (assets/textures/, CC0 Poly Haven scans). Deferred, not
+// critical: they are requested after the first frame, which renders with the drawn maps,
+// so they cost no time-to-first-frame. They still cost transfer on hotel Wi-Fi, so they
+// get their own budget. JPEG does not gzip, so raw is the transfer size. 240KB is
+// 222KB measured plus headroom for one more 256px map; FLAGGED FOR CLEMENT as a new
+// budget line rather than an increase to the critical-path numbers above.
+const TEX_BUDGET = 240 * 1024;
+let texTotal = 0;
+const texFiles = (await readdir(join(ROOT, 'assets/textures'))).filter((f) => /\.jpg$/.test(f));
+for (const f of texFiles) texTotal += (await stat(join(ROOT, 'assets/textures', f))).size;
+console.log(`surface maps (deferred, after first frame): ${texFiles.length} files, ${kb(texTotal)} / ${kb(TEX_BUDGET)}`);
+if (texTotal > TEX_BUDGET) { fails++; console.log(`FAIL surface maps ${kb(texTotal)} exceed budget ${kb(TEX_BUDGET)}`); }
 if (rawTotal > BUDGET_RAW) { fails++; console.log(`FAIL raw ${kb(rawTotal)} exceeds budget ${kb(BUDGET_RAW)}`); }
 if (gzTotal > BUDGET_GZ) { fails++; console.log(`FAIL gzip ${kb(gzTotal)} exceeds budget ${kb(BUDGET_GZ)}`); }
 if (!fails) console.log(`\nBYTE BUDGET PASSED (raw ${kb(rawTotal)} / ${kb(BUDGET_RAW)}, gzip ${kb(gzTotal)} / ${kb(BUDGET_GZ)})`);

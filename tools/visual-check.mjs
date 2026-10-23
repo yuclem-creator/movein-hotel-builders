@@ -209,6 +209,12 @@ try {
   await page.waitForTimeout(1200);
   await page.click('#btnFit');
   await page.waitForTimeout(1500);
+  // The photographic surface maps replace the drawn ones after the first frame. Every
+  // comparison below must see the same surfaces, so measure only once all have landed.
+  const tex = await page.evaluate(() => window.__hb.view.texturesReady());
+  console.log(`== surface maps: ${tex.loaded.length} loaded, ${tex.failed.length} failed ==`);
+  check('every photographic surface map loads', tex.loaded.length >= 8 && tex.failed.length === 0,
+    JSON.stringify(tex.failed));
   // Hide the DOM UI for the comparison frames. Otherwise the hash measures the HUD
   // and the tray, which are identical across styles, and dilutes the real difference.
   await page.evaluate(() => { document.getElementById('ui').style.display = 'none'; });

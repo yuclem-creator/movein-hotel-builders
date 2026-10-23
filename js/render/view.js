@@ -4,7 +4,7 @@
 import * as THREE from '../../vendor/three/three.module.min.js';
 import { SITE, FUNCTION_BY_ID, PLOTS } from '../sim/catalogue.js';
 import { isOwned, ownedBounds } from '../sim/engine.js';
-import { makeKit, applyDusk, environment, skyBackground } from './materials.js';
+import { makeKit, applyDusk, environment, skyBackground, texturesReady } from './materials.js';
 import {
   buildTerrain, buildGrid, buildHeritage, buildLandscape, buildSignature, buildPaths,
   buildPlots, buildPlotOffers, cellCentre,
@@ -733,6 +733,9 @@ export function createView(canvas) {
     rebuild, setPalette, setStyle, setDusk, setGrid, setExpandMode, setSelection,
     setGhost, moveGhost, hideGhost,
     pick, groundCell, fit, focusOn, snap, resize, render, update, dispose, capture,
+    // Photographic surface maps arrive after the first frame; gates and the shot tool wait
+    // on this so a frame is never measured half drawn, half photographed.
+    texturesReady,
     startShowcase, stopShowcase,
     set onTap(fn) { onTap = fn; },
     set onHover(fn) { onHover = fn; },

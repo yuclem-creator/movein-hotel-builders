@@ -53,9 +53,17 @@ try {
   const imageRequests = [];
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
   page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
-  // Any request for an image file at all would mean a baked asset crept back in.
+  // Any image request outside assets/textures/ would mean a baked render crept back in.
+  // The surface maps are the one carve-out: they are materials (slate, paving, sand), never
+  // a picture of a hotel, and they are traced file by file in assets/textures/SOURCES.md.
+  // They are counted separately so the gate still proves they are the ONLY images.
+  const textureRequests = [];
   page.on('request', (r) => {
-    if (r.resourceType() === 'image' || /\.(jpe?g|png|webp)$/i.test(r.url())) imageRequests.push(r.url().split('/').pop());
+    if (r.resourceType() !== 'image' && !/\.(jpe?g|png|webp)$/i.test(r.url())) return;
+    if (r.url().startsWith('data:')) return;
+    const path = new URL(r.url()).pathname;
+    if (/^\/assets\/textures\/[a-z-]+\.jpg$/.test(path)) textureRequests.push(path.split('/').pop());
+    else imageRequests.push(path.split('/').pop());
   });
   page.setDefaultTimeout(45000);
 
@@ -110,6 +118,11 @@ try {
   check('the image is generated, not fetched (a data URL, zero image requests)',
     opened.srcKind === 'data:image/jpeg;base64' && imageRequests.length === 0,
     JSON.stringify({ srcKind: opened.srcKind, requests: imageRequests }));
+  const tex = await page.evaluate(() => window.__hb.view.texturesReady());
+  console.log(`  surface maps: ${textureRequests.length} requested, ${tex.loaded.length} loaded, ${tex.failed.length} failed`);
+  check('the only images fetched are the surface maps, and every one loaded',
+    textureRequests.length === tex.loaded.length && tex.loaded.length >= 8 && tex.failed.length === 0,
+    JSON.stringify({ requested: textureRequests, failed: tex.failed }));
   check('the capture is larger than the screen it was taken from',
     opened.w >= VIEW.width * 1.8 && opened.h >= VIEW.height * 1.8, `${opened.w}x${opened.h}`);
   check('the JPEG carries real bytes', opened.bytes > 20000, `${opened.bytes} chars`);

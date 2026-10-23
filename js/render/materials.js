@@ -1,9 +1,16 @@
-// materials.js â€” brand-locked materials and procedural textures. No image assets:
-// every texture is drawn on a canvas at runtime, so the app stays asset-light and a
-// palette switch costs zero network requests.
+// materials.js — brand-locked materials and their surface maps.
+//
+// Two layers. Every map is first DRAWN on a canvas at runtime, so the first frame never
+// waits on the network and a palette switch costs zero requests. The large surfaces —
+// paving, slate, open ground, flat-roof gravel, planting and the render grain under the
+// facades — are then overwritten in place by scanned CC0 photographs from
+// assets/textures/ (Poly Haven; provenance in assets/textures/SOURCES.md). Drawn maps
+// gave every surface the right colour and the wrong structure, which is the gap the
+// FLORA reference renders exposed. The photos are pre-normalised to grey modulators by
+// tools/textures.mjs, so the MO palette still comes from the material colours.
 //
 // Resolution: a facade tile is 512px (256 on touch). At 128px a window was 18 pixels
-// wide, so a camera move toward a wall showed mush â€” that is what made the first
+// wide, so a camera move toward a wall showed mush — that is what made the first
 // detail pass read as a sticker rather than a building.
 import * as THREE from '../../vendor/three/three.module.min.js';
 import { PALETTES } from '../sim/catalogue.js';
@@ -186,6 +193,8 @@ function facadeSet(role) {
     return t;
   };
   const set = { map: tex('albedo'), lights: tex('lights'), rough: tex('rough') };
+  // Four 1.5 m plaster patches per storey band: render grain at the scale a wall has it.
+  grainInto(set.map, 'plaster-diff.jpg', 4);
   cache.set(key, set);
   return set;
 }
@@ -203,11 +212,116 @@ const hash1 = (i) => { const s = Math.sin(i * 127.1 + 13.7) * 43758.5453; return
 /** Exported for the render modules that need the same deterministic jitter. */
 export { hash1 };
 
+/* ----------------------------------------------------------- photo surfaces */
+
+/**
+ * Photographic maps, loaded after the first frame. A photo is drawn INTO the canvas the
+ * procedural map already uses — same texture object, same pixel size — and the texture
+ * is flagged for re-upload. Swapping the image for a differently sized one would ask
+ * WebGL2's immutable texture storage to resize, which it cannot; swapping the texture
+ * object would mean chasing every material and kit that holds it. Drawing in place has
+ * neither problem, and every material, shader and kit stays exactly as it was built.
+ *
+ * A failed load is a console.error, not a silent fallback: every gate fails on console
+ * errors, so a missing file cannot ship unnoticed. In the room the drawn map simply
+ * stays, because a blank hotel is worse than a procedural one.
+ */
+const TEX_DIR = new URL('../../assets/textures/', import.meta.url);
+const photos = new Map();
+const pending = [];
+export const textureStatus = { loaded: [], failed: [] };
+
+// Requests start only after the window `load` event. Every image fetch started before it —
+// even from a detached `new Image()` — delays `load`, so requesting during boot would hold
+// the first-load signal hostage to 222 KB of JPEG on hotel Wi-Fi. After `load`, the drawn
+// maps are already on screen and the photos replace them as they land.
+const afterLoad = new Promise((resolve) => {
+  if (typeof document === 'undefined' || document.readyState === 'complete') resolve();
+  else window.addEventListener('load', () => resolve(), { once: true });
+});
+
+function photo(file) {
+  if (!photos.has(file)) {
+    photos.set(file, afterLoad.then(() => new Promise((resolve) => {
+      if (typeof Image === 'undefined') { resolve(null); return; }
+      const img = new Image();
+      img.decoding = 'async';
+      img.onload = () => { textureStatus.loaded.push(file); resolve(img); };
+      img.onerror = () => {
+        textureStatus.failed.push(file);
+        console.error(`[textures] ${file} did not load: the drawn map stays in its place`);
+        resolve(null);
+      };
+      img.src = new URL(file, TEX_DIR).href;
+    })));
+  }
+  return photos.get(file);
+}
+
+/** Overwrite a canvas-backed texture with a photograph, at the canvas's own size. */
+function photoInto(t, file) {
+  pending.push(photo(file).then((img) => {
+    if (!img) return;
+    const c = t.image;
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    t.needsUpdate = true;
+  }));
+  return t;
+}
+
+/**
+ * Multiply a photographic grain into a drawn map, tiled `reps` times across it. Used on
+ * the facades, where the windows, sills and rails are drawing that must stay exact (the
+ * light map lines up with them) but the wall between them was a flat painted field.
+ */
+function grainInto(t, file, reps) {
+  pending.push(photo(file).then((img) => {
+    if (!img) return;
+    const c = t.image, g = c.getContext('2d');
+    const step = c.width / reps;
+    g.save();
+    g.globalCompositeOperation = 'multiply';
+    for (let y = 0; y < reps; y++) for (let x = 0; x < reps; x++) g.drawImage(img, x * step, y * step, step, step);
+    g.restore();
+    t.needsUpdate = true;
+  }));
+  return t;
+}
+
+/**
+ * A tangent-space normal map: flat (#8080FF) until its photo arrives. It is created flat
+ * rather than added later because attaching a normalMap to a live material changes its
+ * shader; a flat one costs one sampler and keeps the program stable through the swap.
+ */
+function normalPhoto(key, file, S) {
+  if (cache.has(key)) return cache.get(key);
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const g = c.getContext('2d');
+  g.fillStyle = '#8080FF';
+  g.fillRect(0, 0, S, S);
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;   // data, not colour: no sRGB decode
+  t.anisotropy = 4;
+  cache.set(key, t);
+  return photoInto(t, file);
+}
+
+/**
+ * Resolves once every photo requested so far has loaded (or failed) and been drawn.
+ * The gates and the shot tool wait on it so a frame comparison never straddles a swap.
+ */
+export function texturesReady() {
+  return Promise.all(pending.slice()).then(() => ({
+    loaded: textureStatus.loaded.slice(), failed: textureStatus.failed.slice(),
+  }));
+}
+
 /**
  * Paving: large honed slabs with real joint depth.
  *
  * The 128 px version drew a 32 px grid with 1 px lines, so at the wide camera the
- * entire forecourt was one uniform sheet of graph paper â€” the flattest thing in the
+ * entire forecourt was one uniform sheet of graph paper — the flattest thing in the
  * frame. A generated limestone reference (FLORA, review/flora-ref/paving.png) showed
  * what was missing: four or five slabs of visibly different tone, a chamfer that
  * catches a highlight on one edge and a shadow on the other, and a few faint damp
@@ -278,7 +392,7 @@ export function pavingTexture() {
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 4;
   cache.set('pave', t);
-  return t;
+  return photoInto(t, 'paving-diff.jpg');
 }
 
 /** Flat-roof membrane: welded seams and gravel grain, so a roof is a surface, not a lid. */
@@ -305,21 +419,15 @@ export function roofMembraneTexture() {
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   t.colorSpace = THREE.SRGBColorSpace;
   cache.set('roof', t);
-  return t;
+  return photoInto(t, 'gravel-diff.jpg');
 }
 
 /**
- * Pitched-roof courses. A scaled cone's UVs run base-to-apex in v, so horizontal
- * course lines in this texture wrap the pyramid as tile courses â€” the difference
- * between a tiled roof and a painted tent.
- */
-/**
- * Roof tiling, used by every pitched roof on the site â€” and the pitched roofs are the
- * largest continuous surfaces in the wide shot, which is why the 128 px version read as
- * a grey smear from the inspection camera. The generated slate reference
- * (review/flora-ref/roof.png) had two things this was missing: per-tile tonal range
- * (warm grey-brown through charcoal, not one flat hue) and a crisp shadow line under
- * every course, which is what makes a roof read as overlapping plates.
+ * Pitched-roof slate. The scanned slate (slate-diff.jpg, with slate-nor.jpg for relief) is
+ * drawn over this as soon as it loads; until then, and if it ever fails, this is a bonded
+ * course pattern with per-slate tone, so the first frame still reads as a tiled roof. The
+ * map MODULATES (light field); the darkness lives in the material colour, or the roofs
+ * multiply twice and go near-black.
  */
 export function roofTileTexture() {
   if (cache.has('tile')) return cache.get('tile');
@@ -327,73 +435,22 @@ export function roofTileTexture() {
   const c = document.createElement('canvas');
   c.width = c.height = S;
   const g = c.getContext('2d');
-  const rows = 10, cols = 6, ch = S / rows, cw = S / cols, lw = Math.max(1, S / 320);
-
+  const rows = 10, cols = 6, ch = S / rows, cw = S / cols;
+  const tint = ['#F7F2E6', '#DED6C4', '#F0EADD', '#C9C1AF', '#E6DFCE', '#B3AC9B'];
   g.fillStyle = '#B6AE9E';
   g.fillRect(0, 0, S, S);
-
-  // The map MODULATES; the material colour does the tinting (every other material in this
-  // kit works that way). Painting the slate tints dark here as well made the roofs
-  // multiply twice and go near-black â€” a regression the wide shot showed immediately.
-  // So: a light modulation field with per-tile range, and the darkness lives in the
-  // material colour where it belongs.
-  //
-  // The spread is WIDE on purpose: at the original 14% a slope facing away from a low sun has
-  // no directional light to reveal its courses, so every hipped roof collapsed into a flat
-  // charcoal mass. Albedo contrast is the only lever that survives in shadow.
-  const tint = ['#F7F2E6', '#DED6C4', '#F0EADD', '#C9C1AF', '#E6DFCE', '#B3AC9B'];
   for (let r = 0; r < rows; r++) {
-    for (let k = 0; k < cols; k++) {
-      const x = k * cw + (r % 2 ? cw * 0.5 : 0) - cw * 0.5;
-      const y = r * ch;
-      const t = tint[Math.floor(hash1(r * 31 + k) * tint.length)];
-      g.fillStyle = t;
-      g.fillRect(x + lw * 0.5, y, cw - lw, ch);
-      // Wrap the half-tile that hangs past the right edge so the course stays bonded
-      // across the tile seam instead of showing a cut column.
-      if (x < 0) {
-        g.fillRect(x + S + lw * 0.5, y, cw - lw, ch);
-      } else if (x + cw > S) {
-        g.fillRect(x - S + lw * 0.5, y, cw - lw, ch);
-      }
-      // Vertical slate edges. 0.44, up from 0.34, for the same reason as the tint range: on a
-      // shaded slope the albedo edge is the only thing left to read.
-      g.fillStyle = 'rgba(96,90,80,0.44)';
-      g.fillRect(x + cw - lw, y, lw, ch);
-      // Weathering: a soft darkening down each slate, never a hard line.
-      const grad = g.createLinearGradient(x, y, x, y + ch);
-      grad.addColorStop(0, 'rgba(255,255,255,0.10)');
-      grad.addColorStop(1, 'rgba(60,56,50,0.14)');
-      g.fillStyle = grad;
-      g.fillRect(x + lw * 0.5, y, cw - lw, ch);
-      if (hash1(r * 71 + k + 9) > 0.82) {
-        g.fillStyle = 'rgba(228,230,214,0.22)';   // lichen speck
-        g.fillRect(x + cw * 0.3, y + ch * 0.35, cw * 0.28, ch * 0.18);
-      }
+    for (let k = -1; k < cols; k++) {
+      g.fillStyle = tint[Math.floor(hash1(r * 31 + k + 1) * tint.length)];
+      g.fillRect(k * cw + (r % 2 ? cw * 0.5 : 0) + 1, r * ch, cw - 2, ch - 3);
     }
-    // Course shadow: the single strongest depth cue on a slate roof â€” but shallow. At
-    // 0.55 alpha it reads as a black stripe every 0.5 m and the roof turns into a grate.
-    const sg = g.createLinearGradient(0, r * ch + ch * 0.78, 0, r * ch + ch);
-    sg.addColorStop(0, 'rgba(48,45,40,0)');
-    sg.addColorStop(1, 'rgba(48,45,40,0.34)');
-    g.fillStyle = sg;
-    g.fillRect(0, r * ch + ch * 0.78, S, ch * 0.22);
   }
-
-  for (let i = 0; i < 2600; i++) {
-    const x = hash1(i + 300) * S, y = hash1(i + 1300) * S;
-    g.fillStyle = `rgba(${hash1(i + 2300) > 0.5 ? '210,206,192' : '40,38,34'},0.05)`;
-    g.fillRect(x, y, 1, 1);
-  }
-
   const t = new THREE.CanvasTexture(c);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  // No bake-in repeat: the roof materials declare their world tile size and every roof â€”
-  // box or cone â€” scales its own UVs to it, so courses are the same size on every roof.
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 4;
   cache.set('tile', t);
-  return t;
+  return photoInto(t, 'slate-diff.jpg');
 }
 
 /** Relief for the roof comes from the albedo, as for the paving: the course shadow and the
@@ -405,99 +462,25 @@ export function roofTileTexture() {
  */
 export function groundTexture() {
   if (cache.has('ground')) return cache.get('ground');
-  const S = isTouch() ? 256 : 512;
+  // A placeholder for the first frame only: the sand scan (sand-diff.jpg) is drawn over it
+  // as soon as it loads. Base tone plus a soft mottle, so even a failed load is not flat.
+  const S = 256;
   const c = document.createElement('canvas');
   c.width = c.height = S;
   const g = c.getContext('2d');
   g.fillStyle = '#E4DBC7';
   g.fillRect(0, 0, S, S);
-
-  // Broad tonal patches: dry ground IS uneven, but the first version drew fourteen
-  // patches up to a third of the tile across at 0.44 alpha on a 9 m tile — which tiled
-  // into a repeating field of soft mounds and read as DUNES rather than ground. The
-  // large-scale variation now stays under 1.5 m of real ground, and the variation it
-  // gives up is replaced by mid-frequency mottle below, which tiles without a pattern.
-  for (let i = 0; i < 6; i++) {
-    const x = hash1(i + 11) * S, y = hash1(i + 22) * S, r = S * (0.06 + hash1(i + 33) * 0.09);
-    const rad = g.createRadialGradient(x, y, 0, x, y, r);
-    const warm = hash1(i + 44) > 0.45;
-    rad.addColorStop(0, warm ? 'rgba(206,192,162,0.20)' : 'rgba(188,198,176,0.15)');
-    rad.addColorStop(1, 'rgba(206,192,162,0)');
-    g.fillStyle = rad;
-    g.fillRect(x - r, y - r, r * 2, r * 2);
-  }
-
-  // Mid-frequency mottle: the scale that actually reads as ground at a camera height of
-  // 30-110 m. Soft-edged and small enough that the eye cannot lock onto the tile repeat.
-  for (let i = 0; i < 900; i++) {
+  for (let i = 0; i < 1600; i++) {
     const x = hash1(i + 1201) * S, y = hash1(i + 1303) * S;
-    const r = S * (0.015 + hash1(i + 1407) * 0.030);
-    const light = hash1(i + 1509) > 0.5;
-    const rad = g.createRadialGradient(x, y, 0, x, y, r);
-    rad.addColorStop(0, light
-      ? `rgba(240,231,209,${(0.05 + hash1(i + 1611) * 0.07).toFixed(3)})`
-      : `rgba(168,157,131,${(0.04 + hash1(i + 1713) * 0.07).toFixed(3)})`);
-    rad.addColorStop(1, 'rgba(200,190,166,0)');
-    g.fillStyle = rad;
-    g.fillRect(x - r, y - r, r * 2, r * 2);
+    g.fillStyle = hash1(i + 1509) > 0.5 ? 'rgba(244,236,214,0.18)' : 'rgba(160,150,124,0.14)';
+    g.fillRect(x, y, 1 + hash1(i + 1407) * 3, 1 + hash1(i + 1611) * 2);
   }
-
-  // Mid-scale patches: the scale the camera can actually see. The dune fix removed the
-  // 3-9 m mounds, and the mottle below is 13-40 cm — correct as grain, but from the
-  // establishing camera (30-110 m) it is sub-pixel, which left the ground reading as a flat
-  // sandy field, i.e. the largest surface in the frame as cardboard. These are 0.5-1.2 m
-  // of real ground at low alpha: big enough to break the field at 100 m, too small to tile
-  // into a pattern.
-  for (let i = 0; i < 40; i++) {
-    const x = hash1(i + 2003) * S, y = hash1(i + 2101) * S;
-    const r = S * (0.05 + hash1(i + 2203) * 0.08);
-    const light = hash1(i + 2309) > 0.45;
-    const rad = g.createRadialGradient(x, y, 0, x, y, r);
-    rad.addColorStop(0, light
-      ? `rgba(238,228,205,${(0.14 + hash1(i + 2411) * 0.16).toFixed(3)})`
-      : `rgba(164,152,126,${(0.13 + hash1(i + 2503) * 0.17).toFixed(3)})`);
-    rad.addColorStop(1, 'rgba(200,190,166,0)');
-    g.fillStyle = rad;
-    g.fillRect(x - r, y - r, r * 2, r * 2);
-  }
-
-  // Brushed streaks: the single most useful cue. The old version scattered filled
-  // circles, which read as blotches of paint; sun-bleached ground has directional
-  // grain, so every stroke here is a short, nearly horizontal arc.
-  g.lineWidth = 1;
-  for (let i = 0; i < 2600; i++) {
-    const x = hash1(i + 101) * S, y = hash1(i + 202) * S;
-    const len = S * (0.012 + hash1(i + 303) * 0.05);
-    const tilt = (hash1(i + 404) - 0.5) * 0.22;
-    const light = hash1(i + 505) > 0.5;
-    g.strokeStyle = light
-      ? `rgba(246,238,218,${(0.09 + hash1(i + 606) * 0.20).toFixed(3)})`
-      : `rgba(150,140,116,${(0.07 + hash1(i + 707) * 0.16).toFixed(3)})`;
-    g.beginPath();
-    g.moveTo(x, y);
-    g.lineTo(x + len, y + len * tilt);
-    g.stroke();
-  }
-
-  // Tufts and pebbles at a real scale, then fine dust.
-  for (let i = 0; i < 220; i++) {
-    const x = hash1(i + 808) * S, y = hash1(i + 909) * S;
-    const r = 1 + hash1(i + 111) * 2.6;
-    g.fillStyle = hash1(i + 222) > 0.55 ? 'rgba(158,168,132,0.30)' : 'rgba(176,160,126,0.34)';
-    g.beginPath(); g.ellipse(x, y, r, r * 0.6, 0, 0, Math.PI * 2); g.fill();
-  }
-  for (let i = 0; i < 5200; i++) {
-    const x = hash1(i + 333) * S, y = hash1(i + 444) * S;
-    g.fillStyle = `rgba(132,123,106,${0.03 + hash1(i + 555) * 0.09})`;
-    g.fillRect(x, y, 1, 1);
-  }
-
   const t = new THREE.CanvasTexture(c);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 4;
   cache.set('ground', t);
-  return t;
+  return photoInto(t, 'sand-diff.jpg');
 }
 
 /** Water: pale ripple bands. Pairs with the environment map for a real sheen. */
@@ -506,7 +489,7 @@ export function waterTexture() {
   // 26 lone arcs on a 128 px tile was a flat sage sheet with three faint stripes on it,
   // and the canal is a fifth of the wide frame. Water reads as water because of the
   // *density* of overlapping wavelets at several scales, all nearly horizontal, plus the
-  // sheer the environment map supplies â€” so: three sizes of wavelet, one tile, no assets.
+  // sheer the environment map supplies — so: three sizes of wavelet, one tile, no assets.
   const S = isTouch() ? 256 : 512;
   const c = document.createElement('canvas');
   c.width = c.height = S;
@@ -560,7 +543,7 @@ export function waterTexture() {
 
 /**
  * Roof and bed planting. `lawn` on its own is one flat #9CBBAE, and 40 mÂ² of it on a
- * planted roof read as a plastic lid â€” or, worse, as water. This map is the same green
+ * planted roof read as a plastic lid — or, worse, as water. This map is the same green
  * with groundcover scale under it, so a roof garden reads as vegetation from the
  * inspection camera without a single extra draw call: one 128 px tile, repeated at 2.6 m.
  */
@@ -627,7 +610,7 @@ export function plantingTexture() {
 
   // (2) Groundcover: leaf-scale ellipses in clusters, with one highlight per leaf on its sun
   // side. At this tile (2.6 m) a leaf is ~0.1 m, i.e. 5 px, and one screen pixel is ~2 cm,
-  // so the pattern is at the limit of resolution on purpose â€” it averages to vegetation
+  // so the pattern is at the limit of resolution on purpose — it averages to vegetation
   // instead of resolving as speckle.
   for (let i = 0; i < 40; i++) {
     const cx = rand() * TILE, cy = rand() * TILE;
@@ -651,7 +634,7 @@ export function plantingTexture() {
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   t.colorSpace = THREE.SRGBColorSpace;
   cache.set('planting', t);
-  return t;
+  return photoInto(t, 'planting-diff.jpg');
 }
 
 /** Soft radial blob for props not worth a real shadow pass, and contact darkening. */
@@ -677,7 +660,7 @@ export function blobTexture() {
  *
  * Gold, accent and glass are METALS: with nothing to reflect they render near-black.
  * That is exactly why every accent band in the review screenshot read as dull brown
- * rather than #B59060. Contrast in the environment â€” a warm sun, a cool bounce card â€”
+ * rather than #B59060. Contrast in the environment — a warm sun, a cool bounce card —
  * is what turns a metal surface into gold instead of orange plastic. Costs one small
  * cube render at boot and zero network bytes.
  */
@@ -685,7 +668,7 @@ export function blobTexture() {
  * A real sky, drawn once at 1024x512 and used twice: as the visible background and as
  * the source of the PMREM environment. It is the highest-leverage surface in the whole
  * renderer and it used to be a 16x64 three-band gradient. Every metal in the scene
- * reflects it â€” the gold bands reflected a grey stripe and read as dull brown, and glass
+ * reflects it — the gold bands reflected a grey stripe and read as dull brown, and glass
  * reflected nothing at all, which is most of the reason the first wide shot read as a
  * diagram rather than a photograph.
  *
@@ -724,7 +707,7 @@ export function skyTexture(dusk = false) {
   g.fillRect(0, 0, W, H);
 
   // Sun bloom, broad and disc-less. A hard disc in an IBL puts a small bright dot in
-  // every polished surface â€” a specular artefact, not a sun.
+  // every polished surface — a specular artefact, not a sun.
   const sx = dusk ? W * 0.16 : W * 0.72;
   const sy = dusk ? H * 0.53 : H * 0.30;
   const bloom = g.createRadialGradient(sx, sy, 0, sx, sy, W * 0.40);
@@ -922,6 +905,8 @@ export function makeKit(paletteId) {
   const membrane = roofMembraneTexture();
   const tiles = roofTileTexture();
   const soil = groundTexture();
+  const paveNormal = normalPhoto('pave:n', 'paving-nor.jpg', isTouch() ? 128 : 256);
+  const slateNormal = normalPhoto('tile:n', 'slate-nor.jpg', isTouch() ? 128 : 256);
   const ripple = waterTexture();
   const blob = blobTexture();
   const owned = [];
@@ -939,7 +924,7 @@ export function makeKit(paletteId) {
    * One facade material: shared textures (same GPU upload, one sampler), tinted by
    * the palette. The albedo doubles as the bump map and the matching rough map makes
    * glass glossy and stone matte. `jitter` shifts lightness a few percent so fifteen
-   * walls never read as one flat tone â€” derived from the placement, so the same hotel
+   * walls never read as one flat tone — derived from the placement, so the same hotel
    * always looks the same.
    *
    * `isDynamic` marks per-building copies for disposal on rebuild; kit-shared ones
@@ -982,12 +967,14 @@ export function makeKit(paletteId) {
     gridLine: keep(new THREE.LineBasicMaterial({ color: new THREE.Color(BRAND.gold), transparent: true, opacity: 0.16 })),
   // Land for sale: dashed, so it reads as an offer rather than a wall or a kerb.
   plotOutline: keep(new THREE.LineDashedMaterial({ color: new THREE.Color(BRAND.gold), dashSize: 1.1, gapSize: 0.7, transparent: true, opacity: 0.75 })),
-    roof: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#9C998E'), map: membrane, roughness: 0.96, userData: { tileWorld: 3.4 } })),
-    // tileWorld 4.8, not 3.2: eight courses over 3.2 m is a 0.4 m course, which is about
-    // four pixels in the establishing camera and mips down to flat noise. At 4.8 m the
-    // courses survive at ~8 px and the roofs read as tiled rather than spray-textured.
-    roofTile: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#968A78'), map: tiles, bumpMap: tiles, bumpScale: 0.30, roughness: 0.9, userData: { tileWorld: 4.8 } })),
-    roofSlate: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#6E6A5E'), map: tiles, bumpMap: tiles, bumpScale: 0.30, roughness: 0.88, userData: { tileWorld: 4.8 } })),
+    // Flat roofs: photographic ballast gravel (gravel_floor_02, a 2 m scan) at 2.5 m.
+    roof: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#9C998E'), map: membrane, roughness: 0.96, userData: { tileWorld: 2.5 } })),
+    // Pitched roofs: scanned slate (roof_slates_03) with its own normal map. The scan is a
+    // 3 m patch with ~25 courses; at true scale a 12 cm course is two pixels in the fit
+    // camera and mips to grey, so it is laid at 6.5 m — a 26 cm course, the size the FLORA
+    // court render shows — and the courses survive at both framings.
+    roofTile: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#968A78'), map: tiles, normalMap: slateNormal, normalScale: new THREE.Vector2(1.1, 1.1), roughness: 0.9, userData: { tileWorld: 6.5 } })),
+    roofSlate: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#6E6A5E'), map: tiles, normalMap: slateNormal, normalScale: new THREE.Vector2(1.1, 1.1), roughness: 0.88, userData: { tileWorld: 6.5 } })),
     roofDark: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#8E8577'), roughness: 0.95 })),
     glass: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color(BRAND.glass), roughness: 0.06, metalness: 0.62, transparent: true, opacity: 0.6 })),
     // Water that reflects the sky, not a teal sheet with a sky-coloured tint: the ripple map
@@ -995,10 +982,16 @@ export function makeKit(paletteId) {
     // read as painted card. A near-white base with 0.72 metalness lets the sky IBL do the
     // work; envMapIntensity is raised because the scene-wide environment is only at 0.45.
     water: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#9FB8B2'), map: ripple, bumpMap: ripple, bumpScale: 0.18, roughness: 0.07, metalness: 0.72, envMapIntensity: 2.4, transparent: true, opacity: 0.97, userData: { tileWorld: 6 } })),
-    paving: keep(new THREE.MeshStandardMaterial({ color: mix('#EDE7DC', 0.10), roughness: 0.9, map: pave, bumpMap: pave, bumpScale: 0.45, userData: { tileWorld: 7.5 } })),
-    pavingDark: keep(new THREE.MeshStandardMaterial({ color: mix('#D8D0C1', 0.10), roughness: 0.92, map: pave, bumpMap: pave, bumpScale: 0.45, userData: { tileWorld: 7.5 } })),
-    path: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#C4B79C'), roughness: 0.88, map: pave, bumpMap: pave, bumpScale: 0.40, userData: { tileWorld: 2.2 } })),
-    ground: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#D2C8B2'), map: soil, roughness: 1, userData: { tileWorld: 9 } })),
+    // Paving: scanned precast slabs (precast_stone_paving, 4 x 4 slabs over 2.24 m) with
+    // the scan's normal map for the chamfers and joints, replacing albedo-as-bump, which
+    // on a photograph would emboss every stain. Laid at 6 m (1.5 m slabs, the honed-slab
+    // scale of the FLORA forecourt); the path keeps the scan's true 0.55 m module.
+    paving: keep(new THREE.MeshStandardMaterial({ color: mix('#EDE7DC', 0.10), roughness: 0.9, map: pave, normalMap: paveNormal, normalScale: new THREE.Vector2(0.9, 0.9), userData: { tileWorld: 6 } })),
+    pavingDark: keep(new THREE.MeshStandardMaterial({ color: mix('#D8D0C1', 0.10), roughness: 0.92, map: pave, normalMap: paveNormal, normalScale: new THREE.Vector2(0.9, 0.9), userData: { tileWorld: 6 } })),
+    path: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#C4B79C'), roughness: 0.88, map: pave, normalMap: paveNormal, normalScale: new THREE.Vector2(0.7, 0.7), userData: { tileWorld: 2.2 } })),
+    // Open ground: an aerial sand scan (aerial_sand, 15 m) at its true scale. Its wind
+    // ripple and footprints carry baked relief, so it needs no normal map of its own.
+    ground: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#D2C8B2'), map: soil, roughness: 1, userData: { tileWorld: 15 } })),
     lawn: keep(new THREE.MeshStandardMaterial({ color: new THREE.Color('#9CBBAE'), roughness: 0.95 })),
     // Roof gardens and beds: same green, mottled, so a planted deck does not read as a
     // flat plastic sheet or as a pool.

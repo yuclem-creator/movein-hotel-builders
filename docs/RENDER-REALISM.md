@@ -127,8 +127,17 @@ The in-app realism pass is +12.4 KB raw / +4.5 KB gzip (measured **1194.2 / 320.
 raised 1184 -> 1200 raw and 318 -> 324 gzip, flagged for approval rather than absorbed).
 That is the crown geometry, the hip-roof pavilion, the ground rebalance, the fog and shadow
 work, the accent chroma gain, and the capture panel with its styles. Every byte of it is
-code; the renderer still ships no image assets at all, so a palette switch, a style change
-and a capture all cost zero network requests.
+code; at that point the renderer shipped no image assets at all.
+
+The retexture pass (`docs/RENDER-FIDELITY-GAP.md`) **reverses that claim on purpose**: eight
+CC0 Poly Haven scans (paving, slate, sand, gravel, planting, plaster; two of them normal
+maps) ship in `assets/textures/`, **222.2 KB**, under a new deferred budget of 240 KB. They
+are requested only after the window `load` event, drawn into the existing canvas textures,
+and re-centred on the drawn colours, so the first frame and the palette are unchanged and a
+palette switch, a style change and a capture still cost zero network requests. The
+critical path is **1198.1 / 321.9** (budgets 1200 / 324): the loader cost was paid for by
+shrinking the drawn sand and slate painters to placeholders. The 240 KB line is flagged for
+approval.
 
 
 ## Render set (Workspace 12) — full-frame passes on the built game

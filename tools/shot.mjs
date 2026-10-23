@@ -36,10 +36,12 @@ const browser = await chromium.launch({
 });
 await mkdir(OUT, { recursive: true });
 
+// Sixth argument `std` skips the ultrawide pass: under SwiftShader a 2509 px frame can
+// outlast the screenshot timeout on a loaded machine, and std is enough to iterate on.
 const shots = [
   { tag: 'wide', w: 2509, h: 1186 },
   { tag: 'std', w: 1280, h: 800 },
-];
+].filter((s) => process.argv[6] !== 'std' || s.tag === 'std');
 for (const s of shots) {
   const ctx = await browser.newContext({ viewport: { width: s.w, height: s.h }, deviceScaleFactor: 1 });
   const page = await ctx.newPage();
@@ -52,6 +54,9 @@ for (const s of shots) {
   await page.waitForTimeout(300);
   await page.click('#choicesPreset .choice:nth-child(1)');
   await page.waitForTimeout(1600);
+  // Photographic surface maps load after the first frame: never shoot a half-swapped scene.
+  const tex = await page.evaluate(() => window.__hb.view.texturesReady());
+  console.log(`${s.tag}: textures loaded ${tex.loaded.length}, failed ${tex.failed.length} ${tex.failed.join(' ')}`);
 
   // Exact look, no easing to wait out, and no walking agents differing between frames.
   await page.evaluate(([st, pal]) => {
