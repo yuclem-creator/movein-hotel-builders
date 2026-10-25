@@ -267,10 +267,10 @@ frames or handing a tablet to a colleague.
 
 | gate | proves |
 |---|---|
-| `check-syntax.mjs` | every JS file parses (37 files) |
+| `check-syntax.mjs` | every JS file parses (41 files) |
 | `sim-check.mjs` | determinism, **regression lock against `tools/baseline.json`**, balance assertions, ledger reconciliation, placement rules, journey resolution, journey legs, owned land, manpower requirements and deviations, and **shared-build convergence** — two sessions replaying one intent stream, a refused stale intent, and a late joiner (144 checks) |
 | `brand-gate.mjs` | no off-canon colour anywhere in shipped CSS/HTML/JS, `board.html` included; headings use MO Exceptional at Regular only, never synthesised weight |
-| `bytes.mjs` | first-load budget: **1198.1 KB raw / 321.9 KB gzip** (budgets 1200 / 324), walking all of `js/`; deferred surface maps **222.2 KB** (budget 240, after the first frame) |
+| `bytes.mjs` | first-load budget: **1198.4 KB raw / 322.1 KB gzip** (budgets 1200 / 324), walking all of `js/`; deferred surface maps **222.2 KB** (budget 240, after the first frame) |
 | `qr-check.mjs` | the join-card QR is scannable: finders, timing, both format copies, capacity boundaries, quiet zone — and, when the dev decoder is installed, an independent **decode** of five real join URLs |
 | `smoke.mjs` | browser E2E on desktop **and** phone: boot, WebGL, fonts, full demo flow, result card, showcase, reveal, **browser engine === Node engine**, a *comparative* frame-rate check, zero console errors (39 checks) |
 | `visual-check.mjs` | composition (sky/middle/ground), three styles produce genuinely different silhouettes, each palette's accent is wired to real geometry, four signature elements are distinguishable, add-ons change the building without breaking the frame, and the manpower roster sits clear of the HUD and the tray with its own steps reflected on screen (39 checks) |
@@ -278,6 +278,13 @@ frames or handing a tablet to a colleague.
 | `team-check.mjs` | two devices and a late joiner on one hotel: both see each other, a placement on one appears on the other under the same uid, a roster change and a removal cross over, the late joiner adopts the hotel instead of starting empty, and a round run on one device lands every device on the result screen with the same composite (12 checks) |
 | `class-check.mjs` | the classroom path at 390×844, 844×390 and 1024×768: join from the URL, classroom rules, clock start and countdown, nothing off screen; then place, autosave, reload, resume, four rounds, score code, the reveal card's scroll cue, and the board ranking it — plus the join cards' QR pointing at an address a phone can actually open (56 checks) |
 | `capture-check.mjs` | the Capture panel renders **the team's own hotel**: closed on boot, its tool button unpressed, and *no image requested except the surface maps in `assets/textures/`*, every one of which must have loaded — the image is a `data:` URL produced by the renderer on the click, so a missing asset cannot be what is on screen; it is larger than the viewport it was taken from, carries real bytes, decodes to a frame with real colour spread and variance (a blank buffer fails), names the hotel and team **this session typed** (a demo render could not), states that it is the team's own build and not pre-drawn, hands the same image to a named download, tracks `aria-pressed`, and dismisses by close control, Escape and scrim (15 checks) |
+
+The architectural-fidelity tools are not gates and are not part of `npm run verify`:
+`arch-shot.mjs` renders one isolated building from four fixed cameras, so a reference frame shows
+one building and nothing else; `sig.mjs` scores a candidate reference against our own frame for
+structure (>= 0.75) and colour (<= 30); `flora-upload.mjs` sends a frame to an upload slot FLORA
+reserves. The method is `docs/ARCH-FIDELITY-PLAN.md` and the measured detail rows are
+`docs/ARCH-DETAIL-LEDGER.md`.
 
 The Capture panel is the one place the app shows a picture of the hotel, so it is the one
 place a reader could mistake it for something else. It used to be the opposite risk: three

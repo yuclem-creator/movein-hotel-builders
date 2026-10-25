@@ -179,15 +179,21 @@ export function buildTerrain(kit) {
     g.add(mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.7, 8), kit.gold, a.x + i * 1.5, 0.35, a.z + 2.6));
   }
 
-  // Service yard (north): utilitarian apron, gate posts, a marked holding area.
+  // Service yard (north): utilitarian apron, gate posts, a marked holding area. Its own
+  // named group, not five loose meshes on the terrain: a single-building frame (tools/
+  // arch-shot.mjs) has to be able to hide it, and an unnamed mesh can only be hidden by
+  // guessing at its position. Wrapping changes no world transform and no pixel.
+  const yard = new THREE.Group();
+  yard.name = 'serviceYard';
+  g.add(yard);
   const sv = cellCentre(SITE.service.col, SITE.service.row);
-  g.add(mesh(new THREE.BoxGeometry(SITE.cell * 4, 0.12, SITE.cell * 2.2), kit.pavingDark, sv.x, 0.06, sv.z - 1, false));
-  g.add(mesh(new THREE.BoxGeometry(SITE.cell * 1.8, 0.14, 12), kit.pavingDark, sv.x, 0.07, sv.z - 8, false));
+  yard.add(mesh(new THREE.BoxGeometry(SITE.cell * 4, 0.12, SITE.cell * 2.2), kit.pavingDark, sv.x, 0.06, sv.z - 1, false));
+  yard.add(mesh(new THREE.BoxGeometry(SITE.cell * 1.8, 0.14, 12), kit.pavingDark, sv.x, 0.07, sv.z - 8, false));
   for (const dx of [-2.6, 2.6]) {
-    g.add(mesh(new THREE.BoxGeometry(0.26, 2.2, 0.26), kit.gold, sv.x + dx, 1.1, sv.z - 2.2));
-    g.add(mesh(new THREE.BoxGeometry(0.34, 0.1, 0.34), kit.warm, sv.x + dx, 2.24, sv.z - 2.2));
+    yard.add(mesh(new THREE.BoxGeometry(0.26, 2.2, 0.26), kit.gold, sv.x + dx, 1.1, sv.z - 2.2));
+    yard.add(mesh(new THREE.BoxGeometry(0.34, 0.1, 0.34), kit.warm, sv.x + dx, 2.24, sv.z - 2.2));
   }
-  g.add(mesh(new THREE.BoxGeometry(5.5, 0.16, 0.2), kit.accent, sv.x, 2.2, sv.z - 2.2));
+  yard.add(mesh(new THREE.BoxGeometry(5.5, 0.16, 0.2), kit.accent, sv.x, 2.2, sv.z - 2.2));
 
   return g;
 }
