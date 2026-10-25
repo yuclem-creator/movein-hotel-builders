@@ -1,4 +1,4 @@
-// arch-shot.mjs — one building archetype, alone, from three fixed cameras.
+// arch-shot.mjs — one building archetype, alone, from four fixed cameras.
 //
 // Why this exists: the architectural work is judged against FLORA reference renders, and a
 // reference is only usable if it shows ONE building. The site-wide framings in shot.mjs show
@@ -9,7 +9,8 @@
 //   2. hides everything that is furniture rather than building (grid, plots, offers, ghost,
 //      selection, landscape, signature, the heritage pavilion, agents, overlays, glows).
 //      Terrain and paving stay, so the building keeps its ground contact and cast shadow;
-//   3. shoots three fixed cameras — a 3/4 view, a close 3/4 view and a roof view.
+//   3. shoots four fixed cameras — corner, close, facade and roof.
+//      Global sun/hemi lighting is retained; missing lights, water or textures fail closed.
 //
 // Usage: node tools/arch-shot.mjs [massing] [style] [palette] [dusk]
 //   massing  rooms | public | kiosk | spa | pool | hall | boh | plant | shed | people
@@ -17,15 +18,18 @@
 //   style    tower | courtyard | heritage   (default heritage)
 //   palette  gold | sage | ember | moon     (default gold)
 //   dusk     pass `dusk` to shoot the dusk look
-// Frames land in review/arch/<massing>-<style>-<cam>.png.
+// Frames and machine-readable pre-flight reports land in review/arch-v2/.
 import { spawn } from 'node:child_process';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile, readdir } from 'node:fs/promises';
+import { assertReferenceTextures } from './arch-scene.mjs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const OUT = join(ROOT, 'review', 'arch');
+// v2 preserves the under-lit historical frames in review/arch untouched.
+const OUT = join(ROOT, 'review', 'arch-v2');
+const EXPECTED_TEXTURES = (await readdir(join(ROOT, 'assets', 'textures'))).filter((f) => /\.jpg$/i.test(f));
 const PORT = 5207;
 const PW = 'C:/Users/clementy/Downloads/email-automation/browser/node_modules/playwright-core';
 const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
@@ -103,15 +107,10 @@ try {
     v.rebuild(iso);
     // Anything that is a tool or a neighbour rather than this building. Set AFTER rebuild,
     // because rebuild re-adds the landscape, the signature and the plots.
-    const KEEP = new Set(['world', 'buildings', 'paths', 'terrain']);
-    const shown = [];
-    for (const holder of [v.scene, v.world]) {
-      for (const child of holder.children) {
-        if (!KEEP.has(child.name)) child.visible = false;
-        else shown.push(child.name);
-      }
-    }
-    v.agents.setVisible(false);
+    // Shared with arch-check: isolate world content, not unnamed global lights.
+    const { isolateArchitecture, architectureBounds, waterVisibility } = await import('/tools/arch-scene.mjs');
+    const lights = isolateArchitecture(v);
+    const shown = v.world.children.filter((o) => o.visible).map((o) => o.name);
     // Named site furniture that lives INSIDE a group we keep: the service-yard gate is a
     // 2.2 m goalpost on the north apron, and in a one-building frame it is the only other
     // vertical object in shot, which is exactly the thing a reference must not contain.
@@ -124,37 +123,24 @@ try {
     if (dusk) v.setDusk(true); else v.setDusk(false);
 
     const g = v.world.getObjectByName('buildings').children[0];
-    const box = new THREE.Box3().setFromObject(g);
+    const bounds = architectureBounds(g, p, v.kit);
+    const water = waterVisibility(g, v.kit);
+    if (['pool', 'spa'].includes(massing) && (!water.length || water.some((x) => !x.visible))) {
+      throw new Error(`Water is occluded in ${massing}: ${JSON.stringify(water)}`);
+    }
+    // Frame solid geometry, excluding the large contact-shadow plane.
+    const box = new THREE.Box3(new THREE.Vector3(...bounds.world.min), new THREE.Vector3(...bounds.world.max));
     const size = box.getSize(new THREE.Vector3());
     const ctr = box.getCenter(new THREE.Vector3());
     const span = Math.max(size.x, size.z);
-    // applyRig() does not clamp the radius, so these can go below the [26, 118] orbit limit
-    // the pointer is held to. phi stays inside the pointer's own [0.42, 1.24]. The radii are
-    // deliberately tight: a reference frame that is mostly empty paving gives a FLORA pass
-    // nothing to work on, and the FLORA pass is the whole point of the frame.
+    // Fixed evidence camera parameters may exceed the interactive orbit limits.
+    // Framing is based on solid bounds, not the footprint or the contact-shadow decal.
     const cams = [
       { tag: 'corner', radius: clamp(span * 1.15, 11, 40), phi: 0.78, ty: box.max.y * 0.55 },
       { tag: 'close', radius: clamp(span * 0.80, 8, 28), phi: 1.02, ty: box.max.y * 0.40 },
-      // Facade-dominated and low. This exists because of a measured failure: in the `close`
-      // frame the roof plane fills most of the picture, so when FLORA re-toned the slate the
-      // luminance signature moved 0.497 — a structure score that says "different building"
-      // about a frame where only the surface changed. A wall-dominated frame puts the layout
-      // (window rhythm, wall/paving boundary) back in charge of the signature, so the score
-      // measures the building rather than the tone of one plane.
-      //
-      // Getting that frame took two tries. The first attempt (radius 0.62 span, phi 1.18) was
-      // still all roof: at 13 m from centre the camera is INSIDE the footprint radius of a 21 m
-      // building, so the near roof edge is metres away and fills the view. It has to stand
-      // clear of the building and look along the wall instead, which for a 5 m hall on a 21 m
-      // footprint means phi near 1.48 (about 5 degrees above horizontal) and radius near 1.45
-      // span, putting the eye at roughly eave height: the wall owns the frame and the roof
-      // shows as a shallow band. phi 1.48 is past the pointer's own 1.24 limit, which is fine
-      // here only because applyRig() does not clamp.
-      //
-      // Radius is 1.15 span, not 1.45: a 5 m wall on a 21 m footprint subtends about 15 degrees
-      // at 30 m, so a wider stand-off frames mostly sky and paving and the wall ends up a thin
-      // band in the middle. At 24 m the facade fills the frame width and the signature is
-      // window rhythm and wall/paving boundary, which is the whole point of the frame.
+      // Wall-dominated detail camera. Distances are presentation choices, not footprint
+      // measurements; authored, local-solid and world-solid dimensions are reported separately.
+      // phi 1.48 exceeds the gameplay orbit limit only for this evidence camera.
       { tag: 'facade', radius: clamp(span * 1.15, 10, 50), phi: 1.48, ty: box.max.y * 0.45 },
       { tag: 'roof', radius: clamp(span * 1.25, 12, 44), phi: 0.50, ty: box.max.y * 0.95 },
     ];
@@ -177,7 +163,7 @@ try {
       ok: true, built, fnId: p.fnId, uid: p.uid, col: p.col, row: p.row, w: p.w, h: p.h,
       centre: { x: +ctr.x.toFixed(2), z: +ctr.z.toFixed(2) },
       box: { x: +size.x.toFixed(2), y: +size.y.toFixed(2), z: +size.z.toFixed(2), top: +box.max.y.toFixed(2) },
-      cams, shown, strays, hid,
+      cams, shown, strays, hid, bounds, lights, water,
       calls: v.renderer.info.render.calls, triangles: v.renderer.info.render.triangles,
     };
   }, [MASSING, STYLE, PALETTE, DUSK, PRESET]);
@@ -191,9 +177,14 @@ try {
     let tex = { loaded: [], failed: [] };
     for (let i = 0; i < 20; i++) {
       tex = await page.evaluate(() => window.__hb.view.texturesReady());
-      if (tex.loaded.length >= 8) break;
+      if (EXPECTED_TEXTURES.every((name) => tex.loaded.includes(name)) || tex.failed.length) break;
       await page.waitForTimeout(500);
     }
+    assertReferenceTextures(tex, EXPECTED_TEXTURES);
+    console.log(`  physical plot ${info.bounds.plotMetres.join(' x ')} m; body ${info.bounds.authoredBodyMetres.join(' x ')} m`);
+    console.log(`  local solid bounds ${info.bounds.local.size.map((n) => n.toFixed(2)).join(' x ')} m`);
+    console.log(`  lights ${JSON.stringify(info.lights)}; water ${JSON.stringify(info.water)}`);
+    await writeFile(join(OUT, `${MASSING}-${STYLE}${DUSK ? '-dusk' : ''}.json`), JSON.stringify({ ...info, textures: tex }, null, 2));
     console.log(`${MASSING}/${STYLE}/${PALETTE}${DUSK ? '/dusk' : ''} — ${info.fnId} at `
       + `col ${info.col} row ${info.row} (${info.w}x${info.h} cells), ${PRESET} preset built `
       + `${info.built.placed}`);

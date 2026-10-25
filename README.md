@@ -1,3 +1,6 @@
+> **Current fidelity work:** start with `C:\Users\clementy\.kimi-code\hotel-builders\docs\FIDELITY-CONTINUATION.md` and `FULL-SCENE-BRIEF.md` beside it. Source-lighting and pool/spa occlusion repairs are tracked in `CHECKPOINTS.md`. The existing hall-only architecture plan is historical where it conflicts. Run the canonical checks with `node tools/verify.mjs` from this repository.
+
+
 # MOVEin — Hotel Builders
 
 A static, procedural Three.js prototype of MOVEin Hotel Builders: build a hotel on a

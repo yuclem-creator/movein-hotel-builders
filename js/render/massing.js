@@ -616,7 +616,10 @@ export function buildMassing(placement, style, kit) {
   // building came out as one grey lid with invisible plant under it. Every archetype now
   // caps itself: accent ring, hip roof, planted deck or membrane plate.
   g.updateMatrixWorld(true);
-  g.add(box(w + 0.34, 0.34, d + 0.34, kit.pavingDark, 0, 0.17, 0));
+  // Low terraces already place water/loungers below 0.34 m. A full-height solid plinth
+  // buried them (and the spa garden); keep a low foundation under those two archetypes.
+  const baseHeight = fn.massing === 'pool' || fn.massing === 'spa' ? 0.08 : 0.34;
+  g.add(box(w + 0.34, baseHeight, d + 0.34, kit.pavingDark, 0, baseHeight / 2, 0));
 
   // Contact darkening under the footprint, so the building sits ON the plinth rather
   // than floating a few centimetres above it. Skipped for the ghost: setGhost clones

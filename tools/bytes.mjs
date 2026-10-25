@@ -114,8 +114,14 @@ console.log(`\nfonts (non-blocking, font-display: swap): ${kb(fontTotal)}`);
 // and sills, a plinth course, a cornice and downpipes, built in js/render/detail.js out of the
 // kit's existing materials. The surface-map budget below is NOT raised: no new image files. Any
 // further breach is a stop condition, not a negotiation.
-const BUDGET_RAW = 1225 * 1024;
-const BUDGET_GZ = 332 * 1024;
+// Superseded the same day by the full-scene fidelity package, approved by Clement 2026-10-25:
+// 1225 -> 1260KB raw and 332 -> 345KB gzip. The scope widened from the hall to every archetype
+// in all three styles, plus trees, site furniture, the quay and pool edging, and a hand-written
+// ambient-occlusion pass that runs on laptops and projectors only (phones keep today's path).
+// Estimated +45-55KB raw / +15-18KB gzip from 1198.4 / 322.1 measured. docs/ARCH-HANDOFF.md
+// is the brief. A breach of THESE numbers is a stop condition, not a negotiation.
+const BUDGET_RAW = 1260 * 1024;
+const BUDGET_GZ = 345 * 1024;
 let fails = 0;
 
 // Photographic surface maps (assets/textures/, CC0 Poly Haven scans). Deferred, not
@@ -124,7 +130,10 @@ let fails = 0;
 // get their own budget. JPEG does not gzip, so raw is the transfer size. 240KB is
 // 222KB measured plus headroom for one more 256px map; FLAGGED FOR CLEMENT as a new
 // budget line rather than an increase to the critical-path numbers above.
-const TEX_BUDGET = 240 * 1024;
+// Raised 240 -> 320KB for the full-scene fidelity package (Clement, 2026-10-25): room for one
+// dressed-stone coursing map for wall bases and the quay, and a leaf-card sheet for the trees.
+// Still CC0 or procedural only, recorded in assets/textures/SOURCES.md; never a FLORA pixel.
+const TEX_BUDGET = 320 * 1024;
 let texTotal = 0;
 const texFiles = (await readdir(join(ROOT, 'assets/textures'))).filter((f) => /\.jpg$/.test(f));
 for (const f of texFiles) texTotal += (await stat(join(ROOT, 'assets/textures', f))).size;

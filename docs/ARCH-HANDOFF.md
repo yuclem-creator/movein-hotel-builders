@@ -1,3 +1,6 @@
+> **SUPERSEDED for execution:** read `FULL-SCENE-BRIEF.md` and `FIDELITY-CONTINUATION.md` in this directory first. The hall-only scope, budgets, source-lighting assumptions and broad brand-gate claims below are historical, not current instructions.
+
+
 # Handoff — architectural detail, Phase 3 onward (hall first)
 
 **Repo:** `C:\Users\clementy\.kimi-code\hotel-builders` — git, origin

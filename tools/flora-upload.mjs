@@ -7,7 +7,8 @@
 // Per the asset contract: a POST descriptor takes the multipart form fields verbatim with the
 // file bytes LAST; a PUT descriptor takes the raw bytes.
 //
-// Usage: node tools/flora-upload.mjs <file> <descriptor.json> [--dry]
+// Usage: node tools/flora-upload.mjs <file> <descriptor.json|-> [--dry]
+// '-' reads FLORA_UPLOAD_DESCRIPTOR from the environment; signed credentials need not touch disk.
 //   descriptor.json is the `upload` object from the create response, e.g.
 //   { "method": "POST", "url": "https://…", "headers": {…}, "fields": {…}, "fileField": "file" }
 // Exit code 0 only on a 2xx. Nothing is printed from the descriptor's headers: a signed POST
@@ -22,7 +23,8 @@ if (!file || !descPath) {
   console.log('usage: node tools/flora-upload.mjs <file> <descriptor.json> [--dry]');
   process.exitCode = 2;
 } else {
-  const raw = JSON.parse(await readFile(descPath, 'utf8'));
+  // Signed upload credentials stay in memory; '-' reads an environment variable, never a file.
+  const raw = JSON.parse(descPath === '-' ? process.env.FLORA_UPLOAD_DESCRIPTOR : await readFile(descPath, 'utf8'));
   // Tolerate the descriptor arriving wrapped, and the field map under any of its usual names.
   const desc = raw.upload && typeof raw.upload === 'object' ? raw.upload : raw;
   const method = String(desc.method || desc.httpMethod || 'PUT').toUpperCase();

@@ -1,3 +1,6 @@
+> **2026-10-25 update:** `FULL-SCENE-BRIEF.md` and `FIDELITY-CONTINUATION.md` supersede this plan's hall-only limits and source-capture assumptions. Full-scene limits are 1260/345 KiB code and 320 KiB maps. Old isolated frames had disabled global lights; use corrected `review/arch-v2` evidence. Luminance correlation is not proof of unchanged geometry or visual quality.
+
+
 # Architectural fidelity: bringing the buildings up to the FLORA references
 
 Status: Phase 0 (tooling), Phase 1 (the hall reference) and Phase 2 (the hall ledger) are done;

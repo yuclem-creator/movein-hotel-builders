@@ -1,3 +1,6 @@
+> **Source caveat, 2026-10-25:** the historic hall sources were rendered with sun/hemi accidentally hidden by the isolation harness. Preserve the references as construction-detail evidence, not correct-lighting baselines. See `FIDELITY-CONTINUATION.md`, `FULL-SCENE-BRIEF.md` and `CHECKPOINTS.md` for the current scope and validated source repair. Pilot detail rows are still pending FLORA output; do not invent them.
+
+
 # Architecture detail ledger
 
 What this is: the detail set that separates our buildings from the FLORA references, written
