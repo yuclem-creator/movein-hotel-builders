@@ -5,6 +5,7 @@
 import * as THREE from '../../vendor/three/three.module.min.js';
 import { FUNCTION_BY_ID, SITE } from '../sim/catalogue.js';
 import { storeysFor } from '../sim/engine.js';
+import { roofDetail, columnTrim } from './detail.js';
 
 const C = SITE.cell;
 const FLOOR = 1.5;
@@ -187,6 +188,13 @@ function facadeMat(kit, fn) {
   return kit.makeFacade(role, ((s % 7) - 3) / 130);   // -0.023 .. +0.023
 }
 
+/**
+ * Construction-detail builders are handed the local `box` and the UV tiler rather than
+ * importing them back from this module: a cycle between massing.js and detail.js would be
+ * resolved by load order, and the one thing that must never depend on load order is geometry.
+ */
+const DETAIL = { box, tile: tileToMaterial };
+
 /** Footprint of the placement currently being built; set by buildMassing. */
 let buildCtx = { w: 1, d: 1, x: 0 };
 
@@ -303,12 +311,22 @@ function roomsHeritage(w, d, storeys, kit, fn) {
   g.add(box(0.36, 0.18, 0.36, kit.gold, 0, h + 2.62, 0));
   // Colonnade along the arrival face: the detail that reads "heritage" at 20m.
   const cols = Math.max(3, Math.round(w / 1.5));
+  const shaftH = FLOOR * 1.05;
+  const shaftY = FLOOR * 0.52;
+  const columns = [];
   for (let i = 0; i < cols; i++) {
     const x = -w / 2 + (w / (cols - 1)) * i;
-    g.add(cyl(0.14, 0.17, FLOOR * 1.05, 10, kit.paving, x, FLOOR * 0.52, d / 2 + 0.55));
+    const z = d / 2 + 0.55;
+    g.add(cyl(0.14, 0.17, shaftH, 10, kit.paving, x, shaftY, z));
+    columns.push({ x, z, base: shaftY - shaftH / 2, top: shaftY + shaftH / 2, r: 0.17 });
   }
   g.add(box(w + 0.6, 0.18, 1.4, kit.paving, 0, FLOOR * 1.08, d / 2 + 0.55));
   g.add(box(w + 0.7, 0.1, 1.5, kit.gold, 0, FLOOR * 1.2, d / 2 + 0.55));
+  // Construction detail. Articulates the columns, eave and roof seams that are already here:
+  // no footprint, storey, pitch or column-position change, and the parts are instanced so the
+  // whole-scene draw-call budget measured by tools/perf.mjs is unaffected in practice.
+  columnTrim(g, columns, kit, DETAIL);
+  roofDetail(g, { h, roofW: w + 0.7, roofD: d + 0.7, rise: 2.6, roofY: h + 1.3 }, kit, DETAIL);
   return g;
 }
 
@@ -376,11 +394,21 @@ function publicBlock(w, d, storeys, kit, fn, style) {
   if (style === 'heritage') {
     // A colonnade: the strongest silhouette cue at site scale.
     const cols = Math.max(3, Math.round(w / 1.6));
+    const shaftH = h * 0.82;
+    const shaftY = h * 0.41;
+    const columns = [];
     for (let i = 0; i < cols; i++) {
-      g.add(cyl(0.13, 0.16, h * 0.82, 10, kit.paving, -w / 2 + (w / (cols - 1)) * i, h * 0.41, d / 2 + 0.5));
+      const x = -w / 2 + (w / (cols - 1)) * i;
+      const z = d / 2 + 0.5;
+      g.add(cyl(0.13, 0.16, shaftH, 10, kit.paving, x, shaftY, z));
+      columns.push({ x, z, base: shaftY - shaftH / 2, top: shaftY + shaftH / 2, r: 0.16 });
     }
     g.add(box(w + 0.5, 0.16, 1.2, kit.paving, 0, h * 0.84, d / 2 + 0.5));
     g.add(box(w + 0.6, 0.1, 1.3, kit.gold, 0, h * 0.94, d / 2 + 0.5));
+    // Detail on the columns, eave and roof seams already built above. roofFor() placed this
+    // archetype's hip roof as hipRoof(w+0.5, d+0.5, 1.9) at h + 0.95, so the eave line is at h.
+    columnTrim(g, columns, kit, DETAIL);
+    roofDetail(g, { h, roofW: w + 0.5, roofD: d + 0.5, rise: 1.9, roofY: h + 0.95 }, kit, DETAIL);
   } else if (style === 'courtyard') {
     // A low garden wall and planting in front: reads as a resort, not a tower.
     g.add(box(w + 1.0, 0.5, 0.22, kit.paving, 0, 0.25, d / 2 + 1.1));
@@ -655,8 +683,13 @@ export function buildMassing(placement, style, kit) {
     o.userData.uid = placement.uid;
     o.userData.kind = 'building';
     if (o.isMesh) {
-      const h = o.geometry?.parameters?.height ?? 1;
-      o.castShadow = h > 0.4;
+      // Trim opts out explicitly. geometry.parameters.height is absent on InstancedMesh and on
+      // custom BufferGeometry, so without this flag a 7 cm fascia would cast a full-box shadow.
+      if (o.userData.noShadow) o.castShadow = false;
+      else {
+        const h = o.geometry?.parameters?.height ?? 1;
+        o.castShadow = h > 0.4;
+      }
       o.receiveShadow = true;
     }
   });

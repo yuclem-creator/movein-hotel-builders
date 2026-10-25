@@ -52,11 +52,17 @@ Spa requires a courtyard-focused side view later; low-side water exposure is tes
 hides the garden behind its roof. No source/ref should be accepted on automated scores alone.
 
 ## Next exact action for DeepSeek
-Read FULL-SCENE-BRIEF.md, PILOT-DETAIL-LEDGER.md and CHECKPOINTS.md. Complete W0's full-scene
-performance baseline, then implement a small W1 sample from the reviewed construction cues ONLY,
-using existing source counts/positions/materials. Do not reproduce AI background, bollard or deck
-changes. Present matched before/after runtime views for Clement's approval before expanding.
-No js/render/detail.js or fidelity implementation exists yet; the source repair is complete, not W1.
+The W1 first sample is IMPLEMENTED and measured (see the W1 checkpoint in CHECKPOINTS.md and the
+updated states in PILOT-DETAIL-LEDGER.md): `js/render/detail.js` adds instanced column trim and roof
+trim to roomsHeritage and publicBlock heritage only. Draw calls +4.4/+8.9/+7.2% against limits of
++10%, triangles x1.06-1.08 against 2.5x, bytes 1206.4/325.3 inside 1260/345.
+Do NOT expand to other archetypes or styles until Clement has reviewed the sample visually.
+Next: read the reviewed cues, then extend the SAME builders to the remaining archetypes in heritage,
+then courtyard/tower, re-measuring with tools/perf.mjs after each group and stopping if any preset
+passes +10% calls or 2.5x triangles. Then continue W2-W6. Do not reproduce AI background, bollard or
+deck changes. Present matched before/after runtime views for approval before each expansion.
+W0's full-scene GPU/phone performance baseline is still outstanding; the counters above come from
+software rasterisation and are scene costs, not device frame rates.
 
 ## Delivery workstreams after the pilot
 W0 baseline/tests/performance; W1 shared geometry detail; W2 buildings across styles;

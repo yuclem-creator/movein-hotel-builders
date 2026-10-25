@@ -81,3 +81,48 @@ Unit tests 7/7 PASS; bridge/call syntax PASS; fresh stdio bridge smoke PASS (liv
 ambiguous-input rejection and real read-only asset lookup). CLI alias lookup HTTP 200.
 The running Cline bridge has not been forcibly killed: reconnect its server to load new aliases.
 Current work is already unblocked through the local client. Tests/logs in review/repair-evidence.
+
+## W1 first sample — shared construction detail (2026-10-25)
+
+Implemented the first, deliberately small slice of W1: three reusable builders in a new
+`js/render/detail.js`, applied to the two buildings the pilot references cover, heritage style only.
+
+### What was built
+| Builder | Rows | What it adds | What it deliberately does NOT change |
+|---|---|---|---|
+| `columnTrim` | R1, P1 | Square plinth + abacus on every EXISTING column shaft, one instanced batch | Column count, spacing, height, shaft radius, canopy |
+| `roofDetail` fascia | R2 | Slim accent fascia band at the existing eave line | Roof footprint, pitch, overhang, storey heights |
+| `roofDetail` batch | R2, R3 | Dark soffit slab + hip/ridge caps on the existing roof seams, one instanced batch | Ridge position, apex, finial, slope geometry |
+
+Applied in `roomsHeritage` and in `publicBlock`'s heritage branch. Every other archetype and both
+other styles are untouched. `buildMassing`'s final traverse now honours `userData.noShadow`, so a
+7-10 cm band cannot cast a full-box shadow.
+
+### Measured result (tools/perf.mjs, heritage/gold, 1440x900)
+| Preset | Calls before -> after | Limit +10% | Triangles | Limit 2.5x |
+|---|---|---|---|---|
+| empty | 60 -> 60 | n/a | x1.00 | n/a |
+| balanced | 272 -> 284 (+4.4%) | pass (299) | x1.06 | pass |
+| revenue | 203 -> 221 (+8.9%) | pass (223) | x1.08 | pass |
+| neglect | 207 -> 222 (+7.2%) | pass (228) | x1.07 | pass |
+
+Bytes: 1198.7 -> 1206.4 KiB raw (+7.7) and 322.2 -> 325.3 KiB gzip (+3.1), inside 1260/345.
+
+**A first attempt breached the budget and was reworked, not accepted.** Splitting the soffit and
+the hip caps into separate meshes cost +11.8% calls on the revenue preset, over the +10% limit.
+Because the soffit and the caps are both dark boxes in the same material, they were merged into
+one instanced batch, which brought every preset back inside the limit. The limit is a stop
+condition, so the first version was discarded rather than shipped with an exception.
+
+### Visual result (assistant review, not user acceptance)
+`review/arch-v2/rooms-heritage-{facade,corner,roof}.png` and the public set show column feet and
+capitals reading at facade distance, a continuous fascia line along the eave, and capped roof
+seams. The change is articulation, not transformation: windows are still printed, roof courses are
+still texture-only, and the reference's recessed bays (R4), plinth joints (R5) and pool/landscape
+rows (P2-P4, L1-L3) are all still TODO. Clement's sign-off is required before expanding scope.
+
+### Corrections found while building
+- The caps were first built in `hipRoof`'s local space and added without the roof's own offset,
+  which would have placed them on the ground. Fixed by lifting the batch to `roofY`.
+- `detail.js` does not import from `massing.js`: the two would form a cycle whose behaviour
+  depends on load order. The caller passes its `box` helper and UV tiler in as a `make` object.
