@@ -1,6 +1,8 @@
 # Architectural fidelity: bringing the buildings up to the FLORA references
 
-Status: Phase 0 (tooling) and Phase 1 (the hall reference) are done; Phases 2-6 are the work.
+Status: Phase 0 (tooling), Phase 1 (the hall reference) and Phase 2 (the hall ledger) are done;
+Phases 3-6 are the work. **The executing brief is `docs/ARCH-HANDOFF.md`** - read that with this
+file, not instead of it.
 The detail rows the work builds from are in `docs/ARCH-DETAIL-LEDGER.md`, not in this file. Read
 this together with `docs/RENDER-FIDELITY-GAP.md` (what is still missing, with a cost per item)
 and `docs/RENDER-REALISM.md` (what has already been tried).
@@ -213,10 +215,15 @@ by hash, and update `docs/RENDER-FIDELITY-GAP.md`.
 - a download budget is exceeded;
 - merging breaks picking.
 
-## Open decisions for Clement
+## Decisions taken (2026-10-25) - these are no longer open
 
-1. **Who writes the Phase 2 ledger** - Clement, a vision-capable model over
-   `review/arch-cmp/`, or nobody (stop after Phase 1 and hand back).
-2. **Download budget** - pre-approve roughly +25 KB raw / +8 KB gzip, or stop on breach.
-3. **FLORA access for the executor** - if the executing harness has no FLORA tools, Phase 1
-   runs here and the executor starts at Phase 2.
+1. **Who writes the Phase 2 ledger** - done. Written by the model that ran Phase 1, from the two
+   accepted frames, and corrected on 2026-10-25 where its dimensions were estimates rather than
+   measurements (`docs/ARCH-DETAIL-LEDGER.md`). Rows 1-9 for the hall are the build list; row 10 is
+   deferred because it is surface, not geometry.
+2. **Download budget** - approved. `tools/bytes.mjs` is raised once, to 1225 KB raw / 332 KB gzip,
+   for the detail geometry; measured 1198.4 / 322.1, so 26.6 KB raw and 9.9 KB gzip of headroom.
+   The surface-map budget stays at 240 KB (no new image files). A further breach is a stop.
+3. **FLORA access for the executor** - Phase 1 runs in this harness, which has FLORA tools, so the
+   executor works from references that already exist. An executing harness without FLORA tools
+   stops after the hall rather than guessing the details the hall frames cannot show.

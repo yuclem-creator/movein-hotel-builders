@@ -1,7 +1,8 @@
 # Handoff — architectural detail, Phase 3 onward (hall first)
 
 **Repo:** `C:\Users\clementy\.kimi-code\hotel-builders` — git, origin
-`yuclem-creator/movein-hotel-builders`, branch `main`, clean at `e03844f`.
+`yuclem-creator/movein-hotel-builders`, branch `main`, clean at `fdf8129` (the commit that adds
+this file; the geometry work starts from there).
 **Live:** <https://yuclem-creator.github.io/movein-hotel-builders/>
 
 Ignore the "NOT a git repo / copy the whole folder first" line in `docs/DEEPSEEK-BRIEF.md` — it is
