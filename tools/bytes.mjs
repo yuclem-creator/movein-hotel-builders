@@ -108,8 +108,14 @@ console.log(`\nfonts (non-blocking, font-display: swap): ${kb(fontTotal)}`);
 // transit, and this raise is 4KB on a hotel-Wi-Fi first load. FLAGGED FOR CLEMENT, with the
 // 310 -> 318 gzip raise: if the look does not justify it, revert the pass rather than
 // trimming it into something that looks unchanged.
-const BUDGET_RAW = 1200 * 1024;
-const BUDGET_GZ = 324 * 1024;
+// Raised once more for the architectural-detail pass (Phase 3 of docs/ARCH-FIDELITY-PLAN.md):
+// 1200 -> 1225KB raw and 324 -> 332KB gzip, approved by Clement 2026-10-25. It is geometry, not
+// assets: a fascia/eave assembly, hip and ridge capping, a finial, real window bays with mullions
+// and sills, a plinth course, a cornice and downpipes, built in js/render/detail.js out of the
+// kit's existing materials. The surface-map budget below is NOT raised: no new image files. Any
+// further breach is a stop condition, not a negotiation.
+const BUDGET_RAW = 1225 * 1024;
+const BUDGET_GZ = 332 * 1024;
 let fails = 0;
 
 // Photographic surface maps (assets/textures/, CC0 Poly Haven scans). Deferred, not

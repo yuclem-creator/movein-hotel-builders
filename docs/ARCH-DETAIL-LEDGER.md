@@ -54,18 +54,28 @@ Total spend $0.156 of a $5 cap.
 - **Do not copy from the references**: v1's lighter slate, the invented scrub FLORA added to the
   apron, and its slight paving re-tone. Take the construction detail only.
 
-## Ledger — hall (heritage, 3x3 cells, 21 x 21 m, 5 m, hip roof)
+## Ledger — hall (heritage, 3x3 cells, 11.5 x 11.5 m, 2.28 m wall, 4.88 m to the apex, hip roof)
 
 Ours today, read off `review/arch/hall-heritage-{corner,close,facade,roof}.png`. Reference, read
 off the two accepted frames. Helper names are the Phase 3 units in `js/render/detail.js`.
 
+**Corrections, 2026-10-25.** The three dimensions this table was first sized against were wrong —
+they came from an estimate rather than from the code. Measured: the footprint is **11.5 x 11.5 m**
+(`3 * 4 - MARGIN`, `MARGIN = 0.5`), the wall head is at **2.28 m**
+(`FLOOR * 1.9 * hMul('heritage')` = 1.5 x 1.9 x 0.8), the roof apex is at **4.88 m**, and the
+**0.5 m eave overhang already exists** (the roof is built `w + 1` wide) — it reads as absent only
+because the roof is a zero-thickness surface with nothing under it. Row 1 is therefore an edge
+assembly, not a bigger roof, and row 5's window band is not squeezed under a 5 m eave. Rows 1 and 5
+below carry the corrected reading. Confirm the numbers with `node tools/arch-shot.mjs hall heritage
+gold`, which prints the size, the roof height, draw calls and triangles.
+
 | # | element | ours today | accepted reference | helper | status |
 |---|---|---|---|---|---|
-| 1 | eave assembly | roof plane meets the wall head; a wide flat gold plate, no overhang, no soffit, no thickness | ~0.5 m overhang, slim gold-ochre fascia (~0.15 m exposed), dark soffit with its own shadow line, lead gutter edge | `eave()` | TODO |
+| 1 | eave assembly | roof plane meets the wall head at 2.28 m; the 0.5 m overhang has no thickness and nothing under it — no fascia, no soffit, no gutter. (The wide flat accent plate is the flat-roof styles' eave, not heritage's.) | ~0.5 m overhang, slim gold-ochre fascia (~0.15 m exposed), dark soffit with its own shadow line, lead gutter edge | `eave()` | TODO |
 | 2 | hips and ridge | smooth pyramid, no caps; a faint diagonal UV seam at the valley | raised hip capping along all four hips, raised ridge cap, staggered slate courses | `hipCaps()`, `ridgeCap()` | TODO |
 | 3 | apex finial | bare ochre box (~0.8 m) sitting on the roof surface | tapered gold finial with a knop, on a lead skirt and a short ridge stub | `finial()` | TODO |
 | 4 | windows | painted flat panels with a painted frame; no relief of any kind | recessed reveals (~0.15 m), stone surround, mullions splitting each bay, sills | `windowBay()`, `mullions()` | TODO |
-| 5 | facade rhythm | painted facade tiles at `4 * FLOOR` (6 m) on a 5 m wall, so a partial second window band is squeezed under the eave | one window band at a consistent head height, plain plaster above it to the eave | facade re-tile + `cornice()` | TODO |
+| 5 | facade rhythm | painted facade tiles at `4 * FLOOR` (6 m) on a 2.28 m wall, so the wall shows about one and a half window bands and the upper band is cut by the eave | one window band at a consistent head height, plain plaster above it to the eave | facade re-tile + `cornice()` | TODO |
 | 6 | wall base | plaster to the ground | dressed base course / plinth (~0.5 m) with a moulding at the wall foot | `plinthCourse()` | TODO |
 | 7 | wall head | flat plaster, nothing under the gold band | slim cornice band under the eave | `cornice()` | TODO |
 | 8 | rainwater | none | slender downpipes at the corners | `downpipe()` | TODO |

@@ -21,9 +21,12 @@ Read this whole brief before touching anything. Phases are strictly ordered:
 ---------------------------------------------------------------------------------------------
 ## 1. Project facts
 
-- Root: `C:\Users\clementy\.kimi-code\hotel-builders` (Windows, PowerShell). NOT a git repo.
-  **First action:** copy the whole folder to `C:\Users\clementy\.kimi-code\hotel-builders.bak-<yyyymmdd-hhmm>`
-  before editing. Never work without that backup.
+- Root: `C:\Users\clementy\.kimi-code\hotel-builders` (Windows, PowerShell). **It IS a git repo** —
+  origin `yuclem-creator/movein-hotel-builders`, branch `main`. This line said the opposite until
+  2026-10-25 and was simply wrong. Commit with
+  `git -c user.name='Clement Yu' -c user.email='clementy@mohg.com' commit ...`; the old
+  "first action: copy the folder to `hotel-builders.bak-<yyyymmdd-hhmm>`" instruction is obsolete —
+  `git status` is the backup, and a copy is not.
 - Plain ES modules, no bundler, no `npm install`, no new dependencies. three.js is vendored at
   `vendor/three/three.module.min.js` (core build only — **no three/addons**, so no CSS2DRenderer,
   no OrbitControls; write what you need).
