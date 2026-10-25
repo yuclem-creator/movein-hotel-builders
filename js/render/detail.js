@@ -29,12 +29,19 @@ import * as THREE from '../../vendor/three/three.module.min.js';
  * land on the real seams. The endpoints mirror hipRoof's construction exactly; a square plan
  * collapses the ridge to an apex, which is correct for pavilions and kiosks.
  */
-export function roofDetail(g, { h, roofW, roofD, rise, roofY }, kit, make) {
-  const fascia = make.box(roofW + 0.06, 0.10, roofD + 0.06, kit.accent, 0, h - 0.05, 0);
-  fascia.userData.noShadow = true;
-  g.add(fascia);
+export function roofDetail(g, { h, roofW, roofD, rise, roofY, fascia = true }, kit, make) {
+  // `fascia: false` is for callers that already put an accent band at this eave (roofFor does).
+  // Two bands 0.1 m apart would read as one thick cornice and cost a draw call for nothing.
+  if (fascia) {
+    const band = make.box(roofW + 0.06, 0.10, roofD + 0.06, kit.accent, 0, h - 0.05, 0);
+    band.userData.noShadow = true;
+    g.add(band);
+  }
 
   const alongX = roofW >= roofD;
+  // The batch below is built in the roof's OWN frame and then rotated for a long-in-z plan, so
+  // its local x is always W. Using roofW/roofD directly here transposed the soffit on a
+  // rectangular plan (a 5.9 m roof produced a 12 m slab) — the architecture test caught it.
   const W = alongX ? roofW : roofD, D = alongX ? roofD : roofW;
   const hw = W / 2, hd = D / 2;
   const ridge = Math.max(0, hw - hd);
@@ -52,9 +59,14 @@ export function roofDetail(g, { h, roofW, roofD, rise, roofY }, kit, make) {
   const dir = new THREE.Vector3();
   const CAP = { length: 0.34, width: 0.16, height: 0.13 };   // metres; half buried in the seam
   // Instance 0: the soffit, a thin slab just under the eave so the roof reads as having depth.
-  pos.set(0, h - 0.145, 0);
+  // Sized W x D (the batch's own frame), not roofW x roofD, so it stays under the roof after
+  // the mesh is rotated for a long-in-z plan. Its Y is expressed in the batch's frame too —
+  // i.e. relative to roofY — because the whole batch is lifted to the roof's position below.
+  // Getting this wrong put a full-footprint slab ABOVE the hall roof; the automated checks all
+  // passed (bounds, lighting, water) and only looking at the frame caught it.
+  pos.set(0, h - 0.145 - roofY, 0);
   quat.identity();
-  scale.set(roofW - 0.02, 0.07, roofD - 0.02);
+  scale.set(W - 0.02, 0.07, D - 0.02);
   mesh.setMatrixAt(0, m.compose(pos, quat, scale));
   seams.forEach(([from, to], i) => {
     a.set(...from); b.set(...to);

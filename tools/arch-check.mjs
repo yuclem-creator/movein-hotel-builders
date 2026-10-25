@@ -67,5 +67,40 @@ for (const style of ['heritage', 'courtyard', 'tower']) {
     }
   }
 }
+// Roof trim must sit UNDER the roof it belongs to. This is the regression test for a real defect:
+// the soffit was first built in the roof's local frame but the batch was lifted to the roof's
+// position, so a full-footprint slab ended up ABOVE the hall roof. Every other check passed it
+// (bounds, lighting, water, picking) — a floating slab is geometrically legal and visually absurd,
+// which is precisely why it needs an assertion rather than a reviewer's eye.
+for (const [style, fnId] of [['heritage', 'rooms'], ['heritage', 'front'], ['heritage', 'ballroom']]) {
+  const fn = FUNCTION_BY_ID[fnId];
+  const placement = { uid: `${fnId}-trim`, fnId, col: 4, row: 3, w: fn.w, h: fn.h, addons: [] };
+  const g = buildMassing(placement, style, kit);
+  check(`${fnId}/${style} roof trim stays under the roof`, () => {
+    g.updateMatrixWorld(true);
+    let roofTop = -Infinity, trimTop = -Infinity, soffitY = null;
+    const box = new THREE.Box3(), world = new THREE.Matrix4(), instance = new THREE.Matrix4();
+    g.traverse((o) => {
+      if (!o.isMesh) return;
+      const isTrim = o.userData.noShadow === true && o.isInstancedMesh && o.material === kit.roofDark;
+      if (o.material === kit.roofSlate) {
+        o.geometry.computeBoundingBox();
+        roofTop = Math.max(roofTop, box.copy(o.geometry.boundingBox).applyMatrix4(o.matrixWorld).max.y);
+      }
+      if (isTrim) {
+        o.geometry.computeBoundingBox();
+        trimTop = Math.max(trimTop, box.copy(o.geometry.boundingBox).applyMatrix4(o.matrixWorld).max.y);
+        // Instance 0 is the soffit: its centre must be below the wall head, not above the roof.
+        o.getMatrixAt(0, instance);
+        soffitY = new THREE.Vector3().setFromMatrixPosition(world.multiplyMatrices(o.matrixWorld, instance)).y;
+      }
+    });
+    assert.ok(Number.isFinite(roofTop) && Number.isFinite(trimTop), 'expected both a hip roof and roof trim');
+    assert.ok(soffitY !== null, 'expected an instanced trim batch');
+    assert.ok(trimTop <= roofTop + 0.02, `trim rises above the roof: trim ${trimTop.toFixed(2)} vs roof ${roofTop.toFixed(2)}`);
+    assert.ok(soffitY < roofTop - 0.1, `soffit is not under the roof: ${soffitY.toFixed(2)}`);
+  });
+  g.traverse((o) => { if (o.geometry) o.geometry.dispose(); });
+}
 console.log(`${checks - fails}/${checks} ARCH CHECKS PASSED`);
 process.exitCode = fails ? 1 : 0;

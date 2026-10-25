@@ -126,3 +126,52 @@ rows (P2-P4, L1-L3) are all still TODO. Clement's sign-off is required before ex
   which would have placed them on the ground. Fixed by lifting the batch to `roofY`.
 - `detail.js` does not import from `massing.js`: the two would form a cycle whose behaviour
   depends on load order. The caller passes its `box` helper and UV tiler in as a `make` object.
+
+## W1 extension — every heritage hip-roofed archetype (2026-10-25)
+
+Extended the same builders to the remaining buildings, then fixed two defects that only appeared
+once the trim was applied more widely.
+
+### Extension
+- Roof trim moved INTO `roofFor()`, so every archetype that takes its hip roof from that function
+  (public, spa, people) is detailed by construction and a new caller cannot forget it.
+- `hallBlock` and `kiosk` build their own roofs, so they call `roofDetail` explicitly.
+- `fascia: false` for `roofFor` callers: that branch already draws an accent band at the same eave,
+  and two bands 0.1 m apart read as one thick cornice while costing a draw call for nothing.
+- Column trim still applies only where a colonnade exists (rooms, public).
+
+### Defect 1 — transposed soffit (caught by the architecture test)
+For a rectangular plan the batch is built in the roof's own frame and rotated 90 degrees. The soffit
+was sized `roofW x roofD` instead of `W x D`, so a 5.9 m roof produced a 12 m slab. `arch-check`
+failed on `spa/heritage/swapped ... bounds exclude contact` and named it.
+
+### Defect 2 — soffit floating above the roof (caught only by looking at a frame)
+The soffit's Y was expressed in the WALL frame while the whole batch is lifted to the roof's
+position, so it landed at `h - 0.145 + roofY`: above the roof on every archetype. On the shallower
+public roof it was buried inside the hip and invisible; on the tall hall roof it appeared as a
+full-footprint slab covering the building. **Every automated check passed it** — bounds, lighting,
+water and picking are all satisfied by a slab in the air. A new `arch-check` assertion now requires
+that the trim never rises above the roof and that the soffit sits below it, so this class of defect
+cannot return silently.
+
+### Measured result after the extension (tools/perf.mjs, heritage/gold)
+| Preset | Calls before -> after | Limit +10% | Triangles | Limit 2.5x |
+|---|---|---|---|---|
+| empty | 60 -> 60 | n/a | x1.00 | n/a |
+| balanced | 272 -> 290 (+6.6%) | pass (299) | x1.08 | pass |
+| revenue | 203 -> 220 (+8.4%) | pass (223) | x1.08 | pass |
+| neglect | 207 -> 221 (+6.8%) | pass (228) | x1.07 | pass |
+
+Bytes 1207.9 KiB raw / 325.8 KiB gzip, inside 1260/345. `arch-check` 30/30.
+
+### Honest limits of this checkpoint
+- **The published commit `15d5b02` contains defect 2** (a floating soffit above the rooms and public
+  roofs). It was published before the frame was inspected. This checkpoint corrects it and must be
+  published promptly.
+- Visual confirmation of the corrected frames is **outstanding**: the image channel refused further
+  images part-way through this session, so the fix is verified numerically (30/30, including the new
+  under-roof assertion) but not yet seen. Frames exist at `review/arch-w1-prev/*.jpg` (post-fix) and
+  `review/arch-v2-prev/*.jpg` (pre-W1).
+- A process error of mine, repeated three times: previews were generated in the same batch as the
+  render that overwrites the PNGs, so the preview showed the previous frame. Generate previews in a
+  separate step after the render completes.

@@ -359,6 +359,11 @@ function roofFor(g, style, w, d, h, kit) {
     // straight through a pyramid roof.
     g.add(box(0.3, 0.16, 0.3, kit.gold, 0, h + 1.92, 0));
     g.add(box(w + 0.34, 0.1, d + 0.34, kit.accent, 0, h + 0.05, 0));
+    // Roof trim lives HERE rather than at each call site, so every archetype that gets its
+    // hip roof from this function (public, spa, people) is detailed by construction and a new
+    // caller cannot forget it. Callers that build their own hipRoof call roofDetail themselves.
+    // fascia:false — this branch already added an accent band at the eave just above.
+    roofDetail(g, { h, roofW: w + 0.5, roofD: d + 0.5, rise: 1.9, roofY: h + 0.95, fascia: false }, kit, DETAIL);
   } else if (style === 'courtyard') {
     // Garden resort: a planted roof terrace under a pergola, not a pitched roof. The
     // green is what separates it from Traditional at a glance — two low-rise styles
@@ -407,8 +412,9 @@ function publicBlock(w, d, storeys, kit, fn, style) {
     g.add(box(w + 0.6, 0.1, 1.3, kit.gold, 0, h * 0.94, d / 2 + 0.5));
     // Detail on the columns, eave and roof seams already built above. roofFor() placed this
     // archetype's hip roof as hipRoof(w+0.5, d+0.5, 1.9) at h + 0.95, so the eave line is at h.
+    // Column detail only: the roof trim is added inside roofFor() above, which owns this
+    // archetype's hip roof. Adding it here as well would double the fascia and the caps.
     columnTrim(g, columns, kit, DETAIL);
-    roofDetail(g, { h, roofW: w + 0.5, roofD: d + 0.5, rise: 1.9, roofY: h + 0.95 }, kit, DETAIL);
   } else if (style === 'courtyard') {
     // A low garden wall and planting in front: reads as a resort, not a tower.
     g.add(box(w + 1.0, 0.5, 0.22, kit.paving, 0, 0.25, d / 2 + 1.1));
@@ -436,6 +442,7 @@ function kiosk(w, d, kit, fn, style) {
   g.add(box(w * 0.86, h * 0.44, 0.08, kit.glass, 0, h * 0.6, d / 2 + 0.02));
   if (style === 'heritage') {
     g.add(hipRoof(w + 0.4, d + 0.4, 0.8, kit.roofSlate, 0, h + 0.4, 0));
+    roofDetail(g, { h, roofW: w + 0.4, roofD: d + 0.4, rise: 0.8, roofY: h + 0.4 }, kit, DETAIL);
   } else {
     g.add(cyl(Math.max(w, d) * 0.72, Math.max(w, d) * 0.72, 0.12, 4, kit.gold, 0, h + 0.06, 0).rotateY(Math.PI / 4));
   }
@@ -489,6 +496,9 @@ function hallBlock(w, d, kit, fn, style) {
     g.add(hipRoof(w + 1.0, d + 1.0, 2.6, kit.roofSlate, 0, h + 1.3, 0));
     // Apex finial only — a 0.72d gold bar here read as a gold stick on the roof.
     g.add(box(0.42, 0.2, 0.42, kit.gold, 0, h + 2.62, 0));
+    // The hall builds its own roof rather than going through roofFor(), so it asks for the
+    // same trim explicitly. No colonnade here, so there is no column detail to add.
+    roofDetail(g, { h, roofW: w + 1.0, roofD: d + 1.0, rise: 2.6, roofY: h + 1.3 }, kit, DETAIL);
   } else if (style === 'courtyard') {
     // Planted garden roof: at roof level the hall becomes landscape, not a tiled ridge.
     g.add(box(w * 0.94, 0.14, d * 0.94, kit.roofDark, 0, h + 0.19, 0));
