@@ -36,14 +36,27 @@ Root: C:\Users\clementy\.kimi-code\hotel-builders. Base commit: 5e6dbab.
 Status: runtime/source repairs implemented; corrected rooms/public/pool/spa renders verified.
 Architecture tests 27/27 pass (12 water failures reproduced before the fix). All 12 regression suites
 passed with CHAIN-GREEN. Logs: review/repair-evidence; see docs/CHECKPOINTS.md for exact coverage.
-FLORA pilot BLOCKED: initial signed reservations succeeded, but a replacement one-entry reservation
-returned `MCP error -32000: fetch failed`. No uploads completed, no generation runs, $0 new spend.
-Stop FLORA attempts until access is restored; then fresh-reserve/upload/quote the THREE existing
-hashed pilot sources listed in CHECKPOINTS.md. Do not regenerate sources or repeat a paid run blindly.
+FLORA blocker RESOLVED on 2026-10-25: the existing local call.mjs submitted asset_ids ONLY.
+All three already-uploaded assets finalised ready (HTTP 200), with no re-upload. Three quoted pilot
+generations then completed: $0.156 charged total. Prior hall ledger $0.156; tracked total $0.312 / $5.
+Exact asset/run/output IDs, source/output hashes and scores: docs/PILOT-REFERENCES.json.
+DO NOT reserve, re-upload or regenerate these three. Results are in review/arch-ref-v2 (JPEG bytes
+despite .png CDN URLs). All numerical screens passed; whole-frame fidelity is NOT accepted:
+the outputs contain excluded changes. See docs/PILOT-DETAIL-LEDGER.md for the usable detail rows.
+Permanent bridge aliases and negative tests are installed; see docs/FLORA-CONNECTOR-REPAIR.md.
+Fresh bridge processes and call.mjs pass live tests. Existing Cline connection needs reconnect
+to list the new aliases; use call.mjs in the meantime, never pass both identifier fields.
 Current executing brief: docs/FULL-SCENE-BRIEF.md; old hall-only ARCH-HANDOFF.md is superseded.
 Old PNGs preserved; corrected shots are review/arch-v2 (four views and JSON pre-flight per archetype).
 Spa requires a courtyard-focused side view later; low-side water exposure is tested but corner view
 hides the garden behind its roof. No source/ref should be accepted on automated scores alone.
+
+## Next exact action for DeepSeek
+Read FULL-SCENE-BRIEF.md, PILOT-DETAIL-LEDGER.md and CHECKPOINTS.md. Complete W0's full-scene
+performance baseline, then implement a small W1 sample from the reviewed construction cues ONLY,
+using existing source counts/positions/materials. Do not reproduce AI background, bollard or deck
+changes. Present matched before/after runtime views for Clement's approval before expanding.
+No js/render/detail.js or fidelity implementation exists yet; the source repair is complete, not W1.
 
 ## Delivery workstreams after the pilot
 W0 baseline/tests/performance; W1 shared geometry detail; W2 buildings across styles;

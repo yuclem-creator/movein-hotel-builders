@@ -1,0 +1,24 @@
+{
+  "model": "i2i-elote-gateway",
+  "shared_params": {
+    "aspect_ratio": "auto",
+    "resolution": "1K",
+    "seed": 20261025,
+    "enable_web_search": "false",
+    "thinking_level": "HIGH"
+  },
+  "items": [
+    {
+      "archetype": "rooms",
+      "prompt": "Photorealistic construction-detail study of THIS existing hotel rooms wing. This is a precision image-to-image enhancement, not a redesign. Preserve the exact camera, crop, perspective, building footprint, roof silhouette and pitch, storey heights, every existing window opening and column location/count, all paths, ground, canal and background. Preserve the source exposure, sun direction and shadow positions. Keep every material's overall tone as shown: dark warm charcoal slate, warm ivory walls, muted ochre/gold trim. Do not brighten the roof or make it blue. Improve only construction detail at the existing surfaces: shallow recessed window reveals, slim frames and mullions, stone sills, fine rails where the source already indicates rails; slender bases and capitals on existing columns; slim layered cornice and eave fascia with a dark soffit; restrained slate hip and ridge caps following exactly the existing roof seams; fine plaster grain and base-course joints. Small physically plausible bevels, realistic surface roughness and local contact shadows. Retain the original landscape exactly. Do not add a floor, bay, doorway, staircase, wing, tree, person, vehicle, text, logo, watermark, vignette or overlay. Return a clean text-free reference plate."
+    },
+    {
+      "archetype": "public",
+      "prompt": "Photorealistic construction-detail study of THIS existing public hotel building and colonnade. Strict image-to-image fidelity: keep camera, framing, perspective, footprint, roof shape and pitch, both existing roof/trim tiers, gold-band widths, storey height, column positions/counts and all glass openings exactly as supplied. Do not repair or redesign the massing. Preserve the source light, sun direction, exposure, colour balance and background. Muted ochre/gold trim must remain muted; keep the warm charcoal slate tone and ivory stone. Add detailed bases and capitals to EXISTING columns without changing their shaft proportions, shallow recessed glass and slim mullions at existing openings, realistic stone joints on the base, fine cornice layers within the current envelope, thin dark soffits and eave thickness, restrained hip/ridge caps along existing roof seams and physically plausible bevel highlights. Material detail and local occlusion only, not new architecture. Keep paths, paving and bollards at their current positions. No added doors, steps, planting, people, vehicles, signs, lettering, logos, watermarks, scrims or overlays. Return a clean text-free reference plate."
+    },
+    {
+      "archetype": "pool",
+      "prompt": "Photorealistic material and construction-detail study of THIS existing hotel pool terrace. Preserve the exact overhead camera, framing, perspective, pool rectangle/size/position, deck outline, narrow gold pool-edge strip, all three parasols and all three loungers with their existing sizes and positions. Preserve the source sun direction, shadows, overall exposure and warm ivory/gold/sage palette. Do not invent extra amenities or alter layout. Improve the existing teal-sage water with fine natural ripples, subtle sky reflection, shallow refraction and water-edge contact, without turning the pool bright blue. Add fine stone coping joints inside the current border, subtle bevel highlights and honed paving roughness. Give the existing parasols plausible fabric folds, ribs and slim poles inside their existing silhouettes; existing loungers get slim frames and restrained fabric texture. Keep all surrounding paving and background unchanged. No ladders, steps, planting, extra furniture, swimmers, people, text, logos, watermark, vignette or overlays. Return a clean text-free reference plate."
+    }
+  ]
+}

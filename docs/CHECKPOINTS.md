@@ -35,30 +35,49 @@ but water still reads as a flat sheet, and parasols are low-poly. Spa needs a si
 courtyard: the corner frame is roof-dominated even though the visibility probe passes.
 Do not claim these frames match FLORA yet. No frame has Clement's final visual acceptance.
 
-### Pilot source files (not yet uploaded/generated)
+### Pilot source files (uploaded, finalised and generated; see pilot checkpoint below)
 Paths below relative to C:\Users\clementy\.kimi-code\hotel-builders\review\arch-v2:
 - rooms-heritage-facade.png — SHA256 6A5C8B6CD8EBF03919BB9056E1DE0B234D7B40DE1E1980D07C2BE1ADBC92DC38
 - public-heritage-facade.png — SHA256 E37431121ADFFD1A51089E8A0FD9C9A10DF016ED7F32C8AD1EB5E687FD29B77A
 - pool-heritage-corner.png — SHA256 EED6E006680C22250C7096172FC18235F8FA32FBF3AF0ECEDC90CBC772031B68
 
-### FLORA stop / spend
-Initial three signed upload reservations succeeded. No image bytes submitted, no completion, no runs.
-The middle descriptor was truncated by the tool-result transport. A single-source reservation attempt
-was rejected for source+sources schema ambiguity; a corrected one-entry batch then returned
-`MCP error -32000: fetch failed`. Stopped FLORA operations rather than looping or generating bad inputs.
-New generation spend: $0. Prior hall ledger: $0.156; cap $5. No new run IDs exist.
-Pending known reservations (do not treat as ready; reserve fresh on resumption if expired):
-- rooms asset_jd7b8heksvvw5j5vz6z2e664h58gyppm
-- pool asset_jd7f9rp9hsc97fq3rnkc0zbmj18gysh2
-Public reservation ID was not recovered from the truncated payload. Do not invent it.
+### Historical upload blocker (resolved)
+Earlier reservations/fetch failure were superseded by successful HTTP 204 uploads. Repeated direct
+MCP finalisation calls incorrectly sent BOTH mutually exclusive identifier fields; they did not
+finalise anything. A local client call with asset_ids only returned HTTP 200 and ready for all three.
+Do not reuse the earlier abandoned reservation IDs. Current asset IDs are in PILOT-REFERENCES.json.
 
 ### Next exact action
-Local repair gates complete. Once FLORA access is restored: obtain fresh reservations for
-these three verified source files, upload/finalise, quote all three exact generation requests, then run.
-Score AND visually review outputs before writing pilot construction rows. Do not reshoot valid sources
-or rerun paid batches without checking stored run IDs. No fidelity-detail implementation is complete.
+Local repair and three-image reference loop complete. Implement the reviewed construction cues in
+PILOT-DETAIL-LEDGER.md after recording full-scene performance. Do not reshoot valid sources or rerun
+paid batches; all three outputs already exist. No fidelity-detail implementation is complete.
 
 ### Delivery status
-Save this as a local repair commit; do not publish to the live pilot while the FLORA pilot and
-Clement's visual review are outstanding. Existing live site remains unchanged. W0's full-scene
+Source repair saved as local commit 9a2112d. Do not publish to the live pilot while
+Clement's visual review is outstanding. Existing live site remains unchanged. W0's full-scene
 GPU/performance baseline remains pending; isolated-shot counters are not that measurement.
+
+## Pilot reference / connector checkpoint — 2026-10-25
+- All three input assets are ready. No re-upload was needed to resolve finalisation.
+- Exact three-request quote $0.156; generation charged $0.156. All exact run IDs completed.
+- Tracked architectural-reference total: $0.312 including the previous $0.156 hall ledger.
+  This is not an organisation-wide usage total. Do not regenerate the successful batch.
+- Rooms: structure 0.8875; maximum colour delta 21.62 (numerical PASS).
+- Public: structure 0.8395; maximum colour delta 25.31 (numerical PASS).
+- Pool: structure 0.8186; maximum colour delta 10.02 (numerical PASS).
+- Visual review: construction cues selectively usable. Rooms invents background shrubs; public
+  changes bollards to stone, omits the apex cap, alters lighting/trim; pool exaggerates raised edging
+  and water depth. These are NOT approved changes to the game. Preserve source geometry and palette.
+- User visual acceptance: pending. No code detail row is marked DONE.
+- Public output URLs, exact IDs/hashes and review status: PILOT-REFERENCES.json. Exact submitted
+  prompts: PILOT-PROMPTS.json. All plates are text/logo/scrim-free reference images, not runtime assets.
+
+### Permanent connector fix and tests
+Canonical installed connector: C:\Users\clementy\Documents\Cline\MCP\flora-mcp\ .
+Added asset-tools.mjs, asset-tools.test.mjs, asset-tools.smoke.mjs; integrated in bridge.mjs/call.mjs.
+Aliases flora_complete_assets_batch / flora_get_assets_batch expose only asset_ids. Conflicting raw
+calls fail locally with -32602; no silently discarded field and no authentication/timeout changes.
+Unit tests 7/7 PASS; bridge/call syntax PASS; fresh stdio bridge smoke PASS (live tool discovery,
+ambiguous-input rejection and real read-only asset lookup). CLI alias lookup HTTP 200.
+The running Cline bridge has not been forcibly killed: reconnect its server to load new aliases.
+Current work is already unblocked through the local client. Tests/logs in review/repair-evidence.

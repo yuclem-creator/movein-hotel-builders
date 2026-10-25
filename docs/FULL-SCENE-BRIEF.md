@@ -92,6 +92,9 @@ Review images are git-ignored: transfer them explicitly for another machine, wit
 
 ## First DeepSeek assignment
 Read this brief and FIDELITY-CONTINUATION.md. Verify W0's real evidence; do not redo completed repairs.
+The pilot has completed; read PILOT-DETAIL-LEDGER.md and PILOT-REFERENCES.json. Extract only the
+listed construction cues; whole frames contain explicitly excluded deviations and are not approved
+layout/lighting replacements. Do not restart the upload/finalisation/generation loop.
 Proceed with only the reference-approved construction rows for the pilot, then stop for Clement's
 visual review. Other workstreams stay IN SCOPE, not DONE or silently dropped. If FLORA is unavailable,
 continue independent tested infrastructure and request the specific missing references, not guessed art.

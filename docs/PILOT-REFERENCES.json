@@ -1,0 +1,139 @@
+{
+    "project_id":  "prj_ns7f9jew34edtpbq2sn94jn9w18gsecw",
+    "workspace_id":  "ws_qd73pg6vhpkmrpywgazt4e5h2h895p58",
+    "model":  "i2i-elote-gateway",
+    "seed":  20261025,
+    "resolution":  "1K",
+    "quoted_at":  "2026-10-25T07:57:28Z",
+    "charged_usd":  0.156,
+    "prior_hall_ledger_usd":  0.156,
+    "cap_usd":  5,
+    "status":  "completed; numerical screens passed; selective construction cues reviewed; whole-frame and user acceptance pending",
+    "items":  [
+                  {
+                      "archetype":  "rooms",
+                      "source":  "review/arch-v2/rooms-heritage-facade.png",
+                      "sha256":  "6A5C8B6CD8EBF03919BB9056E1DE0B234D7B40DE1E1980D07C2BE1ADBC92DC38",
+                      "asset_id":  "asset_jd79ezptwz3pee6650a5010csd8gzaq6",
+                      "source_url":  "https://media.flora.ai/mcp-uploads/2026/10/25/user_36lx2cF3eUceRuiN7tWmvCWThpk/eadcffb4-071e-4928-8d8a-bf9b5f739b39.png",
+                      "run_id":  "run_m170668t559xck2c7kv9g0dtb18gyjs0",
+                      "node_id":  "f59cf44c-98b2-49a7-9079-268a71a077d9",
+                      "charged_usd":  0.052,
+                      "output_url":  "https://media.flora.ai/node-inputs/2026/10/25/px70fqe29tk833wybqphdy4yj97x7xyp/gen-m170668t559xck2c7kv9g0dtb18gyjs0-0.png",
+                      "output_asset_id":  "asset_jd7bzqs287cjwzfnc73g0ym9cn8gyjsj",
+                      "output_sha256":  "BC3B75375F07E7F27E28F95104D858E59D4C82B74A3FE55880DBCFA075C4E5F2",
+                      "output_file":  "review/arch-ref-v2/rooms-heritage-pilot.jpg",
+                      "numeric_screen":  {
+                                             "a":  "rooms-heritage-facade.png",
+                                             "b":  "rooms-heritage-pilot.jpg",
+                                             "structure":  0.8875,
+                                             "colour":  {
+                                                            "r":  20.61,
+                                                            "g":  20.56,
+                                                            "b":  21.62
+                                                        },
+                                             "detail":  {
+                                                            "a":  19.7,
+                                                            "b":  24.02,
+                                                            "ratio":  1.219
+                                                        },
+                                             "shadow":  {
+                                                            "a":  0.373,
+                                                            "b":  0.403,
+                                                            "ratio":  1.079
+                                                        },
+                                             "min":  0.75,
+                                             "maxColour":  30,
+                                             "colourMax":  21.62,
+                                             "pass":  true
+                                         },
+                      "asset_status":  "ready",
+                      "visual_status":  "selective_detail_cues_only; exclusions in PILOT-DETAIL-LEDGER.md; user approval pending",
+                      "actual_media_type":  "image/jpeg"
+                  },
+                  {
+                      "archetype":  "public",
+                      "source":  "review/arch-v2/public-heritage-facade.png",
+                      "sha256":  "E37431121ADFFD1A51089E8A0FD9C9A10DF016ED7F32C8AD1EB5E687FD29B77A",
+                      "asset_id":  "asset_jd73b4g042fbb7pjd6stptcqp58gyrrv",
+                      "source_url":  "https://media.flora.ai/mcp-uploads/2026/10/25/user_36lx2cF3eUceRuiN7tWmvCWThpk/4ef4852f-4617-41cd-8fb8-1a4f13a9ad85.png",
+                      "run_id":  "run_m174m5ntk09jb9wzhmtyam7sjn8gy0zh",
+                      "node_id":  "2497d8e3-c763-4dd1-ba4a-b7553de049d7",
+                      "charged_usd":  0.052,
+                      "output_url":  "https://media.flora.ai/node-inputs/2026/10/25/px70fqe29tk833wybqphdy4yj97x7xyp/gen-m174m5ntk09jb9wzhmtyam7sjn8gy0zh-0.png",
+                      "output_asset_id":  "asset_jd72sb4vq3k0d9qvz1erwtypts8gzwy4",
+                      "output_sha256":  "8E170304FC623920861053C78323172076EAA88DC48DF85ADA3A3D3900B3C32C",
+                      "output_file":  "review/arch-ref-v2/public-heritage-pilot.jpg",
+                      "numeric_screen":  {
+                                             "a":  "public-heritage-facade.png",
+                                             "b":  "public-heritage-pilot.jpg",
+                                             "structure":  0.8395,
+                                             "colour":  {
+                                                            "r":  25.31,
+                                                            "g":  25.14,
+                                                            "b":  23.33
+                                                        },
+                                             "detail":  {
+                                                            "a":  22.94,
+                                                            "b":  27.51,
+                                                            "ratio":  1.199
+                                                        },
+                                             "shadow":  {
+                                                            "a":  0.487,
+                                                            "b":  0.438,
+                                                            "ratio":  0.899
+                                                        },
+                                             "min":  0.75,
+                                             "maxColour":  30,
+                                             "colourMax":  25.31,
+                                             "pass":  true
+                                         },
+                      "asset_status":  "ready",
+                      "visual_status":  "selective_detail_cues_only; exclusions in PILOT-DETAIL-LEDGER.md; user approval pending",
+                      "actual_media_type":  "image/jpeg"
+                  },
+                  {
+                      "archetype":  "pool",
+                      "source":  "review/arch-v2/pool-heritage-corner.png",
+                      "sha256":  "EED6E006680C22250C7096172FC18235F8FA32FBF3AF0ECEDC90CBC772031B68",
+                      "asset_id":  "asset_jd7384qhp2f6pfktz8dgc3d0x58gz6m5",
+                      "source_url":  "https://media.flora.ai/mcp-uploads/2026/10/25/user_36lx2cF3eUceRuiN7tWmvCWThpk/d4e27d68-0a74-4e6a-90d6-b2eb13be5112.png",
+                      "run_id":  "run_m1790fc5sdrgdx1x5pbvkrr1xs8gyrmy",
+                      "node_id":  "4eb6d4a4-1fed-496a-837f-66a01ec5d8f1",
+                      "charged_usd":  0.052,
+                      "output_url":  "https://media.flora.ai/node-inputs/2026/10/25/px70fqe29tk833wybqphdy4yj97x7xyp/gen-m1790fc5sdrgdx1x5pbvkrr1xs8gyrmy-0.png",
+                      "output_asset_id":  "asset_jd7175kfj0x6z9tx1rtxykae2x8gytqm",
+                      "output_sha256":  "8547E9262CF5A14B9CCC10690939054D92A52A58939C0504D91C99A5CF19DDD9",
+                      "output_file":  "review/arch-ref-v2/pool-heritage-pilot.jpg",
+                      "numeric_screen":  {
+                                             "a":  "pool-heritage-corner.png",
+                                             "b":  "pool-heritage-pilot.jpg",
+                                             "structure":  0.8186,
+                                             "colour":  {
+                                                            "r":  10.02,
+                                                            "g":  9.82,
+                                                            "b":  9.34
+                                                        },
+                                             "detail":  {
+                                                            "a":  10.25,
+                                                            "b":  16.3,
+                                                            "ratio":  1.59
+                                                        },
+                                             "shadow":  {
+                                                            "a":  0.65,
+                                                            "b":  0.518,
+                                                            "ratio":  0.797
+                                                        },
+                                             "min":  0.75,
+                                             "maxColour":  30,
+                                             "colourMax":  10.02,
+                                             "pass":  true
+                                         },
+                      "asset_status":  "ready",
+                      "visual_status":  "selective_detail_cues_only; exclusions in PILOT-DETAIL-LEDGER.md; user approval pending",
+                      "actual_media_type":  "image/jpeg"
+                  }
+              ],
+    "tracked_total_usd":  0.312,
+    "remaining_tracked_cap_usd":  4.688
+}
