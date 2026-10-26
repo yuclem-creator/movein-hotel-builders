@@ -54,3 +54,40 @@ Three matched views per sample (facade, corner, roof), dusk and an orbit inspect
 details honestly. Numeric similarity alone cannot approve these samples. W0 source fixes remain valid;
 do not undo them to chase an AI target. Stop for Clement after the first W1 sample, then expand the
 rest of the full-scene programme. Maintain counts/layout and simulation baseline throughout.
+
+
+## Deferred: flat-roof eave depth, blocked by the draw-call limit (2026-10-25)
+
+Attempted and **reverted, not shipped**. Every flat-roofed archetype in every style builds its roof
+through one function (`copedRoof`), which today draws a zero-thickness coping ring plus a deck — the
+same "box with a lid" edge the references do not have. Adding the missing underside there would
+cover tower and courtyard in one call site, which is why it is worth doing properly.
+
+Measured cost of a separate dark soffit mesh (tools/perf.mjs, whole scene, limit +10% calls):
+
+| Style | balanced | revenue | neglect |
+|---|---|---|---|
+| heritage | +6.6% pass | +8.4% pass | +6.8% pass |
+| tower | +5.1% pass | **+11.3% BREACH** | **+11.6% BREACH** |
+| courtyard | **+12.9% BREACH** | **+11.3% BREACH** | +8.2% pass |
+
+Sharing the deck's own geometry in one instanced batch recovered about six calls but did not clear
+the breach, so the change was reverted rather than shipped with an exception, and the dark soffit
+tone stays deferred.
+
+### The decision this needs
+The +10% call limit was set for a small detail pass. It is now the binding constraint on the rest of
+the programme, and **it cannot be satisfied by trimming the work**: the remaining rows (recessed
+window bays, plinth courses, pool coping, foliage, ambient occlusion) all add geometry. Two options,
+and this is Clement's call, not the implementer's:
+
+1. **Raise the call limit for the full programme** and state the new ceiling, accepting that a
+   richer scene costs more per frame; or
+2. **Authorise a merging pass first** — instancing the per-storey accent bands and other repeats,
+   which the plan anticipated ("merging should reduce them") and which would buy back headroom
+   before more detail is added. Note the risk: `visual-check` requires the palette accent on at
+   least 10 separate meshes, so merging accent geometry can breach that check and it must not be
+   relaxed.
+
+Until one is chosen, further W2 coverage should not be attempted, because every attempt will either
+breach the limit or be reverted.
